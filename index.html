@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CE Solution Plus</title>
+    <meta
+      name="description"
+      content="CE Solution Plus is a veteran woman owned corporation that provides professional high-quality services to its clients."
+    />
+    <meta name="theme-color" content="#ece7da" />
+    <link
+      rel="icon"
+      href="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=192,fit=crop/mxBroLwkjztKJ8ZW/1-10-YleM13ZDDgf1BzD0.png"
+      type="image/png"
+    />
+    <style>
+      :root {
+        --ink: #111111;
+        --muted: #60645f;
+        --paper: #ece7da;
+        --panel: #f7f2e7;
+        --stone: #ddd6c5;
+        --line: rgba(17, 17, 17, 0.14);
+        --blue: #1c344f;
+        --red: #a51f2a;
+        --olive: #606857;
+        --gold: #a78c54;
+        --max: 1360px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background: var(--paper);
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(90deg, rgba(17, 17, 17, 0.035) 1px, transparent 1px) 0 0 / 88px 88px,
+          linear-gradient(180deg, rgba(17, 17, 17, 0.025) 1px, transparent 1px) 0 0 / 88px 88px,
+          var(--paper);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      .wrap {
+        width: min(var(--max), calc(100% - 24px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: relative;
+        z-index: 60;
+        min-height: 42px;
+        overflow: hidden;
+        background:
+          linear-gradient(115deg, rgba(165, 31, 42, 0.34) 0 9px, transparent 9px 18px),
+          linear-gradient(135deg, #13283f 0%, #1c344f 48%, #14273d 100%);
+        color: #fffaf0;
+        box-shadow: inset 0 -1px rgba(255, 255, 255, 0.16);
+      }
+
+      .topbar::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent),
+          linear-gradient(115deg, transparent 0 58%, rgba(165, 31, 42, 0.22) 58% 59%, transparent 59% 100%),
+          repeating-linear-gradient(90deg, transparent 0 82px, rgba(255, 255, 255, 0.06) 82px 83px);
+        transform: translateX(-100%);
+        animation: barSweep 7s ease-in-out infinite;
+      }
+
+      .topbar::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 4px;
+        background:
+          linear-gradient(90deg, var(--red) 0 30%, #fffaf0 30% 33%, var(--blue) 33% 100%),
+          linear-gradient(90deg, rgba(28, 52, 79, 0.32), transparent);
+        transform-origin: left;
+        animation: missionLine 5.6s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+      }
+
+      .topbar-inner {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .topbar-inner span {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+      }
+
+      .topbar-logo {
+        width: 32px;
+        height: 30px;
+        object-fit: cover;
+        object-position: left center;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+        filter: brightness(0) invert(1);
+      }
+
+      .topbar-flag {
+        width: 42px;
+        height: auto;
+        object-fit: contain;
+        padding: 1px;
+        background: #fffaf0;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.55),
+          0 8px 18px rgba(17, 17, 17, 0.2);
+        filter: saturate(1.15) contrast(1.12);
+      }
+
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border-bottom: 1px solid var(--line);
+        background: rgba(247, 242, 231, 0.95);
+        backdrop-filter: blur(12px);
+        overflow: hidden;
+        transition:
+          box-shadow 240ms ease,
+          background 240ms ease;
+      }
+
+      .header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(115deg, transparent 0 48%, rgba(165, 31, 42, 0.08) 48% 48.5%, transparent 48.5% 100%),
+          linear-gradient(115deg, transparent 0 74%, rgba(28, 52, 79, 0.08) 74% 74.5%, transparent 74.5% 100%);
+        transform: translateX(-5%);
+        transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .header:hover::before {
+        transform: translateX(5%);
+      }
+
+      .header.scrolled {
+        background: rgba(247, 242, 231, 0.985);
+        box-shadow: 0 18px 42px rgba(17, 17, 17, 0.08);
+      }
+
+      .nav {
+        min-height: 86px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+      }
+
+      .brand-panel {
+        min-width: 245px;
+        display: grid;
+        justify-items: start;
+        gap: 4px;
+        padding: 8px 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+        transition: transform 220ms ease;
+      }
+
+      .brand-panel:hover {
+        transform: translateX(2px);
+      }
+
+      .logo {
+        width: 224px;
+        height: auto;
+      }
+
+      .brand-slogan {
+        color: var(--blue);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        line-height: 1.25;
+        text-transform: uppercase;
+      }
+
+      .links {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        color: #202020;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .links a {
+        padding: 10px 0;
+        border-bottom: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+        transition:
+          transform 220ms ease,
+          border-color 180ms ease,
+          color 180ms ease;
+      }
+
+      .links a::before {
+        content: "";
+        position: absolute;
+        right: -8px;
+        bottom: 7px;
+        left: -8px;
+        height: 9px;
+        z-index: -1;
+        background: linear-gradient(90deg, rgba(165, 31, 42, 0.14), rgba(28, 52, 79, 0.13));
+        transform: translateX(-110%) skewX(-18deg);
+        transition: transform 360ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .links a::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: 2px;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--red), #fffaf0, var(--blue));
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+      }
+
+      .links a:hover {
+        transform: translateY(-2px);
+        color: var(--red);
+        border-color: var(--red);
+      }
+
+      .links a:hover::before,
+      .links a.active::before {
+        transform: translateX(0) skewX(-18deg);
+      }
+
+      .links a:hover::after,
+      .links a.active::after {
+        transform: scaleX(1);
+      }
+
+      .links a.active {
+        color: var(--blue);
+      }
+
+      .menu {
+        display: none;
+        width: 44px;
+        height: 44px;
+        border: 1px solid var(--line);
+        background: #fffaf0;
+        position: relative;
+        cursor: pointer;
+      }
+
+      .menu span,
+      .menu::before,
+      .menu::after {
+        content: "";
+        position: absolute;
+        left: 13px;
+        width: 18px;
+        height: 2px;
+        background: var(--ink);
+        transition:
+          transform 220ms ease,
+          opacity 220ms ease;
+      }
+
+      .menu::before {
+        top: 14px;
+      }
+
+      .menu span {
+        top: 21px;
+      }
+
+      .menu::after {
+        top: 28px;
+      }
+
+      .nav.open .menu::before {
+        transform: translateY(7px) rotate(45deg);
+      }
+
+      .nav.open .menu span {
+        opacity: 0;
+      }
+
+      .nav.open .menu::after {
+        transform: translateY(-7px) rotate(-45deg);
+      }
+
+      .hero {
+        position: relative;
+        min-height: calc(100svh - 122px);
+        display: grid;
+        align-items: stretch;
+        overflow: hidden;
+        background: #cfc7b5;
+        --mx: 62%;
+        --my: 42%;
+      }
+
+      .hero-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.92;
+        transform: scale(1.04);
+        filter: saturate(0.78) contrast(1.04) grayscale(0.08);
+        animation: videoDrift 18s ease-in-out infinite alternate;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background:
+          radial-gradient(900px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.18), transparent 44%),
+          linear-gradient(90deg, rgba(17, 17, 17, 0.16), rgba(17, 17, 17, 0.025) 54%, rgba(28, 52, 79, 0.16)),
+          linear-gradient(180deg, rgba(236, 231, 218, 0.04), rgba(236, 231, 218, 0.2));
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 12px;
+        background:
+          linear-gradient(108deg, transparent 0 54%, rgba(255, 250, 240, 0.78) 54% 55%, transparent 55% 100%),
+          linear-gradient(90deg, var(--red) 0 27%, #fffaf0 27% 30%, var(--blue) 30% 100%);
+        z-index: 3;
+      }
+
+      .hero-grid {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: minmax(0, 0.86fr) minmax(330px, 0.72fr);
+        gap: clamp(30px, 5vw, 78px);
+        align-items: center;
+        min-height: calc(100svh - 122px);
+        padding: 94px 0 92px;
+      }
+
+      .command-card {
+        position: relative;
+        max-width: 590px;
+        padding: clamp(28px, 3.5vw, 48px);
+        background: rgba(247, 242, 231, 0.94);
+        box-shadow: 0 36px 90px rgba(20, 20, 17, 0.26);
+        overflow: hidden;
+        isolation: isolate;
+        transform-style: preserve-3d;
+        animation: cardRise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        transition:
+          transform 300ms ease,
+          box-shadow 300ms ease;
+        --rx: 0deg;
+        --ry: 0deg;
+        --glow-x: 50%;
+        --glow-y: 50%;
+      }
+
+      .command-card:hover {
+        transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-4px);
+        box-shadow: 0 46px 110px rgba(20, 20, 17, 0.32);
+      }
+
+      .command-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        background:
+          linear-gradient(108deg, transparent 0 53%, rgba(255, 250, 240, 0.82) 53% 54%, transparent 54% 100%),
+          linear-gradient(90deg, var(--red) 0 30%, #fffaf0 30% 34%, var(--blue) 34% 100%);
+        background-size: 140% 100%;
+        animation: accentSweep 4s ease-in-out infinite alternate;
+      }
+
+      .command-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        opacity: 0.2;
+        background:
+          radial-gradient(420px circle at var(--glow-x) var(--glow-y), rgba(255, 255, 255, 0.62), transparent 46%),
+          linear-gradient(135deg, transparent 0 62%, rgba(28, 52, 79, 0.16) 62% 63%, transparent 63% 100%),
+          repeating-linear-gradient(90deg, transparent 0 34px, rgba(17, 17, 17, 0.045) 34px 35px);
+      }
+
+      .hero-signal {
+        position: absolute;
+        inset: auto 0 0;
+        z-index: 2;
+        height: 42%;
+        pointer-events: none;
+        opacity: 0.7;
+        background:
+          linear-gradient(112deg, transparent 0 52%, rgba(165, 31, 42, 0.22) 52% 53%, transparent 53% 100%),
+          linear-gradient(108deg, transparent 0 62%, rgba(255, 255, 255, 0.38) 62% 62.4%, transparent 62.4% 100%),
+          linear-gradient(104deg, transparent 0 74%, rgba(28, 52, 79, 0.25) 74% 75%, transparent 75% 100%),
+          repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 78px);
+        mask-image: linear-gradient(180deg, transparent, #000 34%, #000);
+      }
+
+      .hero-signal::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+        transform: translateX(-100%);
+        animation: sheen 6.5s ease-in-out infinite;
+      }
+
+      .mission-aperture {
+        position: relative;
+        min-height: min(58vh, 520px);
+        overflow: hidden;
+        background: rgba(247, 242, 231, 0.18);
+        border: 1px solid rgba(247, 242, 231, 0.38);
+        box-shadow: 0 36px 95px rgba(17, 17, 17, 0.28);
+        clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+        isolation: isolate;
+        transform-style: preserve-3d;
+        --rx: 0deg;
+        --ry: 0deg;
+        --glow-x: 50%;
+        --glow-y: 50%;
+        transition:
+          transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+          box-shadow 420ms ease;
+      }
+
+      .mission-aperture:hover {
+        transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-8px);
+        box-shadow: 0 46px 115px rgba(17, 17, 17, 0.34);
+      }
+
+      .aperture-media {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-rows: 1.2fr 0.8fr;
+      }
+
+      .aperture-media video,
+      .aperture-shot {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scale(1.05);
+        transition:
+          transform 1200ms ease,
+          filter 1200ms ease;
+      }
+
+      .aperture-shot {
+        background: var(--image) center / cover;
+      }
+
+      .mission-aperture:hover .aperture-media video,
+      .mission-aperture:hover .aperture-shot {
+        transform: scale(1.1);
+        filter: saturate(1.06) contrast(1.04);
+      }
+
+      .mission-aperture::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background:
+          radial-gradient(420px circle at var(--glow-x) var(--glow-y), rgba(255, 255, 255, 0.28), transparent 46%),
+          linear-gradient(180deg, rgba(17, 17, 17, 0.02), rgba(17, 17, 17, 0.12)),
+          linear-gradient(90deg, rgba(165, 31, 42, 0.24), transparent 22%, transparent 76%, rgba(28, 52, 79, 0.22));
+      }
+
+      .mission-aperture::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        background:
+          linear-gradient(115deg, transparent 0 39%, rgba(247, 242, 231, 0.52) 39% 39.5%, transparent 39.5% 100%),
+          linear-gradient(115deg, transparent 0 74%, rgba(165, 31, 42, 0.42) 74% 75%, transparent 75% 100%);
+        animation: aperturePulse 6s ease-in-out infinite alternate;
+      }
+
+      .aperture-divider {
+        position: absolute;
+        right: 0;
+        left: 0;
+        top: 60%;
+        z-index: 4;
+        height: 7px;
+        background:
+          linear-gradient(108deg, transparent 0 54%, rgba(255, 250, 240, 0.82) 54% 55%, transparent 55% 100%),
+          linear-gradient(90deg, var(--red) 0 31%, #fffaf0 31% 35%, var(--blue) 35% 100%);
+        box-shadow: 0 16px 36px rgba(17, 17, 17, 0.18);
+      }
+
+      @keyframes aperturePulse {
+        from {
+          opacity: 0.72;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes sheen {
+        0%,
+        55% {
+          transform: translateX(-110%);
+        }
+        100% {
+          transform: translateX(110%);
+        }
+      }
+
+      @keyframes videoDrift {
+        from {
+          transform: scale(1.04) translate3d(0, 0, 0);
+        }
+        to {
+          transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+        }
+      }
+
+      @keyframes navSheen {
+        from {
+          background-position: 0% 50%;
+        }
+        to {
+          background-position: 100% 50%;
+        }
+      }
+
+      @keyframes missionLine {
+        from {
+          transform: scaleX(0.52);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes barSweep {
+        0%,
+        42% {
+          transform: translateX(-110%);
+        }
+        100% {
+          transform: translateX(110%);
+        }
+      }
+
+      @keyframes cardRise {
+        from {
+          opacity: 0;
+          transform: translateY(30px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes accentSweep {
+        from {
+          background-position: 0% 50%;
+        }
+        to {
+          background-position: 100% 50%;
+        }
+      }
+
+      .eyebrow,
+      .kicker {
+        margin: 0 0 18px;
+        color: var(--red);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 590px;
+        margin-bottom: 20px;
+        color: var(--ink);
+        font-size: clamp(36px, 4.2vw, 62px);
+        line-height: 0.98;
+        letter-spacing: -0.035em;
+        font-weight: 900;
+      }
+
+      .hero p {
+        max-width: 500px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.58;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-top: 34px;
+      }
+
+      .btn {
+        display: inline-flex;
+        min-height: 50px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 24px;
+        border: 2px solid var(--red);
+        background: var(--red);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease,
+          background 180ms ease,
+          color 180ms ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        background: #8e121b;
+        box-shadow: 0 16px 34px rgba(165, 31, 42, 0.24);
+      }
+
+      .btn.light {
+        border-color: var(--blue);
+        background: var(--panel);
+        color: var(--blue);
+      }
+
+      .btn.light:hover {
+        background: var(--blue);
+        color: #fff;
+      }
+
+      .service-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        margin-top: 38px;
+        max-width: none;
+        border-top: 1px solid var(--line);
+        border-left: 1px solid var(--line);
+        background: rgba(247, 242, 231, 0.96);
+        box-shadow: 0 22px 45px rgba(17, 17, 17, 0.08);
+      }
+
+      .service-strip div {
+        position: relative;
+        padding: 17px;
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        overflow: hidden;
+        transition:
+          background 220ms ease,
+          transform 220ms ease;
+      }
+
+      .service-strip div::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(165, 31, 42, 0.08), rgba(28, 52, 79, 0.08));
+        opacity: 0;
+        transition: opacity 220ms ease;
+      }
+
+      .service-strip div:hover {
+        transform: translateY(-3px);
+        background: #fffaf0;
+      }
+
+      .service-strip div:hover::before {
+        opacity: 1;
+      }
+
+      .service-strip strong {
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .section {
+        padding: 96px 0;
+        position: relative;
+      }
+
+      .section.alt {
+        background: var(--stone);
+      }
+
+      .section.dark {
+        background:
+          linear-gradient(135deg, #101312, #202417 45%, #141414);
+        color: #fff;
+      }
+
+      .head {
+        display: grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        gap: 56px;
+        align-items: end;
+        margin-bottom: 52px;
+      }
+
+      h2 {
+        margin-bottom: 0;
+        max-width: 720px;
+        font-size: clamp(34px, 4.6vw, 62px);
+        line-height: 1;
+        letter-spacing: -0.045em;
+        font-weight: 900;
+      }
+
+      .lead {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.68;
+      }
+
+      .dark .lead {
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: var(--line);
+        box-shadow: 0 28px 70px rgba(17, 17, 17, 0.09);
+      }
+
+      .card {
+        min-height: 310px;
+        background: var(--panel);
+        overflow: hidden;
+        position: relative;
+        transform-style: preserve-3d;
+        --rx: 0deg;
+        --ry: 0deg;
+        --glow-x: 50%;
+        --glow-y: 50%;
+        transition:
+          transform 260ms ease,
+          box-shadow 260ms ease;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 4px;
+        background: var(--red);
+        transition: width 350ms ease;
+        z-index: 2;
+      }
+
+      .card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        background:
+          radial-gradient(340px circle at var(--glow-x) var(--glow-y), rgba(255, 255, 255, 0.46), transparent 48%),
+          linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.35), transparent 70%);
+        transform: translateX(-130%);
+        transition:
+          opacity 250ms ease,
+          transform 850ms ease;
+      }
+
+      .card:hover {
+        transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-10px);
+        box-shadow: 0 30px 70px rgba(17, 17, 17, 0.14);
+      }
+
+      .card:hover::before {
+        width: 100%;
+      }
+
+      .card:hover::after {
+        opacity: 1;
+        transform: translateX(130%);
+      }
+
+      .card-image {
+        height: 205px;
+        background: var(--image) center / cover;
+        transition:
+          transform 850ms ease,
+          filter 850ms ease;
+      }
+
+      .card:hover .card-image {
+        transform: scale(1.05);
+        filter: saturate(1.04) contrast(1.04);
+      }
+
+      .card-body {
+        padding: 26px;
+      }
+
+      .card h3 {
+        margin-bottom: 14px;
+        font-size: 23px;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 58px;
+        align-items: center;
+      }
+
+      .photo {
+        position: relative;
+        overflow: hidden;
+        min-height: 490px;
+        background:
+          linear-gradient(rgba(17, 17, 17, 0.02), rgba(17, 17, 17, 0.18)),
+          var(--image) center / cover;
+        box-shadow: 0 24px 60px rgba(17, 17, 17, 0.12);
+        transform-style: preserve-3d;
+        --rx: 0deg;
+        --ry: 0deg;
+        transition:
+          transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+          filter 700ms ease;
+      }
+
+      .photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(110deg, transparent 0 68%, rgba(165, 31, 42, 0.24) 68% 69%, transparent 69% 100%),
+          repeating-linear-gradient(90deg, transparent 0 54px, rgba(255, 255, 255, 0.12) 54px 55px);
+        opacity: 0;
+        transition: opacity 400ms ease;
+      }
+
+      .photo:hover {
+        transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)) scale(1.015);
+        filter: contrast(1.04) saturate(1.04);
+      }
+
+      .photo:hover::after {
+        opacity: 1;
+      }
+
+      .section.dark {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .section.dark::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        opacity: 0.16;
+        background:
+          linear-gradient(90deg, transparent 0 18%, rgba(180, 31, 42, 0.65) 18% 20%, transparent 20% 100%),
+          repeating-linear-gradient(90deg, transparent 0 76px, rgba(255, 255, 255, 0.08) 76px 77px);
+      }
+
+      .section.dark > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .rules {
+        margin-top: 34px;
+        border-top: 1px solid var(--line);
+      }
+
+      .rule {
+        display: grid;
+        grid-template-columns: 170px 1fr;
+        gap: 24px;
+        padding: 22px 0;
+        border-bottom: 1px solid var(--line);
+        transition:
+          padding-left 240ms ease,
+          background 240ms ease;
+      }
+
+      .rule:hover {
+        padding-left: 12px;
+        background: rgba(180, 31, 42, 0.035);
+      }
+
+      .rule strong {
+        color: var(--blue);
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .rule span {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .quote {
+        max-width: 850px;
+      }
+
+      .quote p {
+        margin-bottom: 24px;
+        font-size: clamp(28px, 4vw, 54px);
+        line-height: 1.05;
+        letter-spacing: -0.035em;
+        font-weight: 900;
+      }
+
+      .stars {
+        color: var(--red);
+        letter-spacing: 0.16em;
+      }
+
+      .contact {
+        display: grid;
+        grid-template-columns: 0.9fr 1.1fr;
+        gap: 58px;
+      }
+
+      .contact-panel {
+        padding: 34px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 24px 60px rgba(17, 17, 17, 0.1);
+        transform-style: preserve-3d;
+        --rx: 0deg;
+        --ry: 0deg;
+        transition:
+          transform 320ms ease,
+          box-shadow 320ms ease;
+      }
+
+      .contact-panel:hover {
+        transform: perspective(1000px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-6px);
+        box-shadow: 0 34px 78px rgba(17, 17, 17, 0.14);
+      }
+
+      .contact-panel p {
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .form {
+        display: grid;
+        gap: 14px;
+      }
+
+      .form input,
+      .form textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #fffaf0;
+        padding: 16px;
+        color: var(--ink);
+        font: inherit;
+        transition:
+          border-color 200ms ease,
+          box-shadow 200ms ease,
+          transform 200ms ease;
+      }
+
+      .form input:focus,
+      .form textarea:focus {
+        outline: none;
+        border-color: rgba(165, 31, 42, 0.58);
+        box-shadow: 0 0 0 4px rgba(165, 31, 42, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .form textarea {
+        min-height: 132px;
+        resize: vertical;
+      }
+
+      .footer {
+        padding: 34px 0;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .footer .wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(28px);
+        transition:
+          opacity 850ms cubic-bezier(0.22, 1, 0.36, 1),
+          transform 850ms cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .stagger:nth-child(2) {
+        transition-delay: 90ms;
+      }
+
+      .stagger:nth-child(3) {
+        transition-delay: 180ms;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      @media (max-width: 920px) {
+        .topbar-inner {
+          font-size: 10px;
+          letter-spacing: 0.12em;
+        }
+
+        .topbar-inner span:last-child {
+          display: none;
+        }
+
+        .links {
+          display: none;
+        }
+
+        .menu {
+          display: inline-grid;
+          place-items: center;
+        }
+
+        .nav.open .links {
+          position: absolute;
+          display: grid;
+          top: 86px;
+          right: 0;
+          left: 0;
+          padding: 12px 20px 18px;
+          border-bottom: 1px solid var(--line);
+          background: var(--panel);
+        }
+
+        .nav.open .links a {
+          padding: 15px 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .hero::before {
+          background:
+            linear-gradient(180deg, rgba(17, 17, 17, 0.18), rgba(17, 17, 17, 0.3)),
+            linear-gradient(90deg, rgba(236, 231, 218, 0.14), rgba(28, 52, 79, 0.16));
+        }
+
+        .hero-video {
+          width: 100%;
+          height: 100%;
+          opacity: 1;
+        }
+
+        .command-card {
+          background: rgba(247, 242, 231, 0.94);
+        }
+
+        .head,
+        .split,
+        .contact {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .mission-aperture {
+          display: none;
+        }
+
+        .cards {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .topbar-inner {
+          gap: 8px;
+          font-size: 8px;
+          letter-spacing: 0.08em;
+        }
+
+        .topbar-logo {
+          width: 26px;
+          height: 24px;
+          padding: 0;
+        }
+
+        .topbar-flag {
+          width: 38px;
+        }
+
+        .wrap {
+          width: min(var(--max), calc(100% - 28px));
+        }
+
+        .logo {
+          width: 168px;
+        }
+
+        .brand-panel {
+          min-width: 0;
+          padding: 8px 10px;
+        }
+
+        .brand-slogan {
+          display: none;
+        }
+
+        .hero-grid {
+          padding: 58px 0 80px;
+        }
+
+        h1 {
+          font-size: 42px;
+        }
+
+        .actions,
+        .footer .wrap {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+        }
+
+        .service-strip {
+          grid-template-columns: 1fr;
+        }
+
+        .section {
+          padding: 74px 0;
+        }
+
+        .photo {
+          min-height: 340px;
+        }
+
+        .rule {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="wrap topbar-inner">
+        <span>
+          <img
+            class="topbar-logo"
+            src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=192,fit=crop/mxBroLwkjztKJ8ZW/1-10-YleM13ZDDgf1BzD0.png"
+            alt="CE Solution Plus logo"
+            width="192"
+            height="38"
+          />
+          Veteran woman owned corporation
+        </span>
+        <span>
+          <img
+            class="topbar-flag"
+            src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg"
+            alt="United States flag"
+            width="34"
+            height="20"
+          />
+          Professional high-quality services
+        </span>
+      </div>
+    </div>
+    <header class="header">
+      <nav class="wrap nav" aria-label="Primary navigation">
+        <a class="brand-panel" href="#home" aria-label="Home">
+          <img
+            class="logo"
+            src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop/mxBroLwkjztKJ8ZW/1-10-YleM13ZDDgf1BzD0.png"
+            alt="CE Solution Plus logo"
+            width="768"
+            height="152"
+          />
+          <span class="brand-slogan">You have a need. We have a solution.</span>
+        </a>
+        <div class="links">
+          <a href="#home">Home</a>
+          <a href="#services">Services</a>
+          <a href="#about">About Us</a>
+          <a href="#contact">Contact</a>
+          <a href="#privacy">Privacy Policy</a>
+        </div>
+        <button class="menu" type="button" aria-label="Menu" aria-expanded="false"><span></span></button>
+      </nav>
+    </header>
+
+    <main id="home">
+      <section class="hero">
+        <video
+          class="hero-video"
+          autoplay
+          muted
+          loop
+          playsinline
+          poster="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/mxBroLwkjztKJ8ZW/capitol_west_front750-YNqJQ1g2nMca07KB.jpg"
+          aria-hidden="true"
+        >
+          <source
+            src="https://videos.pexels.com/video-files/18101973/18101973-hd_1920_1080_30fps.mp4"
+            type="video/mp4"
+          />
+        </video>
+        <div class="hero-signal" aria-hidden="true"></div>
+        <div class="wrap hero-grid">
+          <div class="command-card reveal">
+            <p class="eyebrow">Professional Services Overview</p>
+            <h1>Our Mission Is Your Success</h1>
+            <p>We provide worry-free services, so you can focus on your mission</p>
+            <div class="actions">
+              <a class="btn" href="#services">Explore</a>
+              <a class="btn light" href="#contact">Contact Us</a>
+            </div>
+            <div class="service-strip">
+              <div><strong>Staffing Services</strong></div>
+              <div><strong>Facility Operations & Maintenance</strong></div>
+              <div><strong>Training Services</strong></div>
+            </div>
+          </div>
+          <div class="mission-aperture reveal" aria-hidden="true">
+            <div class="aperture-media">
+              <video autoplay muted loop playsinline>
+                <source
+                  src="https://videos.pexels.com/video-files/13721788/13721788-hd_1280_720_60fps.mp4"
+                  type="video/mp4"
+                />
+              </video>
+              <div
+                class="aperture-shot"
+                style="--image: url('https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/mxBroLwkjztKJ8ZW/capitol_west_front750-YNqJQ1g2nMca07KB.jpg')"
+              ></div>
+            </div>
+            <div class="aperture-divider"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="services">
+        <div class="wrap">
+          <div class="head reveal">
+            <div>
+              <p class="kicker">Services</p>
+              <h2>Professional Services Overview</h2>
+            </div>
+            <p class="lead">Explore our range of professional high-quality services provided by a team of skilled professionals.</p>
+          </div>
+          <div class="cards">
+            <article class="card reveal stagger">
+              <div class="card-image" style="--image: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1000&q=82')"></div>
+              <div class="card-body">
+                <h3>Staffing Services</h3>
+                <p>Exceptional Service Quality</p>
+              </div>
+            </article>
+            <article class="card reveal stagger">
+              <div class="card-image" style="--image: url('https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1440,h=1697,fit=crop/mxBroLwkjztKJ8ZW/services-YBgpO38ZZkFQDeWO.png')"></div>
+              <div class="card-body">
+                <h3>Facility Operations & Maintenance</h3>
+                <p>Reliable Partner Support</p>
+              </div>
+            </article>
+            <article class="card reveal stagger">
+              <div class="card-image" style="--image: url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1000&q=82')"></div>
+              <div class="card-body">
+                <h3>Training Services</h3>
+                <p>Navigate Challenges Together</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt">
+        <div class="wrap split">
+          <div class="photo reveal" style="--image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1400&q=82')" aria-hidden="true"></div>
+          <div class="reveal">
+            <p class="kicker">Exceptional Service Quality</p>
+            <h2>Our commitment to excellence drives us to constantly innovate, adapt, and exceed expectations.</h2>
+            <div class="rules">
+              <div class="rule"><strong>Reliable Partner Support</strong><span>We strive to be a reliable partner on our clients' path to achievement and success.</span></div>
+              <div class="rule"><strong>Navigate Challenges Together</strong><span>Seize Opportunities Now</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section dark">
+        <div class="wrap quote reveal">
+          <p>CE Solution Plus exceeded my expectations with their exceptional services. I highly recommend them!</p>
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="lead">Satisfied Customer</p>
+        </div>
+      </section>
+
+      <section class="section" id="about">
+        <div class="wrap split">
+          <div class="reveal">
+            <p class="kicker">About</p>
+            <h2>CE Solution Plus is a veteran woman owned corporation that provides professional high-quality services to its clients.</h2>
+          </div>
+          <div class="photo reveal" style="--image: url('https://images.unsplash.com/photo-1560264418-c4445382edbc?auto=format&fit=crop&w=1400&q=82')" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section class="section alt" id="contact">
+        <div class="wrap contact">
+          <div class="reveal">
+            <p class="kicker">Contact Us</p>
+            <h2>Reach out to us for professional high-quality services and support</h2>
+            <div class="rules">
+              <div class="rule"><strong>Contact</strong><span>siblini@cesolutionplus.com</span></div>
+              <div class="rule"><strong>Contact Information</strong><span>(718) 587-9987</span></div>
+              <div class="rule"><strong>About</strong><span>3007 43rd Street. Ste1 Astoria, NY 11103</span></div>
+            </div>
+          </div>
+          <div class="contact-panel reveal">
+            <form class="form" action="mailto:siblini@cesolutionplus.com" method="post" enctype="text/plain">
+              <input name="first-name" placeholder="Enter your first name" />
+              <input name="email" type="email" placeholder="Enter your email address*" required />
+              <textarea name="message" placeholder="Enter your message*" required></textarea>
+              <button class="btn" type="submit">Submit your form now</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer" id="privacy">
+      <div class="wrap">
+        <span>&copy; 2025. All rights reserved.</span>
+        <span>Privacy Policy</span>
+      </div>
+    </footer>
+
+    <script>
+      const header = document.querySelector(".header");
+      const hero = document.querySelector(".hero");
+      const nav = document.querySelector(".nav");
+      const menu = document.querySelector(".menu");
+      const links = document.querySelectorAll(".links a");
+
+      menu.addEventListener("click", () => {
+        const open = nav.classList.toggle("open");
+        menu.setAttribute("aria-expanded", String(open));
+      });
+
+      links.forEach((link) => {
+        link.addEventListener("click", () => {
+          nav.classList.remove("open");
+          menu.setAttribute("aria-expanded", "false");
+          links.forEach((item) => item.classList.remove("active"));
+          link.classList.add("active");
+        });
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.16 }
+      );
+
+      document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+
+      const setHeaderState = () => {
+        header.classList.toggle("scrolled", window.scrollY > 12);
+      };
+
+      setHeaderState();
+      window.addEventListener("scroll", setHeaderState, { passive: true });
+
+      const navTargets = Array.from(links)
+        .map((link) => ({
+          link,
+          target: document.querySelector(link.getAttribute("href")),
+        }))
+        .filter((item) => item.target);
+
+      const syncActiveNav = () => {
+        let current = navTargets[0];
+        navTargets.forEach((item) => {
+          const rect = item.target.getBoundingClientRect();
+          if (rect.top <= 150) {
+            current = item;
+          }
+        });
+
+        links.forEach((link) => link.classList.remove("active"));
+        if (current) current.link.classList.add("active");
+      };
+
+      syncActiveNav();
+      window.addEventListener("scroll", syncActiveNav, { passive: true });
+
+      const tiltTargets = document.querySelectorAll(".command-card, .mission-aperture, .card, .photo, .contact-panel");
+
+      tiltTargets.forEach((target) => {
+        target.addEventListener("pointermove", (event) => {
+          const rect = target.getBoundingClientRect();
+          const x = (event.clientX - rect.left) / rect.width;
+          const y = (event.clientY - rect.top) / rect.height;
+          const rotateX = (0.5 - y) * 7;
+          const rotateY = (x - 0.5) * 8;
+
+          target.style.setProperty("--rx", `${rotateX.toFixed(2)}deg`);
+          target.style.setProperty("--ry", `${rotateY.toFixed(2)}deg`);
+          target.style.setProperty("--glow-x", `${(x * 100).toFixed(1)}%`);
+          target.style.setProperty("--glow-y", `${(y * 100).toFixed(1)}%`);
+        });
+
+        target.addEventListener("pointerleave", () => {
+          target.style.setProperty("--rx", "0deg");
+          target.style.setProperty("--ry", "0deg");
+          target.style.setProperty("--glow-x", "50%");
+          target.style.setProperty("--glow-y", "50%");
+        });
+      });
+
+      window.addEventListener(
+        "pointermove",
+        (event) => {
+          if (!hero) return;
+          hero.style.setProperty("--mx", `${(event.clientX / window.innerWidth) * 100}%`);
+          hero.style.setProperty("--my", `${(event.clientY / window.innerHeight) * 100}%`);
+        },
+        { passive: true }
+      );
+    </script>
+  </body>
+</html>
