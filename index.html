@@ -8,7 +8,7 @@
       name="description"
       content="CE Solution Plus is a veteran woman owned corporation that provides professional high-quality services to its clients."
     />
-    <meta name="theme-color" content="#ece7da" />
+    <meta name="theme-color" content="#e4e8e7" />
     <link
       rel="icon"
       href="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=192,fit=crop/mxBroLwkjztKJ8ZW/1-10-YleM13ZDDgf1BzD0.png"
@@ -17,15 +17,15 @@
     <style>
       :root {
         --ink: #111111;
-        --muted: #60645f;
-        --paper: #ece7da;
-        --panel: #f7f2e7;
-        --stone: #ddd6c5;
+        --muted: #566164;
+        --paper: #e4e8e7;
+        --panel: #f2f5f2;
+        --stone: #cfd7d4;
         --line: rgba(17, 17, 17, 0.14);
         --blue: #1c344f;
         --red: #a51f2a;
-        --olive: #606857;
-        --gold: #a78c54;
+        --olive: #5f6d62;
+        --gold: #9b8a5c;
         --max: 1360px;
       }
 
@@ -69,7 +69,7 @@
         position: relative;
         z-index: 60;
         min-height: 42px;
-        overflow: hidden;
+        overflow: visible;
         background:
           linear-gradient(115deg, rgba(165, 31, 42, 0.34) 0 9px, transparent 9px 18px),
           linear-gradient(135deg, #13283f 0%, #1c344f 48%, #14273d 100%);
@@ -140,7 +140,7 @@
         height: auto;
         object-fit: contain;
         padding: 1px;
-        background: #fffaf0;
+        background: #f8faf7;
         box-shadow:
           0 0 0 1px rgba(255, 255, 255, 0.55),
           0 8px 18px rgba(17, 17, 17, 0.2);
@@ -152,9 +152,9 @@
         top: 0;
         z-index: 50;
         border-bottom: 1px solid var(--line);
-        background: rgba(247, 242, 231, 0.95);
+        background: rgba(242, 245, 242, 0.95);
         backdrop-filter: blur(12px);
-        overflow: hidden;
+        overflow: visible;
         transition:
           box-shadow 240ms ease,
           background 240ms ease;
@@ -177,8 +177,8 @@
       }
 
       .header.scrolled {
-        background: rgba(247, 242, 231, 0.985);
-        box-shadow: 0 18px 42px rgba(17, 17, 17, 0.08);
+        background: rgba(242, 245, 242, 0.82);
+        box-shadow: 0 18px 42px rgba(17, 17, 17, 0.1);
       }
 
       .nav {
@@ -290,7 +290,7 @@
         width: 44px;
         height: 44px;
         border: 1px solid var(--line);
-        background: #fffaf0;
+        background: #f8faf7;
         position: relative;
         cursor: pointer;
       }
@@ -339,7 +339,7 @@
         display: grid;
         align-items: stretch;
         overflow: hidden;
-        background: #cfc7b5;
+        background: #bfc9c8;
         --mx: 62%;
         --my: 42%;
       }
@@ -350,6 +350,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        pointer-events: none;
         opacity: 0.92;
         transform: scale(1.04);
         filter: saturate(0.78) contrast(1.04) grayscale(0.08);
@@ -364,7 +365,7 @@
         background:
           radial-gradient(900px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.18), transparent 44%),
           linear-gradient(90deg, rgba(17, 17, 17, 0.16), rgba(17, 17, 17, 0.025) 54%, rgba(28, 52, 79, 0.16)),
-          linear-gradient(180deg, rgba(236, 231, 218, 0.04), rgba(236, 231, 218, 0.2));
+          linear-gradient(180deg, rgba(228, 232, 231, 0.05), rgba(228, 232, 231, 0.22));
       }
 
       .hero::after {
@@ -375,8 +376,8 @@
         left: 0;
         height: 12px;
         background:
-          linear-gradient(108deg, transparent 0 54%, rgba(255, 250, 240, 0.78) 54% 55%, transparent 55% 100%),
-          linear-gradient(90deg, var(--red) 0 27%, #fffaf0 27% 30%, var(--blue) 30% 100%);
+          linear-gradient(108deg, transparent 0 54%, rgba(248, 250, 247, 0.78) 54% 55%, transparent 55% 100%),
+          linear-gradient(90deg, var(--red) 0 27%, #f8faf7 27% 30%, var(--blue) 30% 100%);
         z-index: 3;
       }
 
@@ -395,8 +396,16 @@
         position: relative;
         max-width: 590px;
         padding: clamp(28px, 3.5vw, 48px);
-        background: rgba(247, 242, 231, 0.94);
-        box-shadow: 0 36px 90px rgba(20, 20, 17, 0.26);
+        border: 1px solid rgba(255, 255, 255, 0.58);
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(222, 232, 232, 0.16)),
+          rgba(224, 235, 235, 0.16);
+        -webkit-backdrop-filter: blur(24px) saturate(1.35) contrast(1.08);
+        backdrop-filter: blur(24px) saturate(1.35) contrast(1.08);
+        box-shadow:
+          0 38px 95px rgba(8, 14, 18, 0.32),
+          inset 0 1px 0 rgba(255, 255, 255, 0.72),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.24);
         overflow: hidden;
         isolation: isolate;
         transform-style: preserve-3d;
@@ -412,7 +421,10 @@
 
       .command-card:hover {
         transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-4px);
-        box-shadow: 0 46px 110px rgba(20, 20, 17, 0.32);
+        box-shadow:
+          0 50px 120px rgba(8, 14, 18, 0.38),
+          inset 0 1px 0 rgba(255, 255, 255, 0.78),
+          inset 0 -1px 0 rgba(255, 255, 255, 0.28);
       }
 
       .command-card::before {
@@ -423,8 +435,8 @@
         width: 100%;
         height: 8px;
         background:
-          linear-gradient(108deg, transparent 0 53%, rgba(255, 250, 240, 0.82) 53% 54%, transparent 54% 100%),
-          linear-gradient(90deg, var(--red) 0 30%, #fffaf0 30% 34%, var(--blue) 34% 100%);
+          linear-gradient(108deg, transparent 0 53%, rgba(248, 250, 247, 0.82) 53% 54%, transparent 54% 100%),
+          linear-gradient(90deg, var(--red) 0 30%, #f8faf7 30% 34%, var(--blue) 34% 100%);
         background-size: 140% 100%;
         animation: accentSweep 4s ease-in-out infinite alternate;
       }
@@ -434,11 +446,11 @@
         position: absolute;
         inset: 0;
         z-index: -1;
-        opacity: 0.2;
+        opacity: 1;
         background:
-          radial-gradient(420px circle at var(--glow-x) var(--glow-y), rgba(255, 255, 255, 0.62), transparent 46%),
-          linear-gradient(135deg, transparent 0 62%, rgba(28, 52, 79, 0.16) 62% 63%, transparent 63% 100%),
-          repeating-linear-gradient(90deg, transparent 0 34px, rgba(17, 17, 17, 0.045) 34px 35px);
+          radial-gradient(420px circle at var(--glow-x) var(--glow-y), rgba(255, 255, 255, 0.24), transparent 46%),
+          linear-gradient(112deg, rgba(255, 255, 255, 0.36) 0 1px, transparent 1px 58%),
+          linear-gradient(135deg, transparent 0 62%, rgba(28, 52, 79, 0.08) 62% 63%, transparent 63% 100%);
       }
 
       .hero-signal {
@@ -469,8 +481,8 @@
         position: relative;
         min-height: min(58vh, 520px);
         overflow: hidden;
-        background: rgba(247, 242, 231, 0.18);
-        border: 1px solid rgba(247, 242, 231, 0.38);
+        background: rgba(242, 245, 242, 0.16);
+        border: 1px solid rgba(242, 245, 242, 0.4);
         box-shadow: 0 36px 95px rgba(17, 17, 17, 0.28);
         clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
         isolation: isolate;
@@ -501,6 +513,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        pointer-events: none;
         transform: scale(1.05);
         transition:
           transform 1200ms ease,
@@ -536,7 +549,7 @@
         z-index: 3;
         pointer-events: none;
         background:
-          linear-gradient(115deg, transparent 0 39%, rgba(247, 242, 231, 0.52) 39% 39.5%, transparent 39.5% 100%),
+          linear-gradient(115deg, transparent 0 39%, rgba(242, 245, 242, 0.52) 39% 39.5%, transparent 39.5% 100%),
           linear-gradient(115deg, transparent 0 74%, rgba(165, 31, 42, 0.42) 74% 75%, transparent 75% 100%);
         animation: aperturePulse 6s ease-in-out infinite alternate;
       }
@@ -549,8 +562,8 @@
         z-index: 4;
         height: 7px;
         background:
-          linear-gradient(108deg, transparent 0 54%, rgba(255, 250, 240, 0.82) 54% 55%, transparent 55% 100%),
-          linear-gradient(90deg, var(--red) 0 31%, #fffaf0 31% 35%, var(--blue) 35% 100%);
+          linear-gradient(108deg, transparent 0 54%, rgba(248, 250, 247, 0.82) 54% 55%, transparent 55% 100%),
+          linear-gradient(90deg, var(--red) 0 31%, #f8faf7 31% 35%, var(--blue) 35% 100%);
         box-shadow: 0 16px 36px rgba(17, 17, 17, 0.18);
       }
 
@@ -607,6 +620,17 @@
         }
         100% {
           transform: translateX(110%);
+        }
+      }
+
+      @keyframes mobileMenuIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
       }
 
@@ -697,6 +721,20 @@
         box-shadow: 0 16px 34px rgba(165, 31, 42, 0.24);
       }
 
+      .btn,
+      .links a,
+      .card,
+      .rule,
+      .service-strip div,
+      .contact-panel,
+      .mission-aperture {
+        touch-action: manipulation;
+      }
+
+      .is-pressed {
+        filter: brightness(1.06) saturate(1.08);
+      }
+
       .btn.light {
         border-color: var(--blue);
         background: var(--panel);
@@ -715,7 +753,9 @@
         max-width: none;
         border-top: 1px solid var(--line);
         border-left: 1px solid var(--line);
-        background: rgba(247, 242, 231, 0.96);
+        background: rgba(242, 245, 242, 0.24);
+        -webkit-backdrop-filter: blur(14px) saturate(1.18);
+        backdrop-filter: blur(14px) saturate(1.18);
         box-shadow: 0 22px 45px rgba(17, 17, 17, 0.08);
       }
 
@@ -741,7 +781,7 @@
 
       .service-strip div:hover {
         transform: translateY(-3px);
-        background: #fffaf0;
+        background: rgba(248, 250, 247, 0.36);
       }
 
       .service-strip div:hover::before {
@@ -1044,7 +1084,7 @@
       .form textarea {
         width: 100%;
         border: 1px solid var(--line);
-        background: #fffaf0;
+        background: #f8faf7;
         padding: 16px;
         color: var(--ink);
         font: inherit;
@@ -1133,24 +1173,33 @@
 
         .nav.open .links {
           position: absolute;
+          z-index: 80;
           display: grid;
           top: 86px;
           right: 0;
           left: 0;
-          padding: 12px 20px 18px;
+          padding: 14px 20px 20px;
           border-bottom: 1px solid var(--line);
-          background: var(--panel);
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.56), rgba(222, 232, 232, 0.36)),
+            rgba(242, 245, 242, 0.88);
+          -webkit-backdrop-filter: blur(18px) saturate(1.2);
+          backdrop-filter: blur(18px) saturate(1.2);
+          box-shadow: 0 24px 55px rgba(8, 14, 18, 0.14);
+          gap: 0;
+          animation: mobileMenuIn 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
 
         .nav.open .links a {
-          padding: 15px 0;
+          padding: 16px 0;
           border-bottom: 1px solid var(--line);
+          transform: translateX(0);
         }
 
         .hero::before {
           background:
             linear-gradient(180deg, rgba(17, 17, 17, 0.18), rgba(17, 17, 17, 0.3)),
-            linear-gradient(90deg, rgba(236, 231, 218, 0.14), rgba(28, 52, 79, 0.16));
+            linear-gradient(90deg, rgba(228, 232, 231, 0.14), rgba(28, 52, 79, 0.16));
         }
 
         .hero-video {
@@ -1160,7 +1209,9 @@
         }
 
         .command-card {
-          background: rgba(247, 242, 231, 0.94);
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(222, 232, 232, 0.22)),
+            rgba(224, 235, 235, 0.2);
         }
 
         .head,
@@ -1174,7 +1225,9 @@
         }
 
         .mission-aperture {
-          display: none;
+          min-height: min(42vh, 360px);
+          clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
+          margin-top: -22px;
         }
 
         .cards {
@@ -1217,7 +1270,7 @@
         }
 
         .hero-grid {
-          padding: 58px 0 80px;
+          padding: 54px 0 72px;
         }
 
         h1 {
@@ -1235,6 +1288,11 @@
 
         .service-strip {
           grid-template-columns: 1fr;
+        }
+
+        .mission-aperture {
+          min-height: 235px;
+          margin-top: -10px;
         }
 
         .section {
@@ -1308,6 +1366,8 @@
           muted
           loop
           playsinline
+          disablepictureinpicture
+          disableremoteplayback
           poster="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/mxBroLwkjztKJ8ZW/capitol_west_front750-YNqJQ1g2nMca07KB.jpg"
           aria-hidden="true"
         >
@@ -1334,7 +1394,7 @@
           </div>
           <div class="mission-aperture reveal" aria-hidden="true">
             <div class="aperture-media">
-              <video autoplay muted loop playsinline>
+              <video autoplay muted loop playsinline disablepictureinpicture disableremoteplayback>
                 <source
                   src="https://videos.pexels.com/video-files/13721788/13721788-hd_1280_720_60fps.mp4"
                   type="video/mp4"
@@ -1511,6 +1571,17 @@
 
       syncActiveNav();
       window.addEventListener("scroll", syncActiveNav, { passive: true });
+
+      const pressTargets = document.querySelectorAll(
+        ".btn, .links a, .card, .rule, .service-strip div, .contact-panel, .mission-aperture"
+      );
+
+      pressTargets.forEach((target) => {
+        target.addEventListener("pointerdown", () => {
+          target.classList.add("is-pressed");
+          window.setTimeout(() => target.classList.remove("is-pressed"), 220);
+        });
+      });
 
       const tiltTargets = document.querySelectorAll(".command-card, .mission-aperture, .card, .photo, .contact-panel");
 
