@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useRef } from 'react';
 
 import { cn } from '@/lib/cn';
-import { gsap } from '@/lib/gsap';
+import { duration, gsap } from '@/lib/gsap';
 import {
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
@@ -25,7 +25,7 @@ type ActionProps =
   | (CommonProps & { href?: never; type?: 'button' | 'submit'; disabled?: boolean });
 
 const BASE =
-  'group relative inline-flex items-center justify-center gap-3 overflow-hidden whitespace-nowrap rounded-xs px-7 py-4 label-mono transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50';
+  'group relative inline-flex items-center justify-center gap-3 overflow-hidden whitespace-nowrap rounded-xs px-7 py-4 label-mono transition-[background-color,border-color,color,scale] duration-[var(--motion-micro)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50';
 
 const VARIANTS: Record<Variant, string> = {
   solid: 'bg-accent text-ink-950 hover:bg-accent-bright',
@@ -45,13 +45,13 @@ function useMagnet(strength: number, enabled: boolean) {
   useIsomorphicLayoutEffect(() => {
     const node = ref.current;
     if (!node || !enabled) return;
-    if (window.matchMedia('(hover: none)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
     const label = node.querySelector<HTMLElement>('[data-magnet-label]');
-    const xTo = gsap.quickTo(node, 'x', { duration: 0.5, ease: 'power3.out' });
-    const yTo = gsap.quickTo(node, 'y', { duration: 0.5, ease: 'power3.out' });
-    const lxTo = label ? gsap.quickTo(label, 'x', { duration: 0.6, ease: 'power3.out' }) : null;
-    const lyTo = label ? gsap.quickTo(label, 'y', { duration: 0.6, ease: 'power3.out' }) : null;
+    const xTo = gsap.quickTo(node, 'x', { duration: duration.ui, ease: 'power3.out' });
+    const yTo = gsap.quickTo(node, 'y', { duration: duration.ui, ease: 'power3.out' });
+    const lxTo = label ? gsap.quickTo(label, 'x', { duration: duration.reveal, ease: 'power3.out' }) : null;
+    const lyTo = label ? gsap.quickTo(label, 'y', { duration: duration.reveal, ease: 'power3.out' }) : null;
 
     const onMove = (event: PointerEvent) => {
       const rect = node.getBoundingClientRect();
@@ -64,8 +64,8 @@ function useMagnet(strength: number, enabled: boolean) {
     };
 
     const onLeave = () => {
-      gsap.to(node, { x: 0, y: 0, duration: 0.8, ease: 'ce-spring' });
-      if (label) gsap.to(label, { x: 0, y: 0, duration: 0.9, ease: 'ce-spring' });
+      gsap.to(node, { x: 0, y: 0, duration: duration.reveal, ease: 'ce-spring' });
+      if (label) gsap.to(label, { x: 0, y: 0, duration: duration.feature, ease: 'ce-spring' });
     };
 
     node.addEventListener('pointermove', onMove);
@@ -96,14 +96,15 @@ export function MagneticAction({
     <>
       {/* Sheen wipe on hover — one pass, left to right, no loop. */}
       <span
+        data-action-sheen
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-white/15 to-transparent transition-[left] duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)] group-hover:left-[150%]"
+        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-white/15 to-transparent transition-[left] duration-[var(--motion-reveal)] ease-[var(--ease-precise)] group-hover:left-[150%]"
       />
       <span data-magnet-label className="relative flex items-center gap-3">
         {children}
         <svg
           viewBox="0 0 16 10"
-          className="h-2.5 w-4 shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+          className="h-2.5 w-4 shrink-0 transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:translate-x-1"
           fill="none"
           aria-hidden="true"
         >

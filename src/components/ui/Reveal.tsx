@@ -5,8 +5,8 @@ import { createElement, useRef } from 'react';
 
 import { ease, gsap } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
@@ -51,17 +51,17 @@ export function Reveal({
   className,
   variant = 'up',
   delay = 0,
-  duration = 1.5,
+  duration = 0.56,
   stagger,
   start = 'top 88%',
 }: RevealProps) {
   const ref = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
 
   useIsomorphicLayoutEffect(() => {
     const node = ref.current;
-    if (!node || reducedMotion || fullMotion !== true) return;
+    if (!node || reducedMotion || motionAllowed !== true) return;
 
     const targets =
       stagger !== undefined ? (Array.from(node.children) as HTMLElement[]) : [node];
@@ -80,7 +80,7 @@ export function Reveal({
     }, node);
 
     return () => ctx.revert();
-  }, [reducedMotion, variant, delay, duration, stagger, start, fullMotion]);
+  }, [reducedMotion, variant, delay, duration, stagger, start, motionAllowed]);
 
   return createElement(
     as,

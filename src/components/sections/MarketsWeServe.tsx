@@ -1,16 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import { SectionTag } from '@/components/ui/SectionTag';
 import { markets } from '@/content/site';
-import { ease, gsap } from '@/lib/gsap';
+import { duration, ease, gsap } from '@/lib/gsap';
 import { sitePath } from '@/lib/site-path';
 import { useCursorPlate } from '@/hooks/useCursorPlate';
 import {
   useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
@@ -18,13 +19,15 @@ export function MarketsWeServe() {
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = useState(0);
+  const progressBarRef = useRef<HTMLSpanElement>(null);
+  const progressValueRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const motionAllowed = useMotionAllowed();
   const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion || fullMotion !== true) return;
+    if (!root || reducedMotion || motionAllowed !== true) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -33,8 +36,8 @@ export function MarketsWeServe() {
         {
           opacity: 1,
           y: 0,
-          duration: 1.1,
-          stagger: 0.08,
+          duration: duration.reveal,
+          stagger: duration.stagger,
           ease: ease.spring,
           scrollTrigger: { trigger: root, start: 'top 70%', once: true },
         },
@@ -43,7 +46,7 @@ export function MarketsWeServe() {
       // Desktop only: the section pins and the row scrubs sideways. Below lg the
       // same markup is a native snap-scroll carousel.
       const mm = gsap.matchMedia();
-      mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
+      if (fullMotion === true) mm.add('(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)', () => {
         const track = trackRef.current;
         const stage = stageRef.current;
         if (!track || !stage) return;
@@ -60,7 +63,15 @@ export function MarketsWeServe() {
             pin: true,
             scrub: 0.75,
             invalidateOnRefresh: true,
-            onUpdate: (self) => setProgress(self.progress),
+            onUpdate: (self) => {
+              const progress = self.progress;
+              if (progressBarRef.current) {
+                gsap.set(progressBarRef.current, { scaleX: Math.max(progress, 0.02) });
+              }
+              if (progressValueRef.current) {
+                progressValueRef.current.textContent = `${String(Math.round(progress * 100)).padStart(3, '0')}%`;
+              }
+            },
           },
         });
 
@@ -75,13 +86,13 @@ export function MarketsWeServe() {
     }, root);
 
     return () => ctx.revert();
-  }, [fullMotion, reducedMotion]);
+  }, [fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} id="markets" className="relative z-10 overflow-hidden">
       <div
         ref={stageRef}
-        className="relative flex flex-col justify-center py-24 md:py-28 lg:h-screen lg:py-0"
+        className="relative flex flex-col justify-center py-20 md:py-28 lg:h-screen lg:py-0"
       >
         <div className="shell">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -95,7 +106,11 @@ export function MarketsWeServe() {
           </div>
         </div>
 
-        <div className="mt-10 overflow-x-auto pb-4 [scrollbar-width:none] lg:mt-12 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
+        <div
+          role="region"
+          aria-label="Markets served"
+          className="mt-10 overflow-x-auto pb-4 [scrollbar-width:none] lg:mt-12 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden"
+        >
           <div
             ref={trackRef}
             className="flex w-max snap-x snap-mandatory gap-px bg-ink-800 px-5 md:px-10 lg:snap-none lg:will-change-transform xl:px-14"
@@ -110,12 +125,12 @@ export function MarketsWeServe() {
           <span className="label-mono text-[0.6rem] text-steel-400">Scroll</span>
           <span className="relative h-px flex-1 bg-ink-700">
             <span
-              className="absolute inset-y-0 left-0 bg-accent"
-              style={{ width: `${Math.max(progress * 100, 2)}%` }}
+              ref={progressBarRef}
+              className="absolute inset-y-0 left-0 w-full origin-left scale-x-[0.02] bg-accent"
             />
           </span>
-          <span className="label-mono text-[0.6rem] text-steel-400 tabular-nums">
-            {String(Math.round(progress * 100)).padStart(3, '0')}%
+          <span ref={progressValueRef} className="label-mono text-[0.6rem] text-steel-400 tabular-nums">
+            000%
           </span>
         </div>
       </div>
@@ -137,7 +152,7 @@ function MarketCard({
       ref={ref}
       data-market-card
       tabIndex={0}
-      className="group relative aspect-4/5 w-[78vw] shrink-0 snap-start overflow-hidden bg-ink-950 outline-none sm:w-[20rem] lg:aspect-auto lg:h-[52vh] lg:w-[41.6vh]"
+      className="group relative aspect-4/5 w-[78vw] shrink-0 snap-start overflow-hidden bg-ink-950 outline-none transition-transform duration-[var(--motion-ui)] active:scale-[0.99] sm:w-[20rem] lg:aspect-auto lg:h-[52vh] lg:w-[41.6vh]"
     >
       {/* Slightly oversized so the parallax shift never exposes an edge. */}
       <span data-plate-art className="absolute -inset-[4%] block">
@@ -149,7 +164,7 @@ function MarketCard({
           fill
           sizes="(max-width: 1024px) 78vw, 42vh"
           loading="lazy"
-          className="object-cover transition-transform duration-900 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105 group-focus-visible:scale-105"
+          className="object-cover transition-transform duration-[var(--motion-feature)] ease-[var(--ease-spring)] group-hover:scale-105 group-focus-visible:scale-105"
         />
       </span>
       <span
@@ -164,7 +179,7 @@ function MarketCard({
       />
       <span
         aria-hidden="true"
-        className="absolute inset-0 border border-transparent transition-colors duration-500 group-hover:border-accent/40 group-focus-visible:border-accent/40"
+        className="absolute inset-0 border border-transparent transition-colors duration-[var(--motion-ui)] group-hover:border-accent/40 group-focus-visible:border-accent/40"
       />
 
       <span className="absolute left-5 top-5 label-mono text-[0.58rem] text-steel-300 tabular-nums">
@@ -185,6 +200,16 @@ function MarketCard({
             <p className="pt-4 text-[0.85rem] leading-relaxed text-steel-200">
               {market.description}
             </p>
+            <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={`${market.title} tags`}>
+              {market.tags.map((tag) => (
+                <li
+                  key={tag}
+                  className="border border-steel-400/35 bg-ink-950/55 px-2 py-1.5 label-mono text-[0.48rem] leading-none text-steel-200"
+                >
+                  {tag}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

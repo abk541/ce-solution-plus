@@ -4,283 +4,236 @@ import { useEffect, useRef, useState } from 'react';
 
 import { company } from '@/content/site';
 import {
+  useMotionAllowed,
   usePrefersReducedMotion,
-  useRichMotion,
 } from '@/hooks/usePrefersReducedMotion';
 import { sitePath } from '@/lib/site-path';
 
-/**
- * Full-screen entry sequence.
- *
- * Three phases:
- *   CONVERGE  particles fly in from outside the frame and resolve the lockup
- *   FLARE     the formed logo holds and blooms, with a specular sweep across it
- *   DISPERSE  particles accelerate outward and the curtain lifts
- *
- * Coverage is the whole game here: the lockup's tagline is hairline-fine, so
- * particles are placed one-per-opaque-source-pixel at close to display
- * resolution rather than randomly sampled. Random sampling leaves gaps and
- * clumps, which is what makes this kind of effect look pixelated.
- *
- * Deliberately 2D canvas, not WebGL — this is first paint and must not wait on
- * the Three.js chunk. Runs once per session, skipped under reduced motion.
- */
-
 const SEEN_KEY = 'ce-entry-seen';
-const MARK_SRC = sitePath('/brand/logo-light.png');
+const POINTS_SRC = sitePath('/brand/logo-points.bin');
+const LOCKUP_SRC = sitePath('/brand/logo-compact-clean.webp');
 
-const CONVERGE = 2200;
-const FLARE = 1100;
-const DISPERSE = 850;
-/** Hard ceiling so low-end machines don't try to draw a six-figure particle count. */
-const MAX_PARTICLES = 30000;
+const CONVERGE_MS = 760;
+const HOLD_MS = 180;
+const DISPERSE_MS = 360;
+const EXIT_AT_MS = 1000;
+const FINISH_AT_MS = 1400;
+const HARD_STOP_MS = 1750;
 
 type Particle = {
   tx: number;
   ty: number;
   sx: number;
   sy: number;
-  /** Outward unit vector used by the disperse phase. */
   ex: number;
   ey: number;
   delay: number;
   speed: number;
-  bright: number;
+  gold: boolean;
 };
 
-function easeOutQuint(t: number): number {
-  return 1 - Math.pow(1 - t, 5);
+function clamp01(value: number) {
+  return Math.min(Math.max(value, 0), 1);
 }
 
-function easeInQuad(t: number): number {
-  return t * t;
+function easeOutExpo(value: number) {
+  return value >= 1 ? 1 : 1 - 2 ** (-10 * value);
+}
+
+function seededRandom(seed: number) {
+  let value = seed >>> 0;
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 4294967296;
+  };
 }
 
 export function LogoPreloader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const barRef = useRef<HTMLSpanElement>(null);
-  const pctRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const richMotion = useRichMotion();
+  const motionAllowed = useMotionAllowed();
   const [mounted, setMounted] = useState(true);
+  const [formed, setFormed] = useState(false);
+  const [flaring, setFlaring] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    if (richMotion === null) return;
+    if (motionAllowed === null) return;
 
+    const forceIntro = new URLSearchParams(window.location.search).get('intro') === '1';
     let seen = false;
     try {
       seen = sessionStorage.getItem(SEEN_KEY) === '1';
     } catch {
-      // Storage may be disabled; the visual can still run safely once.
+      // Private browsing and locked-down environments may deny storage.
     }
 
-    if (reducedMotion || !richMotion || seen) {
+    if (reducedMotion || !motionAllowed || (seen && !forceIntro)) {
+      document.documentElement.classList.remove('motion-entry');
+      window.dispatchEvent(new CustomEvent('ce:intro-exit'));
       setMounted(false);
       return;
     }
 
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
+    const context = canvas?.getContext('2d');
+    if (!canvas || !context) {
+      document.documentElement.classList.remove('motion-entry');
+      window.dispatchEvent(new CustomEvent('ce:intro-exit'));
       setMounted(false);
       return;
     }
 
+    const startedAt = performance.now();
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const compact = width < 768 || matchMedia('(pointer: coarse)').matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, compact ? 1.5 : 2);
+    const particleLimit = compact ? 900 : 1600;
+    const timers: number[] = [];
+    let animationFrame = 0;
+    let stopped = false;
+    let particles: Particle[] = [];
+    const cell = compact ? 1.55 : 1.4;
+    const pointRequest = new AbortController();
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    // CSS keeps the short-lived field pinned to the dynamic viewport. Small
+    // iOS toolbar changes scale the buffer with the curtain instead of exposing
+    // an edge or separating particles from the centred DOM lockup.
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
     document.documentElement.style.overflow = 'hidden';
 
-    let raf = 0;
-    let cancelled = false;
-    let particles: Particle[] = [];
-    let startedAt = 0;
-    let hardStop = 0;
-    let w = 0;
-    let h = 0;
-    let minX = 0;
-    let maxX = 0;
-    let cell = 1.7;
-
-    const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = window.innerWidth;
-      h = window.innerHeight;
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
     const finish = () => {
-      if (cancelled) return;
-      window.clearTimeout(hardStop);
+      if (stopped) return;
+      stopped = true;
+      timers.forEach(window.clearTimeout);
+      cancelAnimationFrame(animationFrame);
       try {
         sessionStorage.setItem(SEEN_KEY, '1');
       } catch {
-        // Unlocking the page must never depend on storage availability.
-      } finally {
-        document.documentElement.style.overflow = '';
-        setMounted(false);
+        // Completion and scroll restoration never depend on storage access.
       }
-    };
-
-    // The CSS opt-in has its own visibility fail-safe; this timer also ends
-    // the component and unlocks scrolling if image or animation work stalls.
-    hardStop = window.setTimeout(finish, 6500);
-
-    const draw = (now: number) => {
-      if (cancelled) return;
-      const t = now - startedAt;
-
-      const converge = Math.min(t / CONVERGE, 1);
-      const flare = Math.min(Math.max((t - CONVERGE) / FLARE, 0), 1);
-      const disperse = Math.min(Math.max((t - CONVERGE - FLARE) / DISPERSE, 0), 1);
-
-      ctx.clearRect(0, 0, w, h);
-
-      // Specular line travels the width of the lockup during the flare.
-      const sweepX = minX - 160 + (maxX - minX + 320) * flare;
-      const dispEase = easeInQuad(disperse);
-
-      for (const p of particles) {
-        const local = Math.min(Math.max((converge - p.delay) / (1 - p.delay), 0), 1);
-        const e = easeOutQuint(local);
-        let x = p.sx + (p.tx - p.sx) * e;
-        let y = p.sy + (p.ty - p.sy) * e;
-
-        let alpha = Math.min(local * 2, 1) * p.bright;
-        let s = cell;
-
-        if (flare > 0) {
-          // Bloom: everything lifts, and the sweep line flares locally.
-          const spec = Math.max(0, 1 - Math.abs(x - sweepX) / 150);
-          const bloom = Math.sin(flare * Math.PI) * 0.35;
-          alpha = Math.min(1, alpha + bloom + spec * 0.85);
-          s = cell * (1 + spec * 1.1 + bloom * 0.5);
-        }
-
-        if (disperse > 0) {
-          // Accelerate outward and fade.
-          const travel = dispEase * p.speed * Math.max(w, h) * 0.9;
-          x += p.ex * travel;
-          y += p.ey * travel;
-          alpha *= 1 - disperse;
-          s = cell * (1 + dispEase * 1.6);
-        }
-
-        if (alpha <= 0.01) continue;
-        ctx.globalAlpha = alpha;
-        ctx.fillRect(x, y, s, s);
-      }
-      ctx.globalAlpha = 1;
-
-      if (barRef.current) barRef.current.style.transform = `scaleX(${converge})`;
-      if (pctRef.current) {
-        pctRef.current.textContent = String(Math.round(converge * 100)).padStart(3, '0');
-      }
-
-      // Start lifting the curtain as the particles blow out, not after.
-      if (disperse > 0 && !cancelled) setLeaving(true);
-
-      if (t < CONVERGE + FLARE + DISPERSE) raf = requestAnimationFrame(draw);
-      else finish();
-    };
-
-    const img = new Image();
-    // `decode()` hangs in Chromium for images never attached to the document.
-    img.onerror = () => {
-      window.clearTimeout(hardStop);
+      document.documentElement.classList.remove('motion-entry');
       document.documentElement.style.overflow = '';
+      window.dispatchEvent(new CustomEvent('ce:intro-complete'));
       setMounted(false);
     };
-    img.onload = () => {
-      if (cancelled) return;
-      size();
 
-      const targetW = Math.min(w * 0.64, 900);
-      // Sample at roughly the drawn size so one source pixel maps to one
-      // particle and the tagline stays legible.
-      const sampleW = Math.round(Math.min(targetW, 900));
-      const sampleH = Math.max(1, Math.round((img.naturalHeight / img.naturalWidth) * sampleW));
-
-      const off = document.createElement('canvas');
-      off.width = sampleW;
-      off.height = sampleH;
-      const octx = off.getContext('2d', { willReadFrequently: true });
-      if (!octx) return;
-      octx.drawImage(img, 0, 0, sampleW, sampleH);
-      const { data } = octx.getImageData(0, 0, sampleW, sampleH);
-
-      const hits: number[] = [];
-      for (let i = 0; i < sampleW * sampleH; i += 1) {
-        if (data[i * 4 + 3] > 60) hits.push(i);
-      }
-      if (!hits.length) {
-        document.documentElement.style.overflow = '';
-        setMounted(false);
-        return;
-      }
-
-      // Even stride keeps coverage uniform when the cap is hit; random
-      // selection would reintroduce the gaps this is meant to avoid.
-      const stride = Math.max(1, Math.ceil(hits.length / MAX_PARTICLES));
-      const scale = targetW / sampleW;
-      cell = Math.max(1.25, scale * 1.45);
-
-      const cx = w / 2;
-      const cy = h / 2;
-      minX = cx - (sampleW / 2) * scale;
-      maxX = cx + (sampleW / 2) * scale;
-
-      const built: Particle[] = [];
-      for (let i = 0; i < hits.length; i += stride) {
-        const px = hits[i];
-        const col = px % sampleW;
-        const row = (px / sampleW) | 0;
-        const tx = cx + (col - sampleW / 2) * scale;
-        const ty = cy + (row - sampleH / 2) * scale;
-
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.max(w, h) * (0.6 + Math.random() * 0.55);
-        const outAngle = Math.atan2(ty - cy, tx - cx) + (Math.random() - 0.5) * 0.5;
-        const alphaByte = data[px * 4 + 3] / 255;
-
-        built.push({
-          tx,
-          ty,
-          sx: cx + Math.cos(angle) * radius,
-          sy: cy + Math.sin(angle) * radius,
-          ex: Math.cos(outAngle),
-          ey: Math.sin(outAngle),
-          // Wider spread of delays reads as assembly rather than a single swipe.
-          delay: Math.random() * 0.5,
-          speed: 0.35 + Math.random() * 0.8,
-          bright: 0.55 + alphaByte * 0.45,
-        });
-      }
-      particles = built;
-
-      ctx.fillStyle = '#eef1f5';
-      startedAt = performance.now();
-      raf = requestAnimationFrame(draw);
+    const beginExit = () => {
+      if (stopped) return;
+      setLeaving(true);
+      window.dispatchEvent(new CustomEvent('ce:intro-exit'));
     };
-    img.src = MARK_SRC;
 
-    const onResize = () => {
-      size();
-      ctx.fillStyle = '#eef1f5';
+    timers.push(
+      window.setTimeout(() => setFormed(true), 420),
+      window.setTimeout(() => setFlaring(true), 760),
+      window.setTimeout(beginExit, EXIT_AT_MS),
+      window.setTimeout(finish, FINISH_AT_MS),
+      window.setTimeout(finish, HARD_STOP_MS),
+    );
+
+    const draw = (now: number) => {
+      if (stopped) return;
+      const elapsed = now - startedAt;
+      const converge = clamp01(elapsed / CONVERGE_MS);
+      const disperse = clamp01((elapsed - CONVERGE_MS - HOLD_MS) / DISPERSE_MS);
+      const outward = disperse * disperse;
+      const paperPath = new Path2D();
+      const goldPath = new Path2D();
+
+      context.clearRect(0, 0, width, height);
+      for (const particle of particles) {
+        const local = clamp01((converge - particle.delay) / (1 - particle.delay));
+        if (local < 0.03) continue;
+        const eased = easeOutExpo(local);
+        let x = particle.sx + (particle.tx - particle.sx) * eased;
+        let y = particle.sy + (particle.ty - particle.sy) * eased;
+        let size = cell * clamp01(local * 2);
+
+        if (disperse > 0) {
+          const travel = outward * particle.speed * Math.max(width, height) * 0.42;
+          x += particle.ex * travel;
+          y += particle.ey * travel;
+          size *= 1 + outward;
+        }
+
+        (particle.gold ? goldPath : paperPath).rect(x, y, size, size);
+      }
+      context.globalAlpha = 0.88 * (1 - disperse);
+      context.fillStyle = '#eef1f5';
+      context.fill(paperPath);
+      context.globalAlpha = 0.82 * (1 - disperse);
+      context.fillStyle = '#d7b45e';
+      context.fill(goldPath);
+      context.globalAlpha = 1;
+
+      if (elapsed < FINISH_AT_MS) animationFrame = requestAnimationFrame(draw);
     };
-    window.addEventListener('resize', onResize);
+
+    // The logo coordinates are sampled at build time and stored as uint16
+    // pairs. That keeps image decode + getImageData work off the visitor's main
+    // thread while preserving the real lockup silhouette.
+    fetch(POINTS_SRC, { signal: pointRequest.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.arrayBuffer();
+      })
+      .then((buffer) => {
+        if (stopped) return;
+        const targetWidth = Math.min(width * (compact ? 0.8 : 0.58), 760);
+        const targetHeight = targetWidth * (304 / 1590);
+        const view = new DataView(buffer);
+        const pointCount = Math.floor(view.byteLength / 4);
+        const count = Math.min(pointCount, particleLimit);
+        const random = seededRandom(0xce501);
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const built: Particle[] = [];
+
+        for (let index = 0; index < count; index += 1) {
+          const pointIndex = Math.floor((index * pointCount) / count);
+          const x = view.getUint16(pointIndex * 4, true) / 65535;
+          const y = view.getUint16(pointIndex * 4 + 2, true) / 65535;
+          const tx = centerX + (x - 0.5) * targetWidth;
+          const ty = centerY + (y - 0.5) * targetHeight;
+          const angle = random() * Math.PI * 2;
+          const radius = Math.max(width, height) * (0.43 + random() * 0.35);
+          const exitAngle =
+            Math.atan2(ty - centerY, tx - centerX) + (random() - 0.5) * 0.28;
+
+          built.push({
+            tx,
+            ty,
+            sx: centerX + Math.cos(angle) * radius,
+            sy: centerY + Math.sin(angle) * radius,
+            ex: Math.cos(exitAngle),
+            ey: Math.sin(exitAngle),
+            delay: random() * 0.34,
+            speed: 0.45 + random() * 0.55,
+            gold: random() > 0.82,
+          });
+        }
+
+        particles = built;
+      })
+      .catch(() => {
+        // The crisp DOM lockup remains a complete intro if points fail to load.
+      });
+    animationFrame = requestAnimationFrame(draw);
 
     return () => {
-      cancelled = true;
-      cancelAnimationFrame(raf);
-      window.clearTimeout(hardStop);
-      window.removeEventListener('resize', onResize);
+      stopped = true;
+      timers.forEach(window.clearTimeout);
+      cancelAnimationFrame(animationFrame);
+      pointRequest.abort();
       document.documentElement.style.overflow = '';
     };
-  }, [reducedMotion, richMotion]);
+  }, [motionAllowed, reducedMotion]);
 
   if (!mounted) return null;
 
@@ -288,55 +241,64 @@ export function LogoPreloader() {
     <div
       data-logo-preloader
       role="status"
-      aria-label={`${company.name} — loading`}
+      aria-live="polite"
+      aria-label={`${company.name} — preparing site`}
       className={[
-        'fixed inset-0 z-100 overflow-hidden',
-        // Night navy, lit from above and falling off to near-black at the base.
-        'bg-[linear-gradient(180deg,#22375c_0%,#172a4a_22%,#0f1e38_52%,#081227_78%,#050b18_100%)]',
-        'transition-[opacity,transform,filter] duration-[850ms] ease-[cubic-bezier(0.16,1,0.3,1)]',
-        leaving ? 'pointer-events-none scale-[1.12] opacity-0 blur-[6px]' : 'opacity-100',
+        'fixed inset-0 z-100 h-[100dvh] min-h-[100svh] touch-none overflow-hidden overscroll-none',
+        'bg-[linear-gradient(180deg,#172a4a_0%,#0d1930_48%,#060b18_100%)]',
+        'transition-[opacity,transform] duration-[360ms] ease-[var(--ease-spring)]',
+        leaving ? 'pointer-events-none -translate-y-[1.5%] opacity-0' : 'opacity-100',
       ].join(' ')}
     >
-      {/* Aggregate grain, so the surface reads as concrete rather than a gradient. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.22] [background-size:180px_180px]"
+        className="pointer-events-none absolute inset-0 opacity-[0.18] [background-size:180px_180px]"
         style={{ backgroundImage: `url("${sitePath('/images/grain.svg')}")` }}
       />
-      {/* Vignette to keep the eye on the lockup. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 [background:radial-gradient(70%_60%_at_50%_45%,transparent_35%,rgba(4,8,18,0.6)_100%)]"
+        className={[
+          'pointer-events-none absolute inset-0 transition-opacity duration-[560ms]',
+          flaring ? 'opacity-100' : 'opacity-55',
+          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(201,165,78,0.18),transparent_70%)]',
+        ].join(' ')}
       />
 
-      <canvas ref={canvasRef} className="absolute inset-0 block" />
+      <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 block" />
 
-      {/* Progress rule, set to the lockup's own width. */}
+      <div
+        aria-hidden="true"
+        className={[
+          'absolute left-1/2 top-1/2 aspect-[1590/304] w-[min(80vw,760px)] -translate-x-1/2 -translate-y-1/2',
+          'transition-[opacity,transform] duration-[420ms] ease-[var(--ease-spring)]',
+          formed ? 'scale-100 opacity-100' : 'scale-[0.985] opacity-0',
+          leaving ? 'scale-[1.015] opacity-0' : '',
+        ].join(' ')}
+        style={{
+          backgroundColor: 'var(--color-paper)',
+          WebkitMaskImage: `url("${LOCKUP_SRC}")`,
+          maskImage: `url("${LOCKUP_SRC}")`,
+          WebkitMaskPosition: 'center',
+          maskPosition: 'center',
+          WebkitMaskRepeat: 'no-repeat',
+          maskRepeat: 'no-repeat',
+          WebkitMaskSize: 'contain',
+          maskSize: 'contain',
+        }}
+      />
+
       <div
         className={[
-          'absolute left-1/2 top-1/2 w-[min(64vw,900px)] -translate-x-1/2 translate-y-[7.5rem]',
-          'transition-opacity duration-500',
+          'absolute inset-x-0 bottom-[max(2rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-3',
+          'transition-opacity duration-[200ms]',
           leaving ? 'opacity-0' : 'opacity-100',
         ].join(' ')}
       >
-        <div className="relative h-px w-full bg-paper/15">
-          <span
-            ref={barRef}
-            className="absolute inset-y-0 left-0 block w-full origin-left scale-x-0 bg-paper"
-          />
-        </div>
-      </div>
-
-      <div
-        className={[
-          'absolute inset-x-0 bottom-12 flex justify-center',
-          'transition-opacity duration-500',
-          leaving ? 'opacity-0' : 'opacity-100',
-        ].join(' ')}
-      >
-        <span className="font-mono text-[0.7rem] tracking-[0.3em] text-paper/80 tabular-nums">
-          <span ref={pctRef}>000</span>
-          <span className="text-paper/35">%</span>
+        <span className="label-mono text-[0.55rem] text-steel-300">
+          Mission support systems
+        </span>
+        <span aria-hidden="true" className="relative h-px w-32 overflow-hidden bg-paper/15">
+          <span className="absolute inset-y-0 w-12 bg-linear-to-r from-transparent via-accent to-transparent [animation:loader-scan_900ms_var(--ease-precise)_infinite]" />
         </span>
       </div>
     </div>

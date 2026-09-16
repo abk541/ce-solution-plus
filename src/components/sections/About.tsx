@@ -5,21 +5,21 @@ import { useRef } from 'react';
 import { SectionTag } from '@/components/ui/SectionTag';
 import { SplitWords } from '@/components/ui/SplitWords';
 import { about } from '@/content/site';
-import { ease, gsap } from '@/lib/gsap';
+import { duration, ease, gsap } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
 export function About() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion || fullMotion !== true) return;
+    if (!root || reducedMotion || motionAllowed !== true) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -29,8 +29,8 @@ export function About() {
         {
           yPercent: 0,
           y: 0,
-          duration: 1.2,
-          stagger: 0.045,
+          duration: duration.feature,
+          stagger: duration.stagger,
           ease: ease.spring,
           scrollTrigger: { trigger: '[data-about-statement]', start: 'top 80%', once: true },
         },
@@ -42,7 +42,7 @@ export function About() {
         const proxy = { value: 0 };
         gsap.to(proxy, {
           value: target,
-          duration: 1.6,
+          duration: duration.feature,
           ease: 'power2.out',
           onStart: () => {
             node.textContent = '0';
@@ -60,8 +60,8 @@ export function About() {
         {
           opacity: 1,
           x: 0,
-          duration: 0.9,
-          stagger: 0.08,
+          duration: duration.reveal,
+          stagger: duration.stagger,
           ease: ease.spring,
           scrollTrigger: { trigger: '[data-credential-list]', start: 'top 85%', once: true },
         },
@@ -73,8 +73,8 @@ export function About() {
         {
           opacity: 1,
           y: 0,
-          duration: 1,
-          stagger: 0.12,
+          duration: duration.reveal,
+          stagger: duration.stagger,
           ease: ease.spring,
           scrollTrigger: { trigger: '[data-about-body]', start: 'top 85%', once: true },
         },
@@ -82,7 +82,7 @@ export function About() {
     }, root);
 
     return () => ctx.revert();
-  }, [fullMotion, reducedMotion]);
+  }, [motionAllowed, reducedMotion]);
 
   return (
     <section
@@ -92,7 +92,7 @@ export function About() {
     >
       <div aria-hidden="true" className="absolute inset-0 grid-lines opacity-40" />
 
-      <div className="shell relative py-24 md:py-32 lg:py-40">
+      <div className="shell relative py-20 md:py-28 lg:py-36">
         <SectionTag index="01">{about.label}</SectionTag>
 
         <div className="mt-12 grid gap-14 lg:grid-cols-12 lg:gap-12">
@@ -120,12 +120,12 @@ export function About() {
                 <li
                   key={credential.label}
                   data-credential
-                  className="group flex items-baseline justify-between gap-6 border-b border-ink-700 py-4 transition-colors duration-500 hover:border-steel-400/50"
+                  className="group flex items-baseline justify-between gap-6 border-b border-ink-700 py-4 transition-colors duration-[var(--motion-ui)] hover:border-steel-400/50"
                 >
                   <span className="font-grotesk text-base font-semibold tracking-tight text-steel-100">
                     {credential.label}
                   </span>
-                  <span className="label-mono text-[0.62rem] text-steel-400 transition-colors duration-500 group-hover:text-paper">
+                  <span className="label-mono text-[0.62rem] text-steel-400 transition-colors duration-[var(--motion-ui)] group-hover:text-paper">
                     {credential.note}
                   </span>
                 </li>
@@ -148,11 +148,11 @@ export function About() {
           </div>
         </div>
 
-        <dl className="mt-20 grid grid-cols-2 gap-px border border-ink-800 bg-ink-800 lg:grid-cols-4">
+        <dl className="mt-16 grid grid-cols-2 gap-px border border-ink-800 bg-ink-800 lg:grid-cols-4">
           {about.stats.map((stat) => {
             const numeric = /^\d+$/.test(stat.value);
             return (
-              <div key={stat.label} className="group relative bg-ink-950 px-6 py-8 transition-colors duration-700 hover:bg-ink-850">
+              <div key={stat.label} className="group relative bg-ink-950 px-6 py-8 transition-colors duration-[var(--motion-reveal)] hover:bg-ink-850">
                 <dt className="label-mono min-h-8 text-[0.6rem] leading-[1.6] text-steel-400">
                   {stat.label}
                 </dt>
@@ -166,7 +166,7 @@ export function About() {
                 </dd>
                 <span
                   aria-hidden="true"
-                  className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 bg-paper transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
+                  className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 bg-paper transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100"
                 />
               </div>
             );

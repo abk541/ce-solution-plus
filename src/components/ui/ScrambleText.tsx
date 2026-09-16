@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/cn';
 import { ScrollTrigger } from '@/lib/gsap';
 import {
-  useFullMotion,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
@@ -30,16 +30,16 @@ export function ScrambleText({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
 
   useEffect(() => {
     const node = ref.current;
-    if (!node || reducedMotion || fullMotion !== true) return;
+    if (!node || reducedMotion || motionAllowed !== true) return;
 
     const chars = [...text];
     // Each character gets a settle point; later characters resolve later.
     const settleAt = chars.map((_, i) => (i / Math.max(chars.length - 1, 1)) * 0.62 + Math.random() * 0.3);
-    const total = 900 * speed;
+    const total = 560 * speed;
     let raf = 0;
     let startedAt = 0;
 
@@ -76,7 +76,7 @@ export function ScrambleText({
       cancelAnimationFrame(raf);
       node.textContent = text;
     };
-  }, [text, speed, fullMotion, reducedMotion]);
+  }, [text, speed, motionAllowed, reducedMotion]);
 
   return (
     <span className={cn('inline-block', className)}>

@@ -122,11 +122,11 @@ const organizationJsonLd = {
 };
 
 /**
- * Adds motion classes before first paint so animated targets can start hidden
- * without a flash. Touch-first and compact layouts only opt into the short
- * hero reveal; section choreography is reserved for fine-pointer layouts.
+ * Opts into motion before first paint so animated targets never flash in their
+ * final position. The intro is device-agnostic, session-scoped, and has its own
+ * fail-safe so a hydration error can never leave an opaque curtain on screen.
  */
-const noFlashScript = `(function(){try{var d=document.documentElement,r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!r){d.classList.add('motion-hero');if(window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)').matches){d.classList.add('motion-on');}var s=false;try{s=sessionStorage.getItem('ce-entry-seen')==='1';}catch(x){}if(!s&&window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches){d.classList.add('motion-rich');setTimeout(function(){d.classList.remove('motion-rich');},7000);}}}catch(e){}})();`;
+const noFlashScript = `(function(){try{var d=document.documentElement,r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(r)return;d.classList.add('motion-hero','motion-on');var s=false,f=new URLSearchParams(location.search).get('intro')==='1';try{s=sessionStorage.getItem('ce-entry-seen')==='1';}catch(x){}if(f||!s){d.classList.add('motion-entry');setTimeout(function(){d.classList.remove('motion-entry','motion-hero');},1900);}setTimeout(function(){if(!d.dataset.motionReady)d.classList.remove('motion-entry','motion-hero','motion-on');},3000);}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -140,7 +140,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link
           rel="preload"
           as="image"
-          href={sitePath('/brand/logo-compact-light.png')}
+          href={sitePath('/brand/logo-compact-clean.webp')}
+          type="image/webp"
           crossOrigin="anonymous"
         />
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />

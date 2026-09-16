@@ -10,21 +10,23 @@
  *   lines, contact details) carry no marker.
  */
 
-export type NavLink = { label: string; href: string };
+export type NavLink = { label: string; href: string; index: string };
 
 export type Capability = {
   id: string;
   index: string;
   title: string;
   summary: string;
-  /** PLACEHOLDER: illustrative capability callouts — confirm with the client. */
-  detail: string[];
+  /** PLACEHOLDER: illustrative capability tags — confirm with the client. */
+  tags: string[];
 };
 
 export type Market = {
   id: string;
   title: string;
   description: string;
+  /** PLACEHOLDER: illustrative market tags — confirm with the client. */
+  tags: string[];
   imageSeed: string;
 };
 
@@ -33,6 +35,8 @@ export type Differentiator = {
   label: string;
   title: string;
   body: string;
+  /** PLACEHOLDER: illustrative differentiator tags — confirm with the client. */
+  tags: string[];
 };
 
 export const company = {
@@ -61,10 +65,11 @@ export const company = {
 } as const;
 
 export const navLinks: NavLink[] = [
-  { label: 'Capabilities', href: '#capabilities' },
-  { label: 'About', href: '#about' },
-  { label: 'Markets', href: '#markets' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'About', href: '#about', index: '01' },
+  { label: 'Capabilities', href: '#capabilities', index: '02' },
+  { label: 'Why us', href: '#why-us', index: '03' },
+  { label: 'Markets', href: '#markets', index: '04' },
+  { label: 'Contact', href: '#contact', index: '06' },
 ];
 
 export const hero = {
@@ -101,168 +106,136 @@ export const capabilities: Capability[] = [
     id: 'staffing',
     index: '01',
     title: 'Staffing Services',
-    summary:
-      'World-class service and acquisition support, matched to the billet, the program, and the timeline — so requirements get covered without a gap in delivery.',
-    detail: [
-      'Acquisition and program support personnel',
-      'Surge, backfill, and sustained coverage',
-      'Role-specific vetting and onboarding',
-    ],
+    summary: 'Acquisition and program support matched to the role, mission, and delivery timeline.',
+    tags: ['Program support', 'Surge coverage', 'Role vetting'],
   },
   {
     id: 'facility-operations',
     index: '02',
     title: 'Facility Operations & Maintenance',
-    summary:
-      'Day-to-day operation and upkeep of the buildings and infrastructure that mission work depends on, run to a documented standard rather than to complaint volume.',
-    detail: [
-      'Preventive and corrective maintenance',
-      'Building systems and grounds operations',
-      'Compliance and condition reporting',
-    ],
+    summary: 'Operations and maintenance for the facilities and infrastructure that support mission work.',
+    tags: ['Preventive maintenance', 'Building systems', 'Condition reporting'],
   },
   {
     id: 'training',
     index: '03',
     title: 'Training Services',
-    summary:
-      'Instruction built by people who have done the work, designed so capability transfers to the team and survives turnover.',
-    detail: [
-      'Curriculum design and courseware',
-      'Instructor-led and on-site delivery',
-      'Readiness assessment and refresh cycles',
-    ],
+    summary: 'Practical instruction designed to transfer capability and sustain readiness through turnover.',
+    tags: ['Courseware design', 'On-site delivery', 'Readiness cycles'],
   },
   {
     id: 'professional',
     index: '04',
     title: 'Professional Services',
-    summary:
-      'Performance-based solutions across a wide range of technical disciplines, with deep specialization in the intelligence and cyber communities.',
-    detail: [
-      'Intelligence and cyber community support',
-      'Technical and subject-matter expertise',
-      'Performance-based, outcome-measured delivery',
-    ],
+    summary: 'Technical and subject-matter support focused on intelligence and cyber programs.',
+    tags: ['Intelligence support', 'Cyber support', 'Technical expertise'],
   },
   {
     id: 'construction',
     index: '05',
     title: 'Construction Services',
-    summary:
-      'Build and modification work delivered with the scheduling discipline and site control that operational environments require.',
-    detail: [
-      'Renovation, fit-out, and modification',
-      'Site coordination and safety management',
-      'Schedule and closeout documentation',
-    ],
+    summary: 'Renovation and modification work planned for controlled operational environments.',
+    tags: ['Renovation / fit-out', 'Site coordination', 'Project closeout'],
   },
   {
     id: 'transportation',
     index: '06',
     title: 'Transportation Services',
-    summary:
-      'Movement of people and materiel with the tracking, accountability, and timing that downstream operations are counting on.',
-    detail: [
-      'Scheduled and on-demand movement',
-      'Chain-of-custody and accountability',
-      'Route, timing, and contingency planning',
-    ],
+    summary: 'Accountable movement of people and materiel aligned to operational schedules.',
+    tags: ['Scheduled movement', 'Chain of custody', 'Contingency planning'],
   },
 ];
 
 export const differentiators = {
   label: 'Why CE Solution Plus',
   /** The kinetic/glitch signature moment — used exactly once on the site. */
-  kineticWord: 'Advantage',
-  headline: 'A contracting advantage, not just a capability statement.',
-  lede:
-    'Small-business status is the entry point. What follows it is the reason clients stay.',
+  kineticWord: 'accountability',
+  headline: 'Small-business value. Delivery accountability.',
+  lede: 'Ownership status may support acquisition goals; performance determines the lasting partnership.',
   items: [
     {
       id: 'set-aside',
       label: '01',
-      title: 'VOSB & WOSB set-aside eligible',
-      body:
-        'Veteran and woman-owned status is a real instrument in federal acquisition. It gives contracting officers a direct, defensible path to award — and gives primes a subcontracting partner that strengthens their own small-business plan.',
+      title: 'Veteran- and woman-owned',
+      body: 'CE Solution Plus is veteran- and woman-owned. Eligibility should be confirmed against each solicitation and applicable program requirements.',
+      tags: ['Veteran owned', 'Woman owned', 'Small business'],
     },
     {
       id: 'firsthand',
       label: '02',
-      title: 'Expertise that has been on the other side of the contract',
-      body:
-        'Our team is made up of leading experts from military, government, and private-sector programs. They have written the requirement, run the program, and lived with the result — so they read a statement of work the way the customer meant it.',
+      title: 'Cross-sector experience',
+      body: 'Our team draws on military, government, and private-sector program experience to understand requirements in operating context.',
+      tags: ['Military experience', 'Government experience', 'Private-sector experience'],
     },
     {
       id: 'intel-cyber',
       label: '03',
-      title: 'Intelligence and cyber as a specialization',
-      body:
-        'The intelligence and cyber communities have their own pace, their own constraints, and no patience for a learning curve. We staff and support them as a focus area, not as an adjacent market.',
+      title: 'Intelligence & cyber focus',
+      body: 'Intelligence and cyber are core focus areas within our professional and technical support.',
+      tags: ['Intelligence support', 'Cyber support', 'Mission programs'],
     },
     {
       id: 'performance',
       label: '04',
-      title: 'Performance-based delivery',
-      body:
-        'Scope is defined by outcome, measured against it, and reported honestly. If something is at risk, the customer hears it from us before it becomes their problem.',
+      title: 'Outcome-focused delivery',
+      body: 'We align work to defined outcomes, track performance, and surface delivery risk early.',
+      tags: ['Defined outcomes', 'Performance tracking', 'Early risk visibility'],
     },
     {
       id: 'partner',
       label: '05',
-      title: 'A trusted partner, not a staffing vendor',
-      body:
-        'We are accountable for mission success, not for filling seats. That distinction shows up in who we put forward, what we flag, and what we refuse to take on.',
+      title: 'Mission-aligned partnership',
+      body: 'We focus on requirement fit and delivery accountability—not simply filling seats.',
+      tags: ['Requirement fit', 'Delivery accountability', 'Partner discipline'],
     },
   ] satisfies Differentiator[],
 };
 
 export const markets = {
   label: 'Markets we serve',
-  headline: 'Built for environments where the margin for error is already spent.',
-  lede:
-    'These are the operating environments our six service lines are designed around — from national security technology programs to the facilities and logistics that keep them running.',
+  headline: 'Built around the mission environment.',
+  lede: 'Six service lines supporting national security, intelligence, cyber, facilities, readiness, and logistics.',
   items: [
     {
       id: 'national-security',
       title: 'National Security Technology',
-      description:
-        'Professional and technical services that raise the operational impact of the systems the nation depends on.',
+      description: 'Technical and professional support for national-security systems and programs.',
+      tags: ['Technical services', 'Program support', 'Mission systems'],
       imageSeed: 'ce-national-security',
     },
     {
       id: 'intelligence',
       title: 'Intelligence Community',
-      description:
-        'Specialized support for organizations where access, discretion, and pace are non-negotiable conditions of the work.',
+      description: 'Discreet, responsive support for intelligence organizations and mission programs.',
+      tags: ['Mission support', 'Operational discretion', 'Responsive delivery'],
       imageSeed: 'ce-intelligence',
     },
     {
       id: 'cyber',
       title: 'Cyber Operations',
-      description:
-        'Technical staffing and performance-based support for cyber mission teams and the programs that sustain them.',
+      description: 'Technical staffing and delivery support for cyber mission teams.',
+      tags: ['Cyber staffing', 'Technical support', 'Program delivery'],
       imageSeed: 'ce-cyber',
     },
     {
       id: 'facilities',
       title: 'Federal Facilities & Infrastructure',
-      description:
-        'Operations, maintenance, and construction for the physical plant behind the mission — kept at standard, not at minimum.',
+      description: 'Operations, maintenance, and construction for mission-supporting facilities.',
+      tags: ['Facility operations', 'Preventive maintenance', 'Construction support'],
       imageSeed: 'ce-facilities',
     },
     {
       id: 'readiness',
       title: 'Training & Readiness',
-      description:
-        'Instruction and courseware that move capability into the team and keep it there through rotation and turnover.',
+      description: 'Instruction and courseware that sustain team readiness through turnover.',
+      tags: ['Courseware design', 'Instructor delivery', 'Readiness sustainment'],
       imageSeed: 'ce-readiness',
     },
     {
       id: 'logistics',
       title: 'Logistics & Transportation',
-      description:
-        'Accountable movement of people and materiel, planned against the schedule the mission is actually running on.',
+      description: 'Planned, accountable movement of people and materiel.',
+      tags: ['Personnel movement', 'Materiel movement', 'Schedule alignment'],
       imageSeed: 'ce-logistics',
     },
   ] satisfies Market[],

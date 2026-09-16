@@ -6,21 +6,21 @@ import { ContactForm } from '@/components/sections/ContactForm';
 import { CornerTicks } from '@/components/ui/CornerTicks';
 import { SectionTag } from '@/components/ui/SectionTag';
 import { company, contact } from '@/content/site';
-import { ease, gsap } from '@/lib/gsap';
+import { duration, ease, gsap } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
 export function Contact() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion || fullMotion !== true) return;
+    if (!root || reducedMotion || motionAllowed !== true) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -30,27 +30,27 @@ export function Contact() {
       tl.fromTo(
         '[data-panel-edge]',
         { scaleX: 0 },
-        { scaleX: 1, duration: 0.9, stagger: 0.08, ease: ease.expo },
+        { scaleX: 1, duration: duration.reveal, stagger: duration.stagger, ease: ease.expo },
       )
         .fromTo(
           '[data-panel-column]',
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.9, stagger: 0.1, ease: ease.spring },
+          { opacity: 1, y: 0, duration: duration.reveal, stagger: duration.stagger, ease: ease.spring },
           0.25,
         )
         .fromTo(
           '[data-contact-field]',
           { opacity: 0, y: 16 },
-          { opacity: 1, y: 0, duration: 0.8, stagger: 0.06, ease: ease.spring },
+          { opacity: 1, y: 0, duration: duration.reveal, stagger: duration.stagger, ease: ease.spring },
           0.4,
         );
     }, root);
 
     return () => ctx.revert();
-  }, [fullMotion, reducedMotion]);
+  }, [motionAllowed, reducedMotion]);
 
   return (
-    <section ref={rootRef} id="contact" className="relative z-10 py-24 md:py-32 lg:py-40">
+    <section ref={rootRef} id="contact" className="relative z-10 py-20 md:py-28 lg:py-36">
       <div className="shell">
         <div className="max-w-3xl">
           <SectionTag index="06">{contact.label}</SectionTag>
@@ -62,7 +62,7 @@ export function Contact() {
 
         <div
           data-contact-panel
-          className="relative mt-14 border border-ink-700 bg-ink-900/50 backdrop-blur-sm"
+          className="relative mt-12 border border-ink-700 bg-ink-900/50 backdrop-blur-sm"
         >
           <CornerTicks size={12} />
 
@@ -81,7 +81,7 @@ export function Contact() {
           <div className="grid lg:grid-cols-12">
             <div
               data-panel-column
-              className="border-b border-ink-700 p-8 md:p-10 lg:col-span-5 lg:border-b-0 lg:border-r"
+              className="border-b border-ink-700 p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r"
             >
               <p className="label-mono text-[0.6rem] text-steel-400">Station</p>
 
@@ -99,12 +99,12 @@ export function Contact() {
                   <dd className="mt-2">
                     <a
                       href={`mailto:${company.email}`}
-                      className="group inline-flex items-center gap-2 text-[0.95rem] text-steel-100 transition-colors duration-300 hover:text-accent"
+                      className="group inline-flex items-center gap-2 text-[0.95rem] text-steel-100 transition-colors duration-[var(--motion-micro)] hover:text-accent"
                     >
                       {company.email}
                       <span
                         aria-hidden="true"
-                        className="block h-px w-0 bg-accent transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-5"
+                        className="block h-px w-0 bg-accent transition-all duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:w-5"
                       />
                     </a>
                   </dd>
@@ -114,7 +114,7 @@ export function Contact() {
                   <dd className="mt-2">
                     <a
                       href={`tel:${company.phoneHref}`}
-                      className="font-mono text-[1.6rem] font-medium tracking-[-0.03em] text-paper tabular-nums transition-colors duration-300 hover:text-accent"
+                      className="font-mono text-[1.6rem] font-medium tracking-[-0.03em] text-paper tabular-nums transition-colors duration-[var(--motion-micro)] hover:text-accent"
                     >
                       {company.phone}
                     </a>
@@ -144,7 +144,7 @@ export function Contact() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="label-mono text-[0.58rem] text-steel-400 underline underline-offset-8 transition-colors duration-300 hover:text-accent"
+                    className="label-mono text-[0.58rem] text-steel-400 underline underline-offset-8 transition-colors duration-[var(--motion-micro)] hover:text-accent"
                   >
                     {link.label}
                   </a>
@@ -152,7 +152,7 @@ export function Contact() {
               </div>
             </div>
 
-            <div data-panel-column className="p-8 md:p-10 lg:col-span-7">
+            <div data-panel-column className="p-6 md:p-8 lg:col-span-7">
               <ContactForm />
             </div>
           </div>

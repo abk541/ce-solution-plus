@@ -21,7 +21,7 @@ export function useCursorPlate<T extends HTMLElement>(strength = 1) {
   useEffect(() => {
     const node = ref.current;
     if (!node || reducedMotion) return;
-    if (window.matchMedia('(hover: none)').matches) return;
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
     const art = node.querySelector<HTMLElement>('[data-plate-art]');
     const sheen = node.querySelector<HTMLElement>('[data-plate-sheen]');

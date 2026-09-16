@@ -5,8 +5,8 @@ import Lenis from 'lenis';
 
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
   useRichMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -18,17 +18,15 @@ import {
  */
 export function SmoothScroll() {
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
   const richMotion = useRichMotion();
 
   useIsomorphicLayoutEffect(() => {
-    if (fullMotion !== null) {
-      document.documentElement.classList.toggle('motion-on', fullMotion);
+    if (motionAllowed !== null) {
+      document.documentElement.classList.toggle('motion-on', motionAllowed);
+      document.documentElement.dataset.motionReady = 'true';
     }
-    if (richMotion === false) {
-      document.documentElement.classList.remove('motion-rich');
-    }
-  }, [fullMotion, richMotion]);
+  }, [motionAllowed]);
 
   useEffect(() => {
     // Native touch scrolling is both faster and more predictable than routing

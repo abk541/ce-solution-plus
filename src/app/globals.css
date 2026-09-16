@@ -26,7 +26,7 @@
   --color-ink-500: #35507f;
 
   /* Silver ramp. */
-  --color-steel-400: #7e8799;
+  --color-steel-400: #929cad;
   --color-steel-300: #9aa3b5;
   --color-steel-200: #c0c7d4;
   --color-steel-100: #dee3eb;
@@ -65,6 +65,15 @@
   --ease-precise: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
+:root {
+  --motion-press: 120ms;
+  --motion-micro: 200ms;
+  --motion-ui: 360ms;
+  --motion-reveal: 560ms;
+  --motion-feature: 880ms;
+  --motion-stagger: 60ms;
+}
+
 @layer base {
   * {
     border-color: var(--color-ink-700);
@@ -73,6 +82,13 @@
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: auto;
+    scroll-padding-top: 5.5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 
   body {
@@ -116,6 +132,7 @@
     font: inherit;
     color: inherit;
   }
+
 }
 
 /* ------------------------------------------------------------------ *
@@ -249,6 +266,16 @@
   }
 }
 
+[data-action-sheen] {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-action-sheen] {
+    display: block;
+  }
+}
+
 /* Section-specific timeline targets, pre-hidden to kill the hydration flash. */
 .motion-on [data-about-body] > *,
 .motion-on [data-credential],
@@ -310,13 +337,13 @@
   }
 }
 
-/* Hidden is the safe server/JS-failure default. The prepaint script opts only
-   rich desktop pointers in and removes the class after a hard timeout. */
+/* Hidden is the safe server/JS-failure default. The prepaint script opts in
+   every non-reduced, first-session visit and removes the class before 2s. */
 [data-logo-preloader] {
   display: none;
 }
 
-.motion-rich [data-logo-preloader] {
+.motion-entry [data-logo-preloader] {
   display: block;
 }
 
@@ -328,12 +355,7 @@
   }
 }
 
-/* The entry curtain is intentionally absent on phones and touch-first devices. */
 @media (width < 64rem), (hover: none), (pointer: coarse) {
-  [data-logo-preloader] {
-    display: none !important;
-  }
-
   [data-kinetic-ghost],
   [data-instrument-sweep] {
     display: none !important;
@@ -387,6 +409,15 @@
   }
   100% {
     transform: translateX(400%);
+  }
+}
+
+@keyframes loader-scan {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
   }
 }
 

@@ -10,6 +10,7 @@ import { Hero } from '@/components/sections/Hero';
 import { MarketsWeServe } from '@/components/sections/MarketsWeServe';
 import { TrustStatement } from '@/components/sections/TrustStatement';
 import { Backdrop } from '@/components/ui/Backdrop';
+import { BackToTop } from '@/components/ui/BackToTop';
 
 export default function HomePage() {
   return (
@@ -17,6 +18,7 @@ export default function HomePage() {
       <LogoPreloader />
       <SmoothScroll />
       <Backdrop />
+      <BackToTop />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-xs focus:bg-accent focus:px-5 focus:py-3 focus:font-mono focus:text-[0.7rem] focus:uppercase focus:tracking-[0.2em] focus:text-ink-950"

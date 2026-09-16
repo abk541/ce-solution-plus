@@ -4,24 +4,24 @@ import { useRef } from 'react';
 
 import { SectionTag } from '@/components/ui/SectionTag';
 import { capabilities } from '@/content/site';
-import { ease, gsap } from '@/lib/gsap';
+import { duration, ease, gsap } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
 export function Capabilities() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
     const ctx = gsap.context(() => {
-      if (reducedMotion || fullMotion !== true) return;
+      if (reducedMotion || motionAllowed !== true) return;
       // Cells assemble as the rail enters: rule draws, then contents settle.
       gsap
         .timeline({
@@ -30,12 +30,12 @@ export function Capabilities() {
         .fromTo(
           '[data-cell-rule]',
           { scaleX: 0 },
-          { scaleX: 1, duration: 0.8, ease: ease.expo, stagger: 0.07 },
+          { scaleX: 1, duration: duration.reveal, ease: ease.expo, stagger: duration.stagger },
         )
         .fromTo(
           '[data-cell-body]',
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 1, ease: ease.spring, stagger: 0.07 },
+          { opacity: 1, y: 0, duration: duration.reveal, ease: ease.spring, stagger: duration.stagger },
           0.12,
         );
     }, root);
@@ -66,10 +66,10 @@ export function Capabilities() {
       window.cancelAnimationFrame(frame);
       ctx.revert();
     };
-  }, [fullMotion, reducedMotion]);
+  }, [motionAllowed, reducedMotion]);
 
   return (
-    <section ref={rootRef} id="capabilities" className="relative z-10 py-24 md:py-32 lg:py-40">
+    <section ref={rootRef} id="capabilities" className="relative z-10 py-20 md:py-28 lg:py-36">
       <div className="shell">
         <div className="flex flex-col gap-8 border-b border-ink-700 pb-10 md:flex-row md:items-end md:justify-between">
           <div>
@@ -80,8 +80,8 @@ export function Capabilities() {
           </div>
           <div className="flex max-w-sm flex-col gap-4">
             <p className="text-sm leading-relaxed text-steel-300">
-              Each line is scoped, staffed, and measured on its own terms — and every one of them
-              reports to the same standard of performance.
+              Each service line is scoped to the requirement and held to the same performance
+              standard.
             </p>
             <p className="label-mono text-[0.6rem] text-steel-400">
               <span data-cap-readout className="text-accent tabular-nums">
@@ -91,7 +91,7 @@ export function Capabilities() {
               <span className="tabular-nums">
                 {String(capabilities.length).padStart(2, '0')}
               </span>
-              <span className="ml-3">Scroll the rail</span>
+              <span className="ml-3">Swipe / scroll</span>
             </p>
           </div>
         </div>
@@ -102,6 +102,8 @@ export function Capabilities() {
       <div data-cap-stage className="relative mt-px">
         <div
           data-cap-rail
+          role="region"
+          aria-label="Capability cards"
           className="overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <div className="shell">
@@ -114,7 +116,7 @@ export function Capabilities() {
               key={capability.id}
               tabIndex={0}
               aria-labelledby={`cap-${capability.id}`}
-              className="group relative flex min-h-[24rem] w-[82vw] shrink-0 snap-start flex-col justify-between border border-ink-700 bg-ink-950 p-7 outline-none transition-colors duration-500 hover:border-accent/40 hover:bg-ink-850 focus-visible:border-accent/40 focus-visible:bg-ink-850 sm:w-[24rem] md:min-h-[26rem] md:p-9"
+              className="group relative flex min-h-[21rem] w-[82vw] shrink-0 snap-start flex-col justify-between border border-ink-700 bg-ink-950 p-7 outline-none transition-[background-color,border-color,transform] duration-[var(--motion-ui)] active:scale-[0.99] hover:border-accent/40 hover:bg-ink-850 focus-visible:border-accent/60 focus-visible:bg-ink-850 sm:w-[24rem] md:min-h-[23rem] md:p-9"
             >
               <span
                 data-cell-rule
@@ -123,18 +125,18 @@ export function Capabilities() {
               />
               <span
                 aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-accent transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-accent transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
               />
 
               <div data-cell-body>
                 <div className="flex items-center justify-between">
-                  <span className="label-mono text-[0.65rem] text-steel-400 tabular-nums transition-colors duration-500 group-hover:text-accent group-focus-visible:text-accent">
+                  <span className="label-mono text-[0.65rem] text-steel-400 tabular-nums transition-colors duration-[var(--motion-ui)] group-hover:text-accent group-focus-visible:text-accent">
                     {capability.index}
                   </span>
                   <svg
                     viewBox="0 0 12 12"
                     aria-hidden="true"
-                    className="h-3 w-3 text-ink-500 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:rotate-90 group-hover:text-accent group-focus-visible:rotate-90 group-focus-visible:text-accent"
+                    className="h-3 w-3 text-ink-500 transition-all duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:rotate-90 group-hover:text-accent group-focus-visible:rotate-90 group-focus-visible:text-accent"
                   >
                     <path d="M6 0v12M0 6h12" stroke="currentColor" strokeWidth="1" />
                   </svg>
@@ -151,22 +153,19 @@ export function Capabilities() {
                 </p>
               </div>
 
-              {/* PLACEHOLDER detail bullets — see src/content/site.ts. */}
+              {/* PLACEHOLDER tags — see src/content/site.ts. */}
               <div
                 data-hover-details
                 className="mt-8 grid grid-rows-[1fr]"
               >
                 <div className="overflow-hidden">
                   <span aria-hidden="true" className="mb-4 block h-px w-full bg-ink-700" />
-                  <ul>
-                    {capability.detail.map((item) => (
+                  <ul className="flex flex-wrap gap-2">
+                    {capability.tags.map((item) => (
                       <li
                         key={item}
-                        className="flex items-start gap-3 py-1 label-mono text-[0.6rem] leading-relaxed text-steel-400"
+                        className="border border-ink-600 px-2.5 py-2 label-mono text-[0.55rem] leading-none text-steel-300"
                       >
-                        <span aria-hidden="true" className="mt-px text-accent/70">
-                          &#9656;
-                        </span>
                         {item}
                       </li>
                     ))}

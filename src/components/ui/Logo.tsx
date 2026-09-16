@@ -22,7 +22,11 @@ export function Logo({
   className,
 }: LogoProps) {
   const size = LOCKUP[variant];
-  const source = sitePath(`/brand/logo${variant === 'compact' ? '-compact' : ''}-${tone}.png`);
+  const source = sitePath(
+    variant === 'compact' && tone === 'light'
+      ? '/brand/logo-compact-clean.webp'
+      : `/brand/logo${variant === 'compact' ? '-compact' : ''}-${tone}.webp`,
+  );
   const maskStyle = {
     aspectRatio: `${size.width} / ${size.height}`,
     WebkitMaskImage: `url("${source}")`,
@@ -47,7 +51,7 @@ export function Logo({
 
 /** Monogram only — used where the full lockup would be illegible. */
 export function LogoMark({ tone = 'light', className }: Omit<LogoProps, 'variant'>) {
-  const source = sitePath(`/brand/mark-${tone}.png`);
+  const source = sitePath(tone === 'light' ? '/brand/mark-clean.webp' : '/brand/mark-dark.webp');
   const maskStyle = {
     aspectRatio: `${MARK.width} / ${MARK.height}`,
     WebkitMaskImage: `url("${source}")`,

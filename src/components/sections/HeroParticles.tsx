@@ -32,7 +32,7 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
  */
 
 const COUNT = 9000;
-const MARK_SRC = sitePath('/brand/mark-light.png');
+const MARK_SRC = sitePath('/brand/mark-clean.webp');
 
 const VERTEX = /* glsl */ `
   uniform float uTime;

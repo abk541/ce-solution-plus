@@ -7,21 +7,21 @@ import { MagneticAction } from '@/components/ui/MagneticAction';
 import { SectionTag } from '@/components/ui/SectionTag';
 import { SplitWords } from '@/components/ui/SplitWords';
 import { trust } from '@/content/site';
-import { ease, gsap } from '@/lib/gsap';
+import { duration, ease, gsap } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
 export function TrustStatement() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion || fullMotion !== true) return;
+    if (!root || reducedMotion || motionAllowed !== true) return;
 
     const ctx = gsap.context(() => {
       const words = gsap.utils.toArray<HTMLElement>('[data-word] > span');
@@ -33,8 +33,8 @@ export function TrustStatement() {
         {
           yPercent: 0,
           y: 0,
-          duration: 1.15,
-          stagger: 0.035,
+          duration: duration.feature,
+          stagger: duration.stagger,
           ease: ease.spring,
           scrollTrigger: { trigger: '[data-trust-statement]', start: 'top 82%', once: true },
         },
@@ -47,7 +47,7 @@ export function TrustStatement() {
           opacity: 0.07,
           scale: 1,
           rotate: 0,
-          duration: 1.6,
+          duration: duration.feature,
           ease: ease.spring,
           scrollTrigger: { trigger: root, start: 'top 75%', once: true },
         },
@@ -55,7 +55,7 @@ export function TrustStatement() {
     }, root);
 
     return () => ctx.revert();
-  }, [fullMotion, reducedMotion]);
+  }, [motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} className="relative z-10 overflow-hidden bg-ink-950 text-steel-300">

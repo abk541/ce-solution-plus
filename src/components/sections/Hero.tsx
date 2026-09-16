@@ -1,15 +1,15 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import { MagneticAction } from '@/components/ui/MagneticAction';
-import { LogoMark } from '@/components/ui/Logo';
 import { company, hero } from '@/content/site';
-import { ease, gsap } from '@/lib/gsap';
+import { duration, ease, gsap } from '@/lib/gsap';
 import {
   useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
   useRichMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -24,15 +24,29 @@ const HeroParticles = dynamic(
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const motionAllowed = useMotionAllowed();
   const fullMotion = useFullMotion();
   const richMotion = useRichMotion();
+  const [introReady, setIntroReady] = useState(false);
+
+  useIsomorphicLayoutEffect(() => {
+    const reveal = () => setIntroReady(true);
+    if (!document.documentElement.classList.contains('motion-entry')) reveal();
+    window.addEventListener('ce:intro-exit', reveal);
+    const fallback = window.setTimeout(reveal, 1950);
+    return () => {
+      window.removeEventListener('ce:intro-exit', reveal);
+      window.clearTimeout(fallback);
+    };
+  }, []);
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (
       !root ||
       reducedMotion ||
-      fullMotion === null ||
+      motionAllowed !== true ||
+      !introReady ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       return;
@@ -40,28 +54,20 @@ export function Hero() {
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        defaults: { ease: fullMotion ? ease.spring : 'power3.out' },
+        defaults: { ease: fullMotion === true ? ease.spring : ease.out },
         onComplete: () => {
           document.documentElement.classList.remove('motion-hero');
-          gsap.set('[data-hero-line] > span, [data-hero-status], [data-hero-fade], [data-hero-art]', {
+          gsap.set('[data-hero-line] > span, [data-hero-status], [data-hero-fade]', {
             clearProps: 'transform,opacity',
           });
         },
       });
 
       tl.fromTo(
-        '[data-hero-art]',
-        { opacity: 0, scale: 0.96 },
-        // Match the watermark's resting opacity so clearing GSAP's inline
-        // styles cannot produce a visible 100% -> 20% snap.
-        { opacity: 0.2, scale: 1, duration: 0.8 },
-        0.02,
-      )
-        .fromTo(
         '[data-hero-status]',
         { opacity: 0, y: 8 },
-        { opacity: 1, y: 0, duration: fullMotion ? 0.7 : 0.42 },
-        fullMotion ? 0.1 : 0.04,
+        { opacity: 1, y: 0, duration: fullMotion === true ? duration.reveal : duration.ui },
+        0.04,
       )
         .fromTo(
           '[data-hero-line] > span',
@@ -71,26 +77,26 @@ export function Hero() {
           {
             yPercent: 0,
             y: 0,
-            duration: fullMotion ? 1.15 : 0.72,
-            stagger: fullMotion ? 0.08 : 0.045,
+            duration: fullMotion === true ? duration.feature : duration.reveal,
+            stagger: duration.stagger,
           },
-          fullMotion ? 0.18 : 0.08,
+          0.1,
         )
         .fromTo(
           '[data-hero-fade]',
-          { opacity: 0, y: fullMotion ? 22 : 12 },
+          { opacity: 0, y: fullMotion === true ? 22 : 12 },
           {
             opacity: 1,
             y: 0,
-            duration: fullMotion ? 0.9 : 0.55,
-            stagger: fullMotion ? 0.1 : 0.06,
+            duration: fullMotion === true ? duration.feature : duration.reveal,
+            stagger: duration.stagger,
           },
-          fullMotion ? 0.62 : 0.36,
+          0.42,
         );
 
       // The scrubbed exit belongs to the desktop composition. Native phone
       // scrolling should stop exactly when the user's finger stops.
-      if (fullMotion) {
+      if (fullMotion === true) {
         gsap.to('[data-hero-shift]', {
           yPercent: -12,
           opacity: 0,
@@ -101,26 +107,30 @@ export function Hero() {
     }, root);
 
     return () => ctx.revert();
-  }, [fullMotion, reducedMotion]);
+  }, [fullMotion, introReady, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} id="top" className="relative h-[100svh] lg:h-[118svh]">
       {/* Sticky viewport so the constellation holds briefly as content leaves. */}
       <div className="sticky top-0 flex h-[100svh] flex-col justify-end overflow-hidden pb-10 pt-40 md:pb-14 md:pt-44">
-        {richMotion === true ? (
+        {richMotion === true && introReady ? (
           <HeroParticles className="absolute inset-0 h-full w-full" />
         ) : null}
 
-        {/* Phones use one static, token-coloured monogram instead of loading
-            the WebGL scene. It sits off-axis so it reads as a watermark, not
-            another logo competing with the nav lockup. */}
+        {/* Touch and compact layouts use static range rings. The loader already
+            supplies the branded mark; repeating it here would compete with the
+            headline and make a decorative raster the page's LCP candidate. */}
         <div
-          data-hero-art
           data-hero-static-art
           aria-hidden="true"
-          className="pointer-events-none absolute -right-20 top-[14svh] opacity-20"
+          className="pointer-events-none absolute -right-16 top-[14svh] h-64 w-64 opacity-60 md:-right-10 md:h-80 md:w-80"
         >
-          <LogoMark tone="light" className="w-[17rem] bg-accent" />
+          <span className="absolute inset-0 rounded-full border border-accent/15" />
+          <span className="absolute inset-[13%] rotate-[-18deg] rounded-[50%] border border-steel-400/10" />
+          <span className="absolute inset-[28%] rotate-[32deg] rounded-[50%] border border-accent/20" />
+          <span className="absolute left-1/2 top-0 h-full w-px bg-linear-to-b from-transparent via-ink-600/70 to-transparent" />
+          <span className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-ink-600/70 to-transparent" />
+          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_18px_rgba(201,165,78,0.5)]" />
         </div>
 
         {/* Contrast behind the left-aligned type only, and kept light enough

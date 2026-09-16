@@ -5,10 +5,10 @@ import { useRef, useState } from 'react';
 import { SectionTag } from '@/components/ui/SectionTag';
 import { differentiators } from '@/content/site';
 import { cn } from '@/lib/cn';
-import { ease, gsap, ScrollTrigger } from '@/lib/gsap';
+import { duration, ease, gsap, ScrollTrigger } from '@/lib/gsap';
 import {
-  useFullMotion,
   useIsomorphicLayoutEffect,
+  useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
@@ -16,14 +16,14 @@ export function Differentiators() {
   const rootRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
-  const fullMotion = useFullMotion();
+  const motionAllowed = useMotionAllowed();
   const total = differentiators.items.length;
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    const animate = !reducedMotion && fullMotion === true;
+    const animate = !reducedMotion && motionAllowed === true;
 
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>('[data-diff-item]').forEach((node, index) => {
@@ -43,8 +43,8 @@ export function Differentiators() {
           {
             opacity: 1,
             x: 0,
-            duration: 1.1,
-            stagger: 0.07,
+            duration: duration.reveal,
+            stagger: duration.stagger,
             ease: ease.spring,
             scrollTrigger: { trigger: node, start: 'top 85%', once: true },
           },
@@ -55,7 +55,7 @@ export function Differentiators() {
           { scaleY: 0 },
           {
             scaleY: 1,
-            duration: 0.9,
+            duration: duration.reveal,
             ease: ease.expo,
             scrollTrigger: { trigger: node, start: 'top 85%', once: true },
           },
@@ -64,22 +64,24 @@ export function Differentiators() {
     }, root);
 
     return () => ctx.revert();
-  }, [fullMotion, reducedMotion]);
+  }, [motionAllowed, reducedMotion]);
 
   return (
-    <section ref={rootRef} className="relative z-10 border-y border-ink-800 bg-ink-900">
-      <div className="shell grid gap-16 py-24 md:py-32 lg:grid-cols-12 lg:gap-12 lg:py-40">
+    <section
+      ref={rootRef}
+      id="why-us"
+      className="relative z-10 overflow-x-clip border-y border-ink-800 bg-ink-900"
+    >
+      <div className="shell grid gap-12 py-20 md:py-28 lg:grid-cols-12 lg:gap-12 lg:py-36">
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-32">
             <SectionTag index="03">{differentiators.label}</SectionTag>
 
             <h2 className="mt-7 display-editorial text-[clamp(2rem,4.4vw,3.5rem)]">
-              A contracting{' '}
-              {/* Word and comma share a nowrap box so the comma can't orphan. */}
+              Small-business value. Delivery{' '}
               <span className="whitespace-nowrap">
-                <KineticWord word={differentiators.kineticWord} reducedMotion={reducedMotion} />,
-              </span>{' '}
-              not just a capability statement.
+                <KineticWord word={differentiators.kineticWord} reducedMotion={reducedMotion} />.
+              </span>
             </h2>
 
             <p className="mt-7 max-w-md text-[1.02rem] leading-relaxed text-steel-300">
@@ -92,7 +94,7 @@ export function Differentiators() {
               </span>
               <span className="relative h-px flex-1 max-w-48 bg-ink-700">
                 <span
-                  className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-[var(--motion-reveal)] ease-[var(--ease-spring)]"
                   style={{ width: `${((activeIndex + 1) / total) * 100}%` }}
                 />
               </span>
@@ -108,13 +110,13 @@ export function Differentiators() {
             <li
               key={item.id}
               data-diff-item
-              className="group relative border-b border-ink-800 py-10 first:border-t md:py-12"
+              className="group relative border-b border-ink-800 py-8 first:border-t md:py-10"
             >
               <span
                 data-diff-rule
                 aria-hidden="true"
                 className={cn(
-                  'absolute left-0 top-0 h-full w-px origin-top transition-colors duration-500',
+                  'absolute left-0 top-0 h-full w-px origin-top transition-colors duration-[var(--motion-ui)]',
                   activeIndex === index ? 'bg-accent' : 'bg-ink-700',
                 )}
               />
@@ -126,7 +128,7 @@ export function Differentiators() {
                 >
                   <span
                     className={cn(
-                      'tabular-nums transition-colors duration-500',
+                      'tabular-nums transition-colors duration-[var(--motion-ui)]',
                       activeIndex === index ? 'text-accent' : 'text-steel-400',
                     )}
                   >
@@ -138,7 +140,7 @@ export function Differentiators() {
                 <h3
                   data-diff-inner
                   className={cn(
-                    'mt-5 text-[1.3rem] font-bold leading-snug tracking-tight transition-colors duration-500 md:text-[1.6rem]',
+                    'mt-5 text-[1.3rem] font-bold leading-snug tracking-tight transition-colors duration-[var(--motion-ui)] md:text-[1.6rem]',
                     activeIndex === index ? 'text-paper' : 'text-steel-100',
                   )}
                 >
@@ -151,6 +153,17 @@ export function Differentiators() {
                 >
                   {item.body}
                 </p>
+
+                <ul data-diff-inner className="mt-5 flex flex-wrap gap-2" aria-label={`${item.title} tags`}>
+                  {item.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="border border-ink-600 px-2.5 py-2 label-mono text-[0.55rem] leading-none text-steel-300"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </li>
           ))}

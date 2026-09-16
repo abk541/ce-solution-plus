@@ -6,7 +6,7 @@ import { MagneticAction } from '@/components/ui/MagneticAction';
 import { company, contact } from '@/content/site';
 import { cn } from '@/lib/cn';
 
-type Status = 'idle' | 'sending' | 'sent' | 'error';
+type Status = 'idle' | 'sending' | 'sent' | 'draft' | 'error';
 
 type Fields = {
   name: string;
@@ -30,7 +30,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
 
 const fieldClass =
-  'peer w-full border-b border-ink-600 bg-transparent pb-3 pt-2 text-[0.95rem] text-paper outline-none transition-colors duration-300 placeholder:text-ink-500 hover:border-ink-500 focus:border-accent';
+  'peer w-full border-b border-ink-600 bg-transparent pb-3 pt-2 text-[0.95rem] text-paper outline-none transition-[border-color,box-shadow] duration-[var(--motion-micro)] placeholder:text-steel-400/70 hover:border-ink-500 focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)]';
 
 export function ContactForm() {
   const [fields, setFields] = useState<Fields>(EMPTY);
@@ -42,6 +42,7 @@ export function ContactForm() {
   const set = (key: keyof Fields) => (value: string) => {
     setFields((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+    if (status === 'error') setStatus('idle');
   };
 
   const validate = () => {
@@ -51,6 +52,10 @@ export function ContactForm() {
     else if (!EMAIL_RE.test(fields.email.trim())) next.email = 'Enter a valid email address';
     if (fields.message.trim().length < 10) next.message = 'Tell us a little more (10+ characters)';
     setErrors(next);
+    const firstInvalid = Object.keys(next)[0];
+    if (firstInvalid) {
+      requestAnimationFrame(() => document.getElementById(firstInvalid)?.focus());
+    }
     return Object.keys(next).length === 0;
   };
 
@@ -75,7 +80,7 @@ export function ContactForm() {
       window.location.href = `mailto:${company.email}?subject=${encodeURIComponent(
         `Inquiry — ${fields.interest}`,
       )}&body=${encodeURIComponent(body)}`;
-      setStatus('sent');
+      setStatus('draft');
       return;
     }
 
@@ -93,25 +98,27 @@ export function ContactForm() {
     }
   };
 
-  if (status === 'sent') {
+  if (status === 'sent' || status === 'draft') {
     return (
       <div
         role="status"
         className="relative flex min-h-[26rem] flex-col justify-center border border-ink-700 bg-ink-900/60 p-10"
       >
-        <span className="label-mono text-[0.62rem] text-accent">Transmission logged</span>
+        <span className="label-mono text-[0.62rem] text-accent">
+          {status === 'sent' ? 'Transmission logged' : 'Email draft ready'}
+        </span>
         <p className="mt-6 font-grotesk text-2xl font-bold tracking-tight text-paper">
-          Your requirement is with us.
+          {status === 'sent' ? 'Your requirement is with us.' : 'Review, then send.'}
         </p>
         <p className="mt-4 max-w-md text-[0.95rem] leading-relaxed text-steel-300">
-          {ENDPOINT
+          {status === 'sent'
             ? 'A member of the team will respond directly. If it is time-critical, call the number listed and say so.'
-            : 'Your mail client should now be open with the details filled in. Send it and we will take it from there.'}
+            : 'Your email draft is ready. Review it in your mail app, then send it.'}
         </p>
         <button
           type="button"
           onClick={() => setStatus('idle')}
-          className="mt-8 self-start label-mono text-[0.62rem] text-steel-400 underline underline-offset-8 transition-colors duration-300 hover:text-accent"
+          className="mt-8 self-start label-mono text-[0.62rem] text-steel-400 underline underline-offset-8 transition-colors duration-[var(--motion-micro)] hover:text-accent"
         >
           Submit another
         </button>
@@ -121,6 +128,11 @@ export function ContactForm() {
 
   return (
     <form noValidate onSubmit={handleSubmit} className="relative">
+      {Object.values(errors).some(Boolean) ? (
+        <p role="alert" className="mb-7 border-l-2 border-signal-bright pl-4 text-sm text-signal-bright">
+          Check the highlighted fields before continuing.
+        </p>
+      ) : null}
       <div className="grid gap-x-8 gap-y-9 sm:grid-cols-2">
         <Field
           index="01"
@@ -157,7 +169,7 @@ export function ContactForm() {
           autoComplete="tel"
         />
 
-        <div data-contact-field className="sm:col-span-2">
+        <div data-contact-field className="group/field sm:col-span-2">
           <FieldLabel index="05" htmlFor="interest">
             Area of interest
           </FieldLabel>
@@ -176,7 +188,7 @@ export function ContactForm() {
           </select>
         </div>
 
-        <div data-contact-field className="sm:col-span-2">
+        <div data-contact-field className="group/field sm:col-span-2">
           <FieldLabel index="06" htmlFor="message" required>
             Requirement
           </FieldLabel>
@@ -211,7 +223,11 @@ export function ContactForm() {
 
       <div className="mt-12 flex flex-wrap items-center gap-6">
         <MagneticAction type="submit" variant="solid" disabled={status === 'sending'}>
-          {status === 'sending' ? 'Sending' : 'Send requirement'}
+          {status === 'sending'
+            ? 'Sending'
+            : ENDPOINT
+              ? 'Send requirement'
+              : 'Open email draft'}
         </MagneticAction>
         <p className="max-w-xs label-mono text-[0.58rem] leading-relaxed text-steel-400">
           {ENDPOINT ? 'Encrypted in transit' : 'Opens your mail client'} — no sensitive or
@@ -240,8 +256,11 @@ function FieldLabel({
   children: React.ReactNode;
 }) {
   return (
-    <label htmlFor={htmlFor} className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-steel-400">
-      <span className="text-accent/70 tabular-nums">{index}</span>
+    <label
+      htmlFor={htmlFor}
+      className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-steel-400 transition-colors duration-[var(--motion-micro)] group-focus-within/field:text-paper"
+    >
+      <span className="text-accent tabular-nums">{index}</span>
       {children}
       {required ? <span className="text-signal-bright">*</span> : null}
     </label>
@@ -269,7 +288,7 @@ function Field({
 }) {
   const id = label.toLowerCase().replace(/\s+/g, '-');
   return (
-    <div data-contact-field>
+    <div data-contact-field className="group/field">
       <FieldLabel index={index} htmlFor={id} required={required}>
         {label}
       </FieldLabel>

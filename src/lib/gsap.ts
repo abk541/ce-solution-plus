@@ -56,4 +56,14 @@ export const ease = {
   expo: 'expo.out',
 } as const;
 
+/** Shared duration scale, in seconds, for JS-driven motion. */
+export const duration = {
+  press: 0.12,
+  micro: 0.2,
+  ui: 0.36,
+  reveal: 0.56,
+  feature: 0.88,
+  stagger: 0.06,
+} as const;
+
 export { gsap, ScrollTrigger };

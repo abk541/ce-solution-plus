@@ -7,6 +7,9 @@ export const useIsomorphicLayoutEffect =
 
 const QUERY = '(prefers-reduced-motion: reduce)';
 
+/** Lightweight, finite motion is available on every non-reduced device. */
+export const MOTION_ALLOWED_QUERY = '(prefers-reduced-motion: no-preference)';
+
 /**
  * Full page choreography is reserved for roomier layouts with a precise
  * pointer. Phones and touch-first tablets keep native scrolling and render
@@ -36,6 +39,11 @@ function useMediaQuery(query: string): boolean | null {
 /** `null` only during SSR/the first hydration pass. */
 export function useFullMotion(): boolean | null {
   return useMediaQuery(FULL_MOTION_QUERY);
+}
+
+/** Loader, short reveals, and state transitions; safe for touch devices. */
+export function useMotionAllowed(): boolean | null {
+  return useMediaQuery(MOTION_ALLOWED_QUERY);
 }
 
 /** `null` only during SSR/the first hydration pass. */
