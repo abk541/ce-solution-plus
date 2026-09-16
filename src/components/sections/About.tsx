@@ -7,6 +7,7 @@ import { SplitWords } from '@/components/ui/SplitWords';
 import { about } from '@/content/site';
 import { ease, gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -14,10 +15,11 @@ import {
 export function About() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -42,6 +44,9 @@ export function About() {
           value: target,
           duration: 1.6,
           ease: 'power2.out',
+          onStart: () => {
+            node.textContent = '0';
+          },
           onUpdate: () => {
             node.textContent = String(Math.round(proxy.value));
           },
@@ -77,7 +82,7 @@ export function About() {
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <section
@@ -153,7 +158,7 @@ export function About() {
                 </dt>
                 <dd className="mt-4 font-mono text-[2.6rem] font-medium leading-none tracking-[-0.05em] text-paper tabular-nums md:text-[3.2rem]">
                   {numeric ? (
-                    <span data-count={stat.value}>0</span>
+                    <span data-count={stat.value}>{stat.value}</span>
                   ) : (
                     <span>{stat.value}</span>
                   )}

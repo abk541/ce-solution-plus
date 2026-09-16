@@ -331,7 +331,9 @@ export function HeroParticles({ className }: { className?: string }) {
       burstTween = gsap.to(material.uniforms.uBurst, { value: 1, duration: 1.15, ease: 'power2.out' });
     };
 
-    if (!reducedMotion) {
+    const interactivePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    if (!reducedMotion && interactivePointer) {
       window.addEventListener('pointermove', onPointerMove, { passive: true });
       window.addEventListener('pointerdown', onPointerDown, { passive: true });
       document.addEventListener('pointerleave', onPointerLeave);

@@ -104,7 +104,7 @@ export function ScrollLogo() {
       className="pointer-events-none fixed inset-x-0 top-[38svh] z-60 hidden justify-center lg:flex"
     >
       <div ref={wrapRef} className="origin-center will-change-transform">
-        <Logo tone="light" variant="full" priority className="h-auto w-[clamp(18rem,34vw,34rem)]" />
+        <Logo tone="light" variant="full" className="h-auto w-[clamp(18rem,34vw,34rem)]" />
       </div>
     </div>
   );

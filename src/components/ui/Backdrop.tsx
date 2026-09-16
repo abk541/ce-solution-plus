@@ -27,7 +27,7 @@ export function Backdrop() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,transparent_0%,var(--color-ink-950)_78%)]" />
 
       <div
-        className="absolute inset-0 opacity-[0.035] mix-blend-screen [background-size:180px_180px]"
+        className="absolute inset-0 hidden opacity-[0.035] mix-blend-screen [background-size:180px_180px] md:block"
         style={{ backgroundImage: `url("${sitePath('/images/grain.svg')}")` }}
       />
     </div>

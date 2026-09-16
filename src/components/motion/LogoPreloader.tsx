@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 
 import { company } from '@/content/site';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import {
+  usePrefersReducedMotion,
+  useRichMotion,
+} from '@/hooks/usePrefersReducedMotion';
 import { sitePath } from '@/lib/site-path';
 
 /**
@@ -58,11 +61,21 @@ export function LogoPreloader() {
   const barRef = useRef<HTMLSpanElement>(null);
   const pctRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const richMotion = useRichMotion();
   const [mounted, setMounted] = useState(true);
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion || sessionStorage.getItem(SEEN_KEY)) {
+    if (richMotion === null) return;
+
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem(SEEN_KEY) === '1';
+    } catch {
+      // Storage may be disabled; the visual can still run safely once.
+    }
+
+    if (reducedMotion || !richMotion || seen) {
       setMounted(false);
       return;
     }
@@ -81,6 +94,7 @@ export function LogoPreloader() {
     let cancelled = false;
     let particles: Particle[] = [];
     let startedAt = 0;
+    let hardStop = 0;
     let w = 0;
     let h = 0;
     let minX = 0;
@@ -100,10 +114,20 @@ export function LogoPreloader() {
 
     const finish = () => {
       if (cancelled) return;
-      sessionStorage.setItem(SEEN_KEY, '1');
-      document.documentElement.style.overflow = '';
-      setMounted(false);
+      window.clearTimeout(hardStop);
+      try {
+        sessionStorage.setItem(SEEN_KEY, '1');
+      } catch {
+        // Unlocking the page must never depend on storage availability.
+      } finally {
+        document.documentElement.style.overflow = '';
+        setMounted(false);
+      }
     };
+
+    // The CSS opt-in has its own visibility fail-safe; this timer also ends
+    // the component and unlocks scrolling if image or animation work stalls.
+    hardStop = window.setTimeout(finish, 6500);
 
     const draw = (now: number) => {
       if (cancelled) return;
@@ -166,6 +190,7 @@ export function LogoPreloader() {
     const img = new Image();
     // `decode()` hangs in Chromium for images never attached to the document.
     img.onerror = () => {
+      window.clearTimeout(hardStop);
       document.documentElement.style.overflow = '';
       setMounted(false);
     };
@@ -236,7 +261,7 @@ export function LogoPreloader() {
       }
       particles = built;
 
-      ctx.fillStyle = '#f2f5fa';
+      ctx.fillStyle = '#eef1f5';
       startedAt = performance.now();
       raf = requestAnimationFrame(draw);
     };
@@ -244,22 +269,24 @@ export function LogoPreloader() {
 
     const onResize = () => {
       size();
-      ctx.fillStyle = '#f2f5fa';
+      ctx.fillStyle = '#eef1f5';
     };
     window.addEventListener('resize', onResize);
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      window.clearTimeout(hardStop);
       window.removeEventListener('resize', onResize);
       document.documentElement.style.overflow = '';
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, richMotion]);
 
   if (!mounted) return null;
 
   return (
     <div
+      data-logo-preloader
       role="status"
       aria-label={`${company.name} — loading`}
       className={[

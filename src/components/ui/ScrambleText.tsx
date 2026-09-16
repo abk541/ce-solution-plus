@@ -4,7 +4,10 @@ import { useEffect, useRef } from 'react';
 
 import { cn } from '@/lib/cn';
 import { ScrollTrigger } from '@/lib/gsap';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import {
+  useFullMotion,
+  usePrefersReducedMotion,
+} from '@/hooks/usePrefersReducedMotion';
 
 /**
  * Resolves text out of noise when it scrolls into view — characters settle
@@ -27,10 +30,11 @@ export function ScrambleText({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useEffect(() => {
     const node = ref.current;
-    if (!node || reducedMotion) return;
+    if (!node || reducedMotion || fullMotion !== true) return;
 
     const chars = [...text];
     // Each character gets a settle point; later characters resolve later.
@@ -72,7 +76,7 @@ export function ScrambleText({
       cancelAnimationFrame(raf);
       node.textContent = text;
     };
-  }, [text, speed, reducedMotion]);
+  }, [text, speed, fullMotion, reducedMotion]);
 
   return (
     <span className={cn('inline-block', className)}>

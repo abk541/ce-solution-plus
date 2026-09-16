@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import type { CSSProperties } from 'react';
 
 import { cn } from '@/lib/cn';
 import { sitePath } from '@/lib/site-path';
@@ -9,7 +9,6 @@ type LogoProps = {
   /** `compact` drops the baked-in tagline, which is illegible below ~40px tall. */
   variant?: 'full' | 'compact';
   className?: string;
-  priority?: boolean;
 };
 
 // Intrinsic artwork ratios, measured from public/brand (2x exports of logo.avif).
@@ -21,32 +20,49 @@ export function Logo({
   tone = 'light',
   variant = 'compact',
   className,
-  priority = false,
 }: LogoProps) {
   const size = LOCKUP[variant];
+  const source = sitePath(`/brand/logo${variant === 'compact' ? '-compact' : ''}-${tone}.png`);
+  const maskStyle = {
+    aspectRatio: `${size.width} / ${size.height}`,
+    WebkitMaskImage: `url("${source}")`,
+    maskImage: `url("${source}")`,
+  } as CSSProperties;
+
+  // CSS masks preserve the source alpha while filling it with the site's exact
+  // paper/ink token. That removes the warm-white mismatch in the raster export.
   return (
-    <Image
-      src={sitePath(`/brand/logo${variant === 'compact' ? '-compact' : ''}-${tone}.webp`)}
-      alt="CE Solution Plus"
-      width={size.width}
-      height={size.height}
-      priority={priority}
-      className={cn('h-auto w-auto select-none', className)}
+    <span
+      role="img"
+      aria-label="CE Solution Plus"
+      style={maskStyle}
+      className={cn(
+        'inline-block h-auto w-auto shrink-0 select-none [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]',
+        tone === 'light' ? 'bg-paper' : 'bg-ink-950',
+        className,
+      )}
     />
   );
 }
 
 /** Monogram only — used where the full lockup would be illegible. */
-export function LogoMark({ tone = 'light', className, priority = false }: Omit<LogoProps, 'variant'>) {
+export function LogoMark({ tone = 'light', className }: Omit<LogoProps, 'variant'>) {
+  const source = sitePath(`/brand/mark-${tone}.png`);
+  const maskStyle = {
+    aspectRatio: `${MARK.width} / ${MARK.height}`,
+    WebkitMaskImage: `url("${source}")`,
+    maskImage: `url("${source}")`,
+  } as CSSProperties;
+
   return (
-    <Image
-      src={sitePath(`/brand/mark-${tone}.webp`)}
-      alt=""
+    <span
       aria-hidden="true"
-      width={MARK.width}
-      height={MARK.height}
-      priority={priority}
-      className={cn('h-auto w-auto select-none', className)}
+      style={maskStyle}
+      className={cn(
+        'inline-block h-auto w-auto shrink-0 select-none [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]',
+        tone === 'light' ? 'bg-paper' : 'bg-ink-950',
+        className,
+      )}
     />
   );
 }

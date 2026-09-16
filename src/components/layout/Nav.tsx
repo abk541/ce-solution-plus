@@ -31,6 +31,7 @@ export function Nav() {
 
     let last = window.scrollY;
     let hidden = false;
+    let frame = 0;
     const setHidden = (next: boolean) => {
       if (next === hidden) return;
       hidden = next;
@@ -41,7 +42,8 @@ export function Nav() {
       });
     };
 
-    const onScroll = () => {
+    const updateFromScroll = () => {
+      frame = 0;
       const y = window.scrollY;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       setCondensed(y > 24);
@@ -53,9 +55,16 @@ export function Nav() {
       last = y;
     };
 
-    onScroll();
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateFromScroll);
+    };
+
+    updateFromScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.cancelAnimationFrame(frame);
+    };
   }, [menuOpen, reducedMotion]);
 
   useEffect(() => {
@@ -103,7 +112,7 @@ export function Nav() {
         className={cn(
           'fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500',
           condensed
-            ? 'border-b border-ink-700/80 bg-ink-950/80 backdrop-blur-xl'
+            ? 'border-b border-ink-700/80 bg-ink-950/95 lg:bg-ink-950/80 lg:backdrop-blur-xl'
             : 'border-b border-transparent bg-transparent',
         )}
       >
@@ -113,13 +122,11 @@ export function Nav() {
             aria-label={`${company.name} — home`}
             className="group relative flex items-center gap-4"
           >
-            {/* Real brand artwork — off-white export of logo.avif for dark surfaces.
-                Sized so the Didone hairlines survive; below ~24px they fill in.
-                ScrollLogo measures this slot and hides it until the mark docks. */}
-            <span data-nav-logo-slot className="block transition-opacity duration-200">
+            {/* The compact lockup is the persistent brand anchor. The ornate
+                full lockup is intentionally not floated over the hero. */}
+            <span data-nav-logo-slot className="block">
               <Logo
                 tone="light"
-                priority
                 className="h-6 w-[126px] transition-opacity duration-300 group-hover:opacity-80 md:h-8 md:w-[167px]"
               />
             </span>
@@ -212,7 +219,7 @@ export function Nav() {
         className="fixed inset-0 z-40 lg:hidden"
         onClick={closeMenu}
       >
-        <div className="absolute inset-0 bg-ink-950/95 backdrop-blur-xl" />
+        <div className="absolute inset-0 bg-ink-950 lg:bg-ink-950/95 lg:backdrop-blur-xl" />
         <div className="shell relative flex h-full flex-col justify-center gap-2 pb-24 pt-24">
           <CornerTicks className="inset-x-5 inset-y-24" size={12} />
           {navLinks.map((link, index) => (

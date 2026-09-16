@@ -5,6 +5,7 @@ import { useRef } from 'react';
 
 import { gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -23,10 +24,11 @@ type ParallaxProps = {
 export function Parallax({ children, amount = 12, className = '' }: ParallaxProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -46,7 +48,7 @@ export function Parallax({ children, amount = 12, className = '' }: ParallaxProp
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion, amount]);
+  }, [reducedMotion, amount, fullMotion]);
 
   return (
     <div ref={rootRef} className={`relative overflow-hidden ${className}`}>

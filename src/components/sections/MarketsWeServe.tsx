@@ -9,6 +9,7 @@ import { ease, gsap } from '@/lib/gsap';
 import { sitePath } from '@/lib/site-path';
 import { useCursorPlate } from '@/hooks/useCursorPlate';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -19,26 +20,25 @@ export function MarketsWeServe() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
 
     const ctx = gsap.context(() => {
-      if (!reducedMotion) {
-        gsap.fromTo(
-          '[data-market-card]',
-          { opacity: 0, y: 34 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 1.1,
-            stagger: 0.08,
-            ease: ease.spring,
-            scrollTrigger: { trigger: root, start: 'top 70%', once: true },
-          },
-        );
-      }
+      gsap.fromTo(
+        '[data-market-card]',
+        { opacity: 0, y: 34 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.1,
+          stagger: 0.08,
+          ease: ease.spring,
+          scrollTrigger: { trigger: root, start: 'top 70%', once: true },
+        },
+      );
 
       // Desktop only: the section pins and the row scrubs sideways. Below lg the
       // same markup is a native snap-scroll carousel.
@@ -75,7 +75,7 @@ export function MarketsWeServe() {
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <section ref={rootRef} id="markets" className="relative z-10 overflow-hidden">
@@ -98,7 +98,7 @@ export function MarketsWeServe() {
         <div className="mt-10 overflow-x-auto pb-4 [scrollbar-width:none] lg:mt-12 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden">
           <div
             ref={trackRef}
-            className="flex w-max snap-x snap-mandatory gap-px bg-ink-800 px-5 will-change-transform md:px-10 lg:snap-none xl:px-14"
+            className="flex w-max snap-x snap-mandatory gap-px bg-ink-800 px-5 md:px-10 lg:snap-none lg:will-change-transform xl:px-14"
           >
             {markets.items.map((market, index) => (
               <MarketCard key={market.id} market={market} index={index} />
@@ -180,7 +180,7 @@ function MarketCard({
           aria-hidden="true"
           className="mt-3 block h-px w-8 origin-left bg-accent transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-[4] group-focus-visible:scale-x-[4]"
         />
-        <div className="grid grid-rows-[0fr] transition-[grid-template-rows] duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]">
+        <div data-hover-details className="grid grid-rows-[1fr]">
           <div className="overflow-hidden">
             <p className="pt-4 text-[0.85rem] leading-relaxed text-steel-200">
               {market.description}

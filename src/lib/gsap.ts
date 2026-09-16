@@ -14,11 +14,18 @@ function springEase(damping: number, frequency: number) {
   const w = frequency * Math.PI * 2;
   const z = damping;
   const wd = w * Math.sqrt(Math.max(1 - z * z, 0.0001));
+  const sample = (t: number) => {
+    const decay = Math.exp(-z * w * t);
+    return 1 - decay * (Math.cos(wd * t) + ((z * w) / wd) * Math.sin(wd * t));
+  };
+  // Some heavily damped curves are well short of 1 at t=1. Normalising the
+  // sampled endpoint removes the visible last-frame snap while retaining the
+  // intended shape.
+  const endpoint = sample(1);
   return (t: number) => {
     if (t <= 0) return 0;
     if (t >= 1) return 1;
-    const decay = Math.exp(-z * w * t);
-    return 1 - decay * (Math.cos(wd * t) + ((z * w) / wd) * Math.sin(wd * t));
+    return sample(t) / endpoint;
   };
 }
 

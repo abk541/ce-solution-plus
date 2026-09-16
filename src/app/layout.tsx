@@ -122,21 +122,27 @@ const organizationJsonLd = {
 };
 
 /**
- * Adds `motion-on` before first paint so scroll-reveal targets can start hidden
- * without a flash. Users with reduced-motion preferences, or with JS disabled,
- * never get the class — so the server-rendered content stays visible.
+ * Adds motion classes before first paint so animated targets can start hidden
+ * without a flash. Touch-first and compact layouts only opt into the short
+ * hero reveal; section choreography is reserved for fine-pointer layouts.
  */
-const noFlashScript = `(function(){try{if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('motion-on');}}catch(e){}})();`;
+const noFlashScript = `(function(){try{var d=document.documentElement,r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(!r){d.classList.add('motion-hero');if(window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)').matches){d.classList.add('motion-on');}var s=false;try{s=sessionStorage.getItem('ce-entry-seen')==='1';}catch(x){}if(!s&&window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)').matches){d.classList.add('motion-rich');setTimeout(function(){d.classList.remove('motion-rich');},7000);}}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      // The no-flash script below adds `motion-on` before hydration; that diff is intentional.
+      // The no-flash script below adds motion classes before hydration; that diff is intentional.
       suppressHydrationWarning
       className={`${archivo.variable} ${inter.variable} ${plexMono.variable}`}
     >
       <head>
+        <link
+          rel="preload"
+          as="image"
+          href={sitePath('/brand/logo-compact-light.png')}
+          crossOrigin="anonymous"
+        />
         <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
         <script
           type="application/ld+json"

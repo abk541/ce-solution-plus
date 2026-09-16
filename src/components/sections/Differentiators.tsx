@@ -7,6 +7,7 @@ import { differentiators } from '@/content/site';
 import { cn } from '@/lib/cn';
 import { ease, gsap, ScrollTrigger } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -15,11 +16,14 @@ export function Differentiators() {
   const rootRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
   const total = differentiators.items.length;
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+
+    const animate = !reducedMotion && fullMotion === true;
 
     const ctx = gsap.context(() => {
       gsap.utils.toArray<HTMLElement>('[data-diff-item]').forEach((node, index) => {
@@ -31,7 +35,7 @@ export function Differentiators() {
           onEnterBack: () => setActiveIndex(index),
         });
 
-        if (reducedMotion) return;
+        if (!animate) return;
 
         gsap.fromTo(
           node.querySelectorAll('[data-diff-inner]'),
@@ -60,7 +64,7 @@ export function Differentiators() {
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <section ref={rootRef} className="relative z-10 border-y border-ink-800 bg-ink-900">
@@ -168,12 +172,14 @@ function KineticWord({ word, reducedMotion }: { word: string; reducedMotion: boo
       {!reducedMotion ? (
         <>
           <span
+            data-kinetic-ghost
             aria-hidden="true"
             className="absolute inset-0 z-0 select-none text-steel-200 [animation:register-shift_7s_steps(1,end)_infinite]"
           >
             {word}
           </span>
           <span
+            data-kinetic-ghost
             aria-hidden="true"
             className="absolute inset-0 z-0 select-none text-accent-dim [animation:register-shift_7s_steps(1,end)_infinite_reverse,register-clip_7s_steps(1,end)_infinite]"
           >

@@ -9,6 +9,7 @@ import { SplitWords } from '@/components/ui/SplitWords';
 import { trust } from '@/content/site';
 import { ease, gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -16,10 +17,11 @@ import {
 export function TrustStatement() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
 
     const ctx = gsap.context(() => {
       const words = gsap.utils.toArray<HTMLElement>('[data-word] > span');
@@ -38,20 +40,6 @@ export function TrustStatement() {
         },
       );
 
-      // Ink builds word by word as the section crosses the viewport — the
-      // statement "develops" rather than fading in.
-      gsap.to(words, {
-        color: '#08090b',
-        ease: 'none',
-        stagger: 0.05,
-        scrollTrigger: {
-          trigger: '[data-trust-statement]',
-          start: 'top 70%',
-          end: 'bottom 62%',
-          scrub: 0.6,
-        },
-      });
-
       gsap.fromTo(
         '[data-trust-mark]',
         { opacity: 0, scale: 0.9, rotate: -6 },
@@ -67,7 +55,7 @@ export function TrustStatement() {
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <section ref={rootRef} className="relative z-10 overflow-hidden bg-ink-950 text-steel-300">

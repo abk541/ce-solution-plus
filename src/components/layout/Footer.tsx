@@ -6,6 +6,7 @@ import { Logo } from '@/components/ui/Logo';
 import { company, footer, navLinks } from '@/content/site';
 import { ease, gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -13,11 +14,12 @@ import {
 export function Footer() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
   const year = new Date().getFullYear();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -35,7 +37,7 @@ export function Footer() {
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <footer ref={rootRef} className="relative z-10 border-t border-ink-800 bg-ink-950">

@@ -8,6 +8,42 @@ export const useIsomorphicLayoutEffect =
 const QUERY = '(prefers-reduced-motion: reduce)';
 
 /**
+ * Full page choreography is reserved for roomier layouts with a precise
+ * pointer. Phones and touch-first tablets keep native scrolling and render
+ * section content in its final state.
+ */
+export const FULL_MOTION_QUERY =
+  '(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
+
+/** The WebGL field and entry curtain are desktop-only enhancements. */
+export const RICH_MOTION_QUERY =
+  '(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
+
+function useMediaQuery(query: string): boolean | null {
+  const [matches, setMatches] = useState<boolean | null>(null);
+
+  useIsomorphicLayoutEffect(() => {
+    const media = window.matchMedia(query);
+    const sync = () => setMatches(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, [query]);
+
+  return matches;
+}
+
+/** `null` only during SSR/the first hydration pass. */
+export function useFullMotion(): boolean | null {
+  return useMediaQuery(FULL_MOTION_QUERY);
+}
+
+/** `null` only during SSR/the first hydration pass. */
+export function useRichMotion(): boolean | null {
+  return useMediaQuery(RICH_MOTION_QUERY);
+}
+
+/**
  * Returns `true` once the client confirms the user prefers reduced motion.
  * Always `false` during SSR and the first render so hydration stays stable.
  */

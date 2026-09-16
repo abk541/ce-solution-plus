@@ -1,7 +1,6 @@
 import { Footer } from '@/components/layout/Footer';
 import { Nav } from '@/components/layout/Nav';
 import { LogoPreloader } from '@/components/motion/LogoPreloader';
-import { ScrollLogo } from '@/components/motion/ScrollLogo';
 import { SmoothScroll } from '@/components/motion/SmoothScroll';
 import { About } from '@/components/sections/About';
 import { Capabilities } from '@/components/sections/Capabilities';
@@ -25,7 +24,6 @@ export default function HomePage() {
         Skip to content
       </a>
       <Nav />
-      <ScrollLogo />
       <main id="main" className="relative">
         <Hero />
         <About />

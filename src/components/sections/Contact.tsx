@@ -8,6 +8,7 @@ import { SectionTag } from '@/components/ui/SectionTag';
 import { company, contact } from '@/content/site';
 import { ease, gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -15,10 +16,11 @@ import {
 export function Contact() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -45,7 +47,7 @@ export function Contact() {
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <section ref={rootRef} id="contact" className="relative z-10 py-24 md:py-32 lg:py-40">
@@ -71,6 +73,7 @@ export function Contact() {
             className="absolute inset-x-0 top-0 h-px origin-left bg-accent/60"
           />
           <span
+            data-instrument-sweep
             aria-hidden="true"
             className="pointer-events-none absolute left-0 top-0 h-px w-16 bg-linear-to-r from-transparent via-accent to-transparent [animation:sweep-x_7s_cubic-bezier(0.45,0,0.55,1)_infinite]"
           />

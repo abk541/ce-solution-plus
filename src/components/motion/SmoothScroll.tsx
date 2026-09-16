@@ -4,7 +4,12 @@ import { useEffect } from 'react';
 import Lenis from 'lenis';
 
 import { gsap, ScrollTrigger } from '@/lib/gsap';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
+import {
+  useFullMotion,
+  useIsomorphicLayoutEffect,
+  usePrefersReducedMotion,
+  useRichMotion,
+} from '@/hooks/usePrefersReducedMotion';
 
 /**
  * Drives Lenis from GSAP's ticker so smooth scrolling and ScrollTrigger share a
@@ -13,9 +18,22 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
  */
 export function SmoothScroll() {
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
+  const richMotion = useRichMotion();
+
+  useIsomorphicLayoutEffect(() => {
+    if (fullMotion !== null) {
+      document.documentElement.classList.toggle('motion-on', fullMotion);
+    }
+    if (richMotion === false) {
+      document.documentElement.classList.remove('motion-rich');
+    }
+  }, [fullMotion, richMotion]);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    // Native touch scrolling is both faster and more predictable than routing
+    // phone gestures through Lenis + GSAP's ticker.
+    if (reducedMotion || richMotion !== true) return;
 
     const lenis = new Lenis({
       duration: 1.35,
@@ -69,7 +87,7 @@ export function SmoothScroll() {
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, richMotion]);
 
   return null;
 }

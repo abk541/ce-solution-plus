@@ -220,18 +220,33 @@
   transform: scaleX(0);
 }
 
-/* Hero intro is a bespoke timeline, so its targets need the same pre-hide. */
-.motion-on [data-hero-line] > span {
+/* The hero keeps one short reveal on touch layouts; the rest of the page does not. */
+.motion-hero [data-hero-line] > span {
   transform: translate3d(0, 112%, 0);
 }
 
-.motion-on [data-hero-status],
-.motion-on [data-hero-fade] {
+.motion-hero [data-hero-status],
+.motion-hero [data-hero-fade],
+.motion-hero [data-hero-art] {
   opacity: 0;
 }
 
 .motion-on [data-word] > span {
   transform: translate3d(0, 115%, 0);
+}
+
+/* Interactive disclosures collapse only where hover is genuinely available.
+   Touch-first tablets keep every detail visible regardless of viewport width. */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  [data-hover-details] {
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .group:hover [data-hover-details],
+  .group:focus-visible [data-hover-details] {
+    grid-template-rows: 1fr;
+  }
 }
 
 /* Section-specific timeline targets, pre-hidden to kill the hydration flash. */
@@ -261,9 +276,10 @@
 @media (prefers-reduced-motion: reduce) {
   .motion-on [data-reveal],
   [data-reveal],
-  .motion-on [data-hero-line] > span,
-  .motion-on [data-hero-status],
-  .motion-on [data-hero-fade],
+  .motion-hero [data-hero-line] > span,
+  .motion-hero [data-hero-status],
+  .motion-hero [data-hero-fade],
+  .motion-hero [data-hero-art],
   .motion-on [data-word] > span,
   .motion-on [data-about-body] > *,
   .motion-on [data-credential],
@@ -287,6 +303,40 @@
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+  }
+
+  [data-logo-preloader] {
+    display: none !important;
+  }
+}
+
+/* Hidden is the safe server/JS-failure default. The prepaint script opts only
+   rich desktop pointers in and removes the class after a hard timeout. */
+[data-logo-preloader] {
+  display: none;
+}
+
+.motion-rich [data-logo-preloader] {
+  display: block;
+}
+
+/* The static monogram is the inverse of the rich WebGL enhancement. This
+   includes large touch-first tablets and reduced-motion desktops. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-hero-static-art] {
+    display: none;
+  }
+}
+
+/* The entry curtain is intentionally absent on phones and touch-first devices. */
+@media (width < 64rem), (hover: none), (pointer: coarse) {
+  [data-logo-preloader] {
+    display: none !important;
+  }
+
+  [data-kinetic-ghost],
+  [data-instrument-sweep] {
+    display: none !important;
   }
 }
 

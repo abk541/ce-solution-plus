@@ -6,6 +6,7 @@ import { SectionTag } from '@/components/ui/SectionTag';
 import { capabilities } from '@/content/site';
 import { ease, gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -13,12 +14,14 @@ import {
 export function Capabilities() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion) return;
+    if (!root) return;
 
     const ctx = gsap.context(() => {
+      if (reducedMotion || fullMotion !== true) return;
       // Cells assemble as the rail enters: rule draws, then contents settle.
       gsap
         .timeline({
@@ -41,20 +44,29 @@ export function Capabilities() {
     // so it stays correct regardless of smooth-scroll or resize behaviour.
     const rail = root.querySelector<HTMLElement>('[data-cap-rail]');
     const readout = root.querySelector<HTMLElement>('[data-cap-readout]');
-    const onRail = () => {
+    let frame = 0;
+    let lastIndex = 1;
+    const updateRail = () => {
+      frame = 0;
       if (!rail || !readout) return;
       const max = rail.scrollWidth - rail.clientWidth;
       const p = max > 0 ? rail.scrollLeft / max : 0;
       const index = Math.min(capabilities.length, Math.floor(p * capabilities.length) + 1);
+      if (index === lastIndex) return;
+      lastIndex = index;
       readout.textContent = String(index).padStart(2, '0');
+    };
+    const onRail = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateRail);
     };
     rail?.addEventListener('scroll', onRail, { passive: true });
 
     return () => {
       rail?.removeEventListener('scroll', onRail);
+      window.cancelAnimationFrame(frame);
       ctx.revert();
     };
-  }, [reducedMotion]);
+  }, [fullMotion, reducedMotion]);
 
   return (
     <section ref={rootRef} id="capabilities" className="relative z-10 py-24 md:py-32 lg:py-40">
@@ -140,7 +152,10 @@ export function Capabilities() {
               </div>
 
               {/* PLACEHOLDER detail bullets — see src/content/site.ts. */}
-              <div className="mt-8 grid grid-rows-[0fr] transition-[grid-template-rows] duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:grid-rows-[1fr] group-focus-visible:grid-rows-[1fr]">
+              <div
+                data-hover-details
+                className="mt-8 grid grid-rows-[1fr]"
+              >
                 <div className="overflow-hidden">
                   <span aria-hidden="true" className="mb-4 block h-px w-full bg-ink-700" />
                   <ul>
