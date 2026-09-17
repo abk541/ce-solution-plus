@@ -9,6 +9,7 @@ import { SplitWords } from '@/components/ui/SplitWords';
 import { trust } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
+  useCompactMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -18,6 +19,7 @@ export function TrustStatement() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const compactMotion = useCompactMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
@@ -52,10 +54,24 @@ export function TrustStatement() {
           scrollTrigger: { trigger: root, start: 'top 75%', once: true },
         },
       );
+
+      if (compactMotion === true) {
+        gsap.fromTo(
+          '[data-trust-drift]',
+          { x: 10, y: -7, rotate: -1.5 },
+          {
+            x: -6,
+            y: 7,
+            rotate: 1.5,
+            ease: 'none',
+            scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: true },
+          },
+        );
+      }
     }, root);
 
     return () => ctx.revert();
-  }, [motionAllowed, reducedMotion]);
+  }, [compactMotion, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} className="relative z-10 overflow-hidden bg-ink-950 text-steel-300">
@@ -65,9 +81,11 @@ export function TrustStatement() {
       <div
         data-trust-mark
         aria-hidden="true"
-        className="pointer-events-none absolute -right-16 top-1/2 hidden -translate-y-1/2 opacity-[0.06] md:block"
+        className="pointer-events-none absolute -right-40 top-[45%] -translate-y-1/2 opacity-[0.05] md:-right-16 md:top-1/2 md:opacity-[0.06]"
       >
-        <LogoMark tone="light" className="w-[34rem] max-w-none" />
+        <div data-trust-drift>
+          <LogoMark tone="light" className="w-[22rem] max-w-none md:w-[34rem]" />
+        </div>
       </div>
 
       <div className="shell relative py-28 md:py-36 lg:py-44">

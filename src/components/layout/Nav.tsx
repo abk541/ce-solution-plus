@@ -93,7 +93,9 @@ export function Nav() {
 
     const blocked = [
       headerRef.current,
-      ...Array.from(document.querySelectorAll<HTMLElement>('main, footer')),
+      ...Array.from(
+        document.querySelectorAll<HTMLElement>('main, footer, [data-menu-background]'),
+      ),
     ].filter((node): node is HTMLElement => node !== null);
     blocked.forEach((node) => node.setAttribute('inert', ''));
     document.body.style.overflow = 'hidden';
@@ -243,7 +245,9 @@ export function Nav() {
           ref={progressRef}
           aria-hidden="true"
           className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 bg-power"
-        />
+        >
+          <span className="nav-progress-tip absolute -right-8 inset-y-0 w-8 bg-linear-to-r from-power to-power-bright" />
+        </span>
       </header>
 
       {menuMounted ? (
@@ -260,6 +264,20 @@ export function Nav() {
           onClick={closeMenu}
         >
           <div className="absolute inset-0 bg-ink-950" />
+          <span
+            aria-hidden="true"
+            className={cn(
+              'absolute left-5 right-5 top-[calc(76px+env(safe-area-inset-top))] z-10 h-px origin-left bg-power/70 transition-transform duration-[320ms] ease-[var(--ease-precise)]',
+              menuOpen ? 'scale-x-100' : 'scale-x-0',
+            )}
+          />
+          <span
+            aria-hidden="true"
+            className={cn(
+              'absolute bottom-[max(2rem,env(safe-area-inset-bottom))] left-5 right-5 z-10 h-px origin-right bg-ink-600 transition-transform duration-[320ms] ease-[var(--ease-precise)]',
+              menuOpen ? 'scale-x-100' : 'scale-x-0',
+            )}
+          />
           <div
             className="fixed inset-x-0 top-0 z-20 flex h-[calc(76px+env(safe-area-inset-top))] items-center justify-between border-b border-ink-700/55 bg-ink-950 pl-[max(20px,env(safe-area-inset-left))] pr-[max(20px,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]"
             onClick={(event) => event.stopPropagation()}
@@ -307,7 +325,7 @@ export function Nav() {
                   data-menu-initial-focus={index === 0 ? '' : undefined}
                   data-mobile-menu-link
                   aria-current={isActive ? 'location' : undefined}
-                  style={{ transitionDelay: `${index * 45}ms` }}
+                  style={{ transitionDelay: menuOpen ? `${index * 45}ms` : '0ms' }}
                   className={cn(
                     'flex items-baseline gap-5 border-b py-5 transition-[opacity,transform,border-color] duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
                     isActive ? 'border-power/75' : 'border-ink-800',

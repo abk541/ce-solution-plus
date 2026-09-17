@@ -9,6 +9,7 @@ import { duration, ease, gsap } from '@/lib/gsap';
 import { sitePath } from '@/lib/site-path';
 import { useCursorPlate } from '@/hooks/useCursorPlate';
 import {
+  useCompactMotion,
   useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
@@ -19,10 +20,14 @@ export function MarketsWeServe() {
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const railRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLSpanElement>(null);
   const progressValueRef = useRef<HTMLSpanElement>(null);
+  const mobileProgressBarRef = useRef<HTMLSpanElement>(null);
+  const mobileProgressValueRef = useRef<HTMLSpanElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const compactMotion = useCompactMotion();
   const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
@@ -128,8 +133,82 @@ export function MarketsWeServe() {
       return () => mm.revert();
     }, root);
 
-    return () => ctx.revert();
-  }, [fullMotion, motionAllowed, reducedMotion]);
+    const rail = railRef.current;
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-market-card]'));
+    let mobileFrame = 0;
+    let settleTimer = 0;
+    let lastMobilePercent = -1;
+    const updateMobileRail = () => {
+      mobileFrame = 0;
+      if (!rail || compactMotion !== true) return;
+
+      const max = Math.max(rail.scrollWidth - rail.clientWidth, 0);
+      const progress = max > 0 ? rail.scrollLeft / max : 0;
+      const railRect = rail.getBoundingClientRect();
+      const focusX = railRect.left + railRect.width / 2;
+      const falloff = Math.max(railRect.width * 0.72, 1);
+      const states = cards.map((card) => {
+        const rect = card.getBoundingClientRect();
+        const signedOffset = Math.max(
+          -1,
+          Math.min(1, (rect.left + rect.width / 2 - focusX) / falloff),
+        );
+        const weight = 1 - Math.abs(signedOffset);
+        return { card, signedOffset, weight };
+      });
+
+      if (mobileProgressBarRef.current) {
+        mobileProgressBarRef.current.style.transform = `scaleX(${Math.max(progress, 0.02)})`;
+      }
+      const percent = Math.round(progress * 100);
+      if (mobileProgressValueRef.current && percent !== lastMobilePercent) {
+        lastMobilePercent = percent;
+        mobileProgressValueRef.current.textContent = `${String(percent).padStart(3, '0')}%`;
+      }
+      states.forEach(({ card, signedOffset, weight }) => {
+        card.style.setProperty('--market-scale', String(0.96 + weight * 0.04));
+        card.style.opacity = String(0.78 + weight * 0.22);
+        card.style.setProperty('--market-art-x', `${signedOffset * -8}px`);
+        card.style.setProperty('--market-art-scale', String(1.015 + weight * 0.02));
+        card.style.setProperty('--market-rule', String(0.75 + weight * 3.25));
+        card.toggleAttribute('data-current', weight > 0.72);
+      });
+    };
+    const onMobileRail = () => {
+      if (rail && compactMotion === true) {
+        rail.setAttribute('data-moving', 'true');
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(() => {
+          rail.removeAttribute('data-moving');
+          if (!mobileFrame) mobileFrame = window.requestAnimationFrame(updateMobileRail);
+        }, 90);
+      }
+      if (!mobileFrame) mobileFrame = window.requestAnimationFrame(updateMobileRail);
+    };
+    if (compactMotion === true) {
+      rail?.addEventListener('scroll', onMobileRail, { passive: true });
+      window.addEventListener('resize', onMobileRail, { passive: true });
+      mobileFrame = window.requestAnimationFrame(updateMobileRail);
+    }
+
+    return () => {
+      rail?.removeEventListener('scroll', onMobileRail);
+      window.removeEventListener('resize', onMobileRail);
+      window.cancelAnimationFrame(mobileFrame);
+      window.clearTimeout(settleTimer);
+      rail?.removeAttribute('data-moving');
+      cards.forEach((card) => {
+        card.style.removeProperty('--market-scale');
+        card.style.removeProperty('opacity');
+        card.style.removeProperty('--market-art-x');
+        card.style.removeProperty('--market-art-scale');
+        card.style.removeProperty('--market-rule');
+        card.removeAttribute('data-current');
+      });
+      mobileProgressBarRef.current?.style.removeProperty('transform');
+      ctx.revert();
+    };
+  }, [compactMotion, fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} id="markets" className="relative z-10 overflow-hidden bg-surface-intermediate text-foreground-secondary">
@@ -150,6 +229,8 @@ export function MarketsWeServe() {
         </div>
 
         <div
+          ref={railRef}
+          data-market-rail
           role="region"
           aria-label="Markets served"
           className="mt-10 overflow-x-auto pb-4 [scrollbar-width:none] lg:mt-12 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden"
@@ -162,6 +243,22 @@ export function MarketsWeServe() {
               <MarketCard key={market.id} market={market} index={index} />
             ))}
           </div>
+        </div>
+
+        <div className="shell mt-5 flex items-center gap-4 lg:hidden" aria-hidden="true">
+          <span className="label-mono text-[0.56rem] text-foreground-secondary">Swipe</span>
+          <span className="relative h-px flex-1 overflow-hidden bg-border-command/45">
+            <span
+              ref={mobileProgressBarRef}
+              className="absolute inset-0 origin-left scale-x-[0.02] bg-power"
+            />
+          </span>
+          <span
+            ref={mobileProgressValueRef}
+            className="min-w-[3.2rem] text-right label-mono text-[0.56rem] text-foreground-secondary tabular-nums"
+          >
+            000%
+          </span>
         </div>
 
         <div className="shell mt-8 hidden items-center gap-5 lg:flex">
@@ -236,6 +333,7 @@ function MarketCard({
             {market.title}
           </h3>
           <span
+            data-market-rule
             aria-hidden="true"
             className="mt-3 block h-[3px] w-8 origin-left bg-power transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-[4] group-focus-visible:scale-x-[4]"
           />

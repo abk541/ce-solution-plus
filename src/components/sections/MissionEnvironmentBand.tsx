@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { SectionTag } from '@/components/ui/SectionTag';
 
@@ -18,10 +19,35 @@ const missionEnvironments = [
 type MissionIconName = (typeof missionEnvironments)[number]['icon'];
 
 export function MissionEnvironmentBand() {
+  const rootRef = useRef<HTMLElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const motionPaused = isPaused || !isVisible;
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    let intersecting = true;
+    const sync = () => setIsVisible(intersecting && !document.hidden);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        intersecting = Boolean(entry?.isIntersecting);
+        sync();
+      },
+      { rootMargin: '160px 0px' },
+    );
+    observer.observe(root);
+    document.addEventListener('visibilitychange', sync);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', sync);
+    };
+  }, []);
 
   return (
     <section
+      ref={rootRef}
       id="mission-environments"
       aria-labelledby="mission-environments-title"
       className="relative z-10 overflow-hidden border-y border-power/50 bg-surface-canvas text-foreground-primary"
@@ -59,7 +85,7 @@ export function MissionEnvironmentBand() {
 
       <div
         className={`mission-belt relative border-y border-border-command/55 bg-surface-intermediate${isPaused ? ' is-paused' : ''}`}
-        data-paused={isPaused ? 'true' : 'false'}
+        data-paused={motionPaused ? 'true' : 'false'}
       >
         <span
           aria-hidden="true"
@@ -73,7 +99,7 @@ export function MissionEnvironmentBand() {
         <div
           id="mission-environments-track"
           className="mission-track flex w-max motion-reduce:transform-none"
-          data-paused={isPaused ? 'true' : 'false'}
+          data-paused={motionPaused ? 'true' : 'false'}
         >
           <MissionSet />
           <MissionSet duplicate />
@@ -105,6 +131,7 @@ function MissionSet({ duplicate = false }: { duplicate?: boolean }) {
           <span
             aria-hidden="true"
             className="mission-mark-icon grid size-14 shrink-0 place-items-center border border-border-command/65 bg-surface-canvas text-foreground-primary"
+            style={{ '--mission-delay': `${index * 1.05}s` } as CSSProperties}
           >
             <MissionIcon name={mission.icon} />
           </span>

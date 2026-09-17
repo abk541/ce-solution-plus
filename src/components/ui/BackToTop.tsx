@@ -30,6 +30,7 @@ export function BackToTop() {
     <a
       href="#top"
       data-back-to-top
+      data-menu-background
       aria-label="Back to top"
       tabIndex={visible ? 0 : -1}
       className={cn(

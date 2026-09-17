@@ -30,7 +30,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
 
 const fieldClass =
-  'peer w-full border-b border-border-command/55 bg-transparent pb-3 pt-2 text-[0.95rem] text-foreground-primary outline-none transition-[border-color,box-shadow] duration-[var(--motion-micro)] placeholder:text-foreground-muted hover:border-accent/75 focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)]';
+  'peer w-full border-b border-border-command/55 bg-transparent pb-3 pt-2 text-[0.95rem] text-foreground-primary outline-none transition-[border-color,box-shadow] duration-[var(--motion-micro)] placeholder:text-foreground-secondary hover:border-accent/75 focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)]';
 
 export function ContactForm() {
   const [fields, setFields] = useState<Fields>(EMPTY);
@@ -229,7 +229,7 @@ export function ContactForm() {
               ? 'Send requirement'
               : 'Open email draft'}
         </MagneticAction>
-        <p className="max-w-xs label-mono text-[0.58rem] leading-relaxed text-foreground-muted">
+        <p className="max-w-xs label-mono text-[0.58rem] leading-relaxed text-foreground-secondary">
           {ENDPOINT ? 'Encrypted in transit' : 'Opens your mail client'} — no sensitive or
           classified information.
         </p>
@@ -258,7 +258,7 @@ function FieldLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-foreground-muted transition-colors duration-[var(--motion-micro)] group-focus-within/field:text-accent"
+      className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-foreground-secondary transition-colors duration-[var(--motion-micro)] group-focus-within/field:text-accent"
     >
       <span className="text-power-bright tabular-nums">{index}</span>
       {children}

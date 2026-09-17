@@ -7,6 +7,7 @@ import { SplitWords } from '@/components/ui/SplitWords';
 import { about } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
+  useCompactMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -16,6 +17,7 @@ export function About() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const compactMotion = useCompactMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
@@ -36,11 +38,15 @@ export function About() {
         },
       );
 
+      const countTimeline = gsap.timeline({
+        scrollTrigger: { trigger: '[data-stat-grid]', start: 'top 92%', once: true },
+      });
       gsap.utils.toArray<HTMLElement>('[data-count]').forEach((node) => {
         const target = Number(node.dataset.count);
         if (Number.isNaN(target)) return;
         const proxy = { value: 0 };
-        gsap.to(proxy, {
+        let lastValue = -1;
+        countTimeline.to(proxy, {
           value: target,
           duration: duration.feature,
           ease: 'power2.out',
@@ -48,11 +54,29 @@ export function About() {
             node.textContent = '0';
           },
           onUpdate: () => {
-            node.textContent = String(Math.round(proxy.value));
+            const nextValue = Math.round(proxy.value);
+            if (nextValue === lastValue) return;
+            lastValue = nextValue;
+            node.textContent = String(nextValue);
           },
-          scrollTrigger: { trigger: node, start: 'top 92%', once: true },
-        });
+          onComplete: () => {
+            node.closest<HTMLElement>('[data-stat]')?.setAttribute('data-counted', 'true');
+          },
+        }, 0);
       });
+
+      if (compactMotion === true) {
+        gsap.fromTo(
+          '[data-about-grid]',
+          { x: -7, y: -5 },
+          {
+            x: 7,
+            y: 9,
+            ease: 'none',
+            scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: true },
+          },
+        );
+      }
 
       gsap.fromTo(
         '[data-credential]',
@@ -82,7 +106,7 @@ export function About() {
     }, root);
 
     return () => ctx.revert();
-  }, [motionAllowed, reducedMotion]);
+  }, [compactMotion, motionAllowed, reducedMotion]);
 
   return (
     <section
@@ -90,10 +114,12 @@ export function About() {
       id="about"
       className="relative z-10 border-y border-border-command/35 bg-surface-panel text-foreground-secondary"
     >
-      <div aria-hidden="true" className="absolute inset-0 grid-lines opacity-35" />
+      <div data-about-grid aria-hidden="true" className="absolute -inset-4 grid-lines opacity-35" />
 
       <div className="shell relative py-20 md:py-28 lg:py-36">
-        <SectionTag index="01">{about.label}</SectionTag>
+        <SectionTag index="01" className="text-foreground-secondary">
+          {about.label}
+        </SectionTag>
 
         <div className="mt-12 grid gap-14 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-6">
@@ -148,11 +174,11 @@ export function About() {
           </div>
         </div>
 
-        <dl className="mt-16 grid grid-cols-1 gap-px border border-border-command/45 bg-border-command/45 sm:grid-cols-3">
+        <dl data-stat-grid className="mt-16 grid grid-cols-1 gap-px border border-border-command/45 bg-border-command/45 sm:grid-cols-3">
           {about.stats.map((stat) => {
             const numeric = /^\d+$/.test(stat.value);
             return (
-              <div key={stat.label} className="group relative bg-surface-intermediate px-6 py-8 transition-colors duration-[var(--motion-reveal)] hover:bg-surface-canvas">
+              <div key={stat.label} data-stat className="group relative bg-surface-intermediate px-6 py-8 transition-colors duration-[var(--motion-reveal)] hover:bg-surface-canvas">
                 <dt className="label-mono min-h-8 text-[0.6rem] leading-[1.6] text-foreground-secondary">
                   {stat.label}
                 </dt>
@@ -165,6 +191,7 @@ export function About() {
                   {stat.unit ? <span className="text-foreground-secondary">{stat.unit}</span> : null}
                 </dd>
                 <span
+                  data-stat-lock
                   aria-hidden="true"
                   className="absolute inset-x-6 bottom-0 h-[3px] origin-left scale-x-0 bg-power transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100"
                 />

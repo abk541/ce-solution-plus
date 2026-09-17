@@ -7,6 +7,7 @@ import { differentiators } from '@/content/site';
 import { cn } from '@/lib/cn';
 import { duration, ease, gsap, ScrollTrigger } from '@/lib/gsap';
 import {
+  useCompactMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -17,6 +18,7 @@ export function Differentiators() {
   const [activeIndex, setActiveIndex] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const compactMotion = useCompactMotion();
   const total = differentiators.items.length;
 
   useIsomorphicLayoutEffect(() => {
@@ -24,6 +26,9 @@ export function Differentiators() {
     if (!root) return;
 
     const animate = !reducedMotion && motionAllowed === true;
+    const items = Array.from(root.querySelectorAll<HTMLElement>('[data-diff-item]'));
+    const compactAnimations: Animation[] = [];
+    let compactObserver: IntersectionObserver | null = null;
 
     const ctx = gsap.context(() => {
       if (animate) {
@@ -86,7 +91,9 @@ export function Differentiators() {
         }
       }
 
-      gsap.utils.toArray<HTMLElement>('[data-diff-item]').forEach((node, index) => {
+      items.forEach((node, index) => {
+        if (compactMotion === true) return;
+
         ScrollTrigger.create({
           trigger: node,
           start: 'top 62%',
@@ -123,8 +130,76 @@ export function Differentiators() {
       });
     }, root);
 
-    return () => ctx.revert();
-  }, [motionAllowed, reducedMotion]);
+    if (animate && compactMotion === true) {
+      const revealed = new WeakSet<HTMLElement>();
+      compactObserver = new IntersectionObserver(
+        (entries) => {
+          const viewportCenter = window.innerHeight * 0.54;
+          const closest = items
+            .map((item, index) => {
+              const rect = item.getBoundingClientRect();
+              return {
+                index,
+                distance: Math.abs(rect.top + rect.height / 2 - viewportCenter),
+                visible: rect.bottom > 0 && rect.top < window.innerHeight,
+              };
+            })
+            .filter((item) => item.visible)
+            .sort((a, b) => a.distance - b.distance)[0];
+          if (closest) setActiveIndex(closest.index);
+
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const node = entry.target as HTMLElement;
+            if (revealed.has(node)) return;
+            revealed.add(node);
+
+            const inner = Array.from(node.querySelectorAll<HTMLElement>('[data-diff-inner]'));
+            inner.forEach((element, index) => {
+              const animation = element.animate(
+                [
+                  { opacity: 0, transform: 'translate3d(18px, 0, 0)' },
+                  { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+                ],
+                {
+                  duration: 560,
+                  delay: index * 55,
+                  easing: 'cubic-bezier(.16,1,.3,1)',
+                  fill: 'forwards',
+                },
+              );
+              compactAnimations.push(animation);
+            });
+
+            const rule = node.querySelector<HTMLElement>('[data-diff-rule]');
+            if (rule) {
+              compactAnimations.push(
+                rule.animate(
+                  [
+                    { transform: 'scaleY(0)' },
+                    { transform: 'scaleY(1)' },
+                  ],
+                  {
+                    duration: 480,
+                    easing: 'cubic-bezier(.16,1,.3,1)',
+                    fill: 'forwards',
+                  },
+                ),
+              );
+            }
+          });
+        },
+        { rootMargin: '0px 0px -14% 0px', threshold: [0.12, 0.35] },
+      );
+      items.forEach((item) => compactObserver?.observe(item));
+    }
+
+    return () => {
+      compactObserver?.disconnect();
+      compactAnimations.forEach((animation) => animation.cancel());
+      ctx.revert();
+    };
+  }, [compactMotion, motionAllowed, reducedMotion]);
 
   return (
     <section
@@ -175,13 +250,22 @@ export function Differentiators() {
               <span
                 data-diff-rule
                 aria-hidden="true"
-                className={cn(
-                  'absolute left-0 top-0 h-full w-px origin-top transition-colors duration-[var(--motion-ui)]',
-                  activeIndex === index ? 'bg-power' : 'bg-ink-700',
-                )}
-              />
+                className="absolute left-0 top-0 h-full w-px origin-top bg-ink-700"
+              >
+                <span
+                  className={cn(
+                    'absolute inset-0 origin-top bg-power transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
+                    activeIndex === index ? 'scale-y-100' : 'scale-y-0',
+                  )}
+                />
+              </span>
 
-              <div className="pl-7 md:pl-10">
+              <div
+                className={cn(
+                  'pl-7 transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)] md:pl-10',
+                  activeIndex === index ? 'translate-x-1' : 'translate-x-0',
+                )}
+              >
                 <div
                   data-diff-inner
                   className="flex items-center gap-4 label-mono text-[0.62rem] text-steel-400"

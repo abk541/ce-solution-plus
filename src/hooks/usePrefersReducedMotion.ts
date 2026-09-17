@@ -22,6 +22,14 @@ export const FULL_MOTION_QUERY =
 export const RICH_MOTION_QUERY =
   '(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
 
+/**
+ * Touch-first choreography keeps native scrolling but still enables the
+ * lightweight canvas, scroll-depth and carousel-focus effects authored for
+ * phones and tablets.
+ */
+export const COMPACT_MOTION_QUERY =
+  '(max-width: 1023px) and (prefers-reduced-motion: no-preference), (hover: none) and (prefers-reduced-motion: no-preference), (pointer: coarse) and (prefers-reduced-motion: no-preference)';
+
 function useMediaQuery(query: string): boolean | null {
   const [matches, setMatches] = useState<boolean | null>(null);
 
@@ -49,6 +57,11 @@ export function useMotionAllowed(): boolean | null {
 /** `null` only during SSR/the first hydration pass. */
 export function useRichMotion(): boolean | null {
   return useMediaQuery(RICH_MOTION_QUERY);
+}
+
+/** `null` only during SSR/the first hydration pass. */
+export function useCompactMotion(): boolean | null {
+  return useMediaQuery(COMPACT_MOTION_QUERY);
 }
 
 /**

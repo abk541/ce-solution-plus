@@ -22,6 +22,7 @@ export default function HomePage() {
       <BackToTop />
       <a
         href="#main"
+        data-menu-background
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-xs focus:bg-accent focus:px-5 focus:py-3 focus:font-mono focus:text-[0.7rem] focus:uppercase focus:tracking-[0.2em] focus:text-ink-950"
       >
         Skip to content

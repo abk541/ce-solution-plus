@@ -1,5 +1,6 @@
 'use client';
 
+import type { CSSProperties } from 'react';
 import { useEffect, useRef } from 'react';
 
 import { LogoMark } from '@/components/ui/Logo';
@@ -11,6 +12,8 @@ const MARK_SRC = sitePath('/brand/mark-clean.webp');
 const DOT_COUNT = 440;
 const ASSEMBLE_MS = 820;
 const BURST_MS = 620;
+const FRAME_MS = 1000 / 30;
+const SIGNAL_PASS_MS = 4600;
 
 type Dot = {
   tx: number;
@@ -19,6 +22,9 @@ type Dot = {
   sy: number;
   size: number;
   accent: boolean;
+  phase: number;
+  drift: number;
+  tempo: number;
 };
 
 function clamp01(value: number) {
@@ -38,10 +44,10 @@ function seededRandom(seed: number) {
 }
 
 /**
- * A phone-sized counterpart to the desktop Three.js mark. It assembles once,
- * stops completely when idle, and wakes for one short tap response. The real
- * image remains underneath, so the brand is crisp before JS and under reduced
- * motion instead of depending on hundreds of dots to stay legible.
+ * A phone-sized counterpart to the desktop Three.js mark. The real image stays
+ * beneath the canvas for a razor-sharp silhouette while a low-amplitude field
+ * keeps the mark visibly powered. Work pauses whenever the hero leaves the
+ * viewport or the document is hidden.
  */
 export function MobileLogoField({ className }: { className?: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -76,6 +82,15 @@ export function MobileLogoField({ className }: { className?: string }) {
     let burstY = 0;
     let lastFrame = 0;
     let assemblyStartedAt = performance.now();
+    let fieldStartedAt = assemblyStartedAt;
+    let activeUntil = fieldStartedAt + ASSEMBLE_MS + SIGNAL_PASS_MS;
+    let fieldVisible = true;
+    let documentVisible = !document.hidden;
+    let pointerActive = false;
+    let pointerX = 0;
+    let pointerY = 0;
+    let pointerStartX = 0;
+    let pointerStartY = 0;
 
     const sample = document.createElement('canvas');
     sample.width = 136;
@@ -83,8 +98,9 @@ export function MobileLogoField({ className }: { className?: string }) {
     const sampleContext = sample.getContext('2d', { willReadFrequently: true });
 
     const draw = (now: number) => {
-      if (disposed || !dots.length) return;
-      if (now - lastFrame < 1000 / 30) {
+      raf = 0;
+      if (disposed || !dots.length || !fieldVisible || !documentVisible) return;
+      if (now - lastFrame < FRAME_MS) {
         raf = requestAnimationFrame(draw);
         return;
       }
@@ -94,13 +110,32 @@ export function MobileLogoField({ className }: { className?: string }) {
       const eased = easeOutExpo(assembly);
       const burst = burstStartedAt < 0 ? 1 : clamp01((now - burstStartedAt) / BURST_MS);
       const ringRadius = burst * Math.max(width, height) * 0.72;
-      const mineral = new Path2D();
+      const signalPass = ((now - fieldStartedAt) % SIGNAL_PASS_MS) / SIGNAL_PASS_MS;
+      const signalPosition = -0.12 + signalPass * 1.24;
+      const mineralLow = new Path2D();
+      const mineralHigh = new Path2D();
       const signal = new Path2D();
+      const energized = new Path2D();
 
       context.clearRect(0, 0, width, height);
       for (const dot of dots) {
         let x = dot.sx + (dot.tx - dot.sx) * eased;
         let y = dot.sy + (dot.ty - dot.sy) * eased;
+
+        if (assembly >= 1) {
+          const t = now * 0.001 * dot.tempo + dot.phase;
+          x += Math.cos(t) * dot.drift;
+          y += Math.sin(t * 0.87) * dot.drift;
+
+          if (pointerActive) {
+            const pointerDx = pointerX - x;
+            const pointerDy = pointerY - y;
+            const pointerDistance = Math.hypot(pointerDx, pointerDy) || 1;
+            const pull = Math.max(0, 1 - pointerDistance / 92) * 4.8;
+            x += (pointerDx / pointerDistance) * pull;
+            y += (pointerDy / pointerDistance) * pull;
+          }
+        }
 
         if (burst < 1) {
           const dx = dot.tx - burstX;
@@ -113,22 +148,43 @@ export function MobileLogoField({ className }: { className?: string }) {
         }
 
         const size = dot.size * (0.65 + eased * 0.35);
-        (dot.accent ? signal : mineral).rect(x, y, size, size);
+        const contourPosition = (dot.tx / Math.max(width, 1)) * 0.58 + (dot.ty / Math.max(height, 1)) * 0.42;
+        const passEnergy = Math.max(0, 1 - Math.abs(contourPosition - signalPosition) / 0.065);
+        const shimmer = (Math.sin(now * 0.0022 * dot.tempo + dot.phase) + 1) * 0.5;
+
+        if (passEnergy > 0.2) energized.rect(x, y, size * (1 + passEnergy * 0.36), size * (1 + passEnergy * 0.36));
+        else if (dot.accent) signal.rect(x, y, size, size);
+        else if (shimmer > 0.58) mineralHigh.rect(x, y, size, size);
+        else mineralLow.rect(x, y, size, size);
       }
 
-      context.globalAlpha = 0.08 + eased * 0.2;
+      context.globalAlpha = 0.12 + eased * 0.13;
       context.fillStyle = '#F2F3EF';
-      context.fill(mineral);
-      context.globalAlpha = 0.22 + eased * 0.3;
+      context.fill(mineralLow);
+      context.globalAlpha = 0.2 + eased * 0.2;
+      context.fill(mineralHigh);
+      context.globalAlpha = 0.35 + eased * 0.28;
       context.fillStyle = '#FF5C3D';
       context.fill(signal);
+      context.globalAlpha = 0.72 * eased;
+      context.fillStyle = '#F2F3EF';
+      context.fill(energized);
       context.globalAlpha = 1;
 
-      if (assembly < 1 || burst < 1) {
-        raf = requestAnimationFrame(draw);
-      } else {
+      if (assembly >= 1) {
         assembled = true;
-        burstStartedAt = -1;
+        if (burst >= 1) burstStartedAt = -1;
+      }
+      const keepAnimating =
+        assembly < 1 || burst < 1 || pointerActive || now < activeUntil;
+      if (keepAnimating) raf = requestAnimationFrame(draw);
+    };
+
+    const start = () => {
+      const now = performance.now();
+      const shouldAnimate = !assembled || burstStartedAt >= 0 || pointerActive || now < activeUntil;
+      if (!disposed && fieldVisible && documentVisible && dots.length && !raf && shouldAnimate) {
+        raf = requestAnimationFrame(draw);
       }
     };
 
@@ -175,37 +231,102 @@ export function MobileLogoField({ className }: { className?: string }) {
           sy: ty + Math.sin(angle) * radius,
           size: 0.65 + random() * 1.05,
           accent: random() > 0.945,
+          phase: random() * Math.PI * 2,
+          drift: 0.45 + random() * 0.95,
+          tempo: 0.72 + random() * 0.62,
         };
       });
 
       cancelAnimationFrame(raf);
+      raf = 0;
       assemblyStartedAt = performance.now();
+      fieldStartedAt = assemblyStartedAt;
+      activeUntil = fieldStartedAt + ASSEMBLE_MS + SIGNAL_PASS_MS;
       assembled = false;
-      raf = requestAnimationFrame(draw);
+      start();
+    };
+
+    const updatePointer = (event: PointerEvent) => {
+      const rect = host.getBoundingClientRect();
+      pointerX = event.clientX - rect.left;
+      pointerY = event.clientY - rect.top;
     };
 
     const onPointerDown = (event: PointerEvent) => {
       if (!assembled || !dots.length) return;
-      const rect = host.getBoundingClientRect();
-      burstX = event.clientX - rect.left;
-      burstY = event.clientY - rect.top;
-      burstStartedAt = performance.now();
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(draw);
+      updatePointer(event);
+      pointerActive = true;
+      pointerStartX = pointerX;
+      pointerStartY = pointerY;
+      activeUntil = performance.now() + 900;
+      start();
+    };
+    const onPointerMove = (event: PointerEvent) => {
+      if (pointerActive) updatePointer(event);
+    };
+    const onPointerUp = (event: PointerEvent) => {
+      if (!pointerActive) return;
+      updatePointer(event);
+      const movement = Math.hypot(pointerX - pointerStartX, pointerY - pointerStartY);
+      if (movement < 12) {
+        burstX = pointerX;
+        burstY = pointerY;
+        burstStartedAt = performance.now();
+        activeUntil = burstStartedAt + BURST_MS;
+      }
+      pointerActive = false;
+    };
+    const cancelPointer = () => {
+      pointerActive = false;
+    };
+    const onVisibilityChange = () => {
+      documentVisible = !document.hidden;
+      if (!documentVisible) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else {
+        lastFrame = performance.now();
+        start();
+      }
     };
 
     image.onload = build;
     image.src = MARK_SRC;
     const observer = new ResizeObserver(build);
     observer.observe(host);
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        fieldVisible = Boolean(entry?.isIntersecting);
+        if (!fieldVisible) {
+          cancelAnimationFrame(raf);
+          raf = 0;
+        } else {
+          lastFrame = performance.now();
+          start();
+        }
+      },
+      { rootMargin: '120px 0px' },
+    );
+    visibilityObserver.observe(host);
     host.addEventListener('pointerdown', onPointerDown, { passive: true });
+    host.addEventListener('pointermove', onPointerMove, { passive: true });
+    host.addEventListener('pointerup', onPointerUp, { passive: true });
+    host.addEventListener('pointercancel', cancelPointer, { passive: true });
+    host.addEventListener('pointerleave', cancelPointer, { passive: true });
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       disposed = true;
       image.onload = null;
       cancelAnimationFrame(raf);
       observer.disconnect();
+      visibilityObserver.disconnect();
       host.removeEventListener('pointerdown', onPointerDown);
+      host.removeEventListener('pointermove', onPointerMove);
+      host.removeEventListener('pointerup', onPointerUp);
+      host.removeEventListener('pointercancel', cancelPointer);
+      host.removeEventListener('pointerleave', cancelPointer);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [reducedMotion]);
 
@@ -219,6 +340,23 @@ export function MobileLogoField({ className }: { className?: string }) {
         tone="light"
         className="pointer-events-none absolute left-[55%] top-1/2 w-[72%] -translate-x-1/2 -translate-y-1/2 opacity-90 motion-reduce:opacity-100"
       />
+      <span
+        className="pointer-events-none absolute left-[55%] top-1/2 aspect-[340/304] w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden"
+        style={
+          {
+            WebkitMaskImage: `url("${MARK_SRC}")`,
+            maskImage: `url("${MARK_SRC}")`,
+            WebkitMaskPosition: 'center',
+            maskPosition: 'center',
+            WebkitMaskRepeat: 'no-repeat',
+            maskRepeat: 'no-repeat',
+            WebkitMaskSize: 'contain',
+            maskSize: 'contain',
+          } as CSSProperties
+        }
+      >
+        <span className="mobile-logo-energy-pass absolute -bottom-1/4 -top-1/4 -left-1/3 w-[22%] rotate-12 bg-linear-to-r from-transparent via-power-bright/80 to-transparent" />
+      </span>
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 block h-full w-full" />
     </div>
   );

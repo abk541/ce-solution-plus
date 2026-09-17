@@ -73,7 +73,9 @@ export function Contact() {
     <section ref={rootRef} id="contact" className="relative z-10 bg-surface-panel py-20 text-foreground-secondary md:py-28 lg:py-36">
       <div className="shell">
         <div className="max-w-3xl">
-          <SectionTag index="06">{contact.label}</SectionTag>
+          <SectionTag index="06" className="text-foreground-secondary">
+            {contact.label}
+          </SectionTag>
           <h2 className="mt-7 display-editorial text-[clamp(2.2rem,5vw,4rem)] text-foreground-primary">{contact.headline}</h2>
           <p className="mt-6 max-w-xl text-[1.02rem] leading-relaxed text-foreground-secondary">
             {contact.lede}
@@ -103,11 +105,11 @@ export function Contact() {
               data-panel-column
               className="border-b border-border-command/40 p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r"
             >
-              <p className="label-mono text-[0.6rem] text-foreground-muted">Station</p>
+              <p className="label-mono text-[0.6rem] text-foreground-secondary">Station</p>
 
               <dl className="mt-8 space-y-7">
                 <div>
-                  <dt className="label-mono text-[0.56rem] text-foreground-muted">Location</dt>
+                  <dt className="label-mono text-[0.56rem] text-foreground-secondary">Location</dt>
                   <dd className="mt-2 text-[0.95rem] leading-relaxed text-foreground-primary">
                     {company.address.street}
                     <br />
@@ -115,7 +117,7 @@ export function Contact() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="label-mono text-[0.56rem] text-foreground-muted">Email</dt>
+                  <dt className="label-mono text-[0.56rem] text-foreground-secondary">Email</dt>
                   <dd className="mt-2">
                     <a
                       href={`mailto:${company.email}`}
@@ -130,7 +132,7 @@ export function Contact() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="label-mono text-[0.56rem] text-foreground-muted">Voice</dt>
+                  <dt className="label-mono text-[0.56rem] text-foreground-secondary">Voice</dt>
                   <dd className="mt-2">
                     <a
                       href={`tel:${company.phoneHref}`}
@@ -143,7 +145,7 @@ export function Contact() {
               </dl>
 
               <div className="mt-10 border-t border-border-command/40 pt-7">
-                <p className="label-mono text-[0.56rem] text-foreground-muted">Designation</p>
+                <p className="label-mono text-[0.56rem] text-foreground-secondary">Designation</p>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {['VOSB', 'WOSB', 'Small Business'].map((item) => (
                     <li

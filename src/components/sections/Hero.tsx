@@ -8,6 +8,7 @@ import { MagneticAction } from '@/components/ui/MagneticAction';
 import { company, hero } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
+  useCompactMotion,
   useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
@@ -27,6 +28,7 @@ export function Hero() {
   const heroWasPrehiddenRef = useRef(false);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const compactMotion = useCompactMotion();
   const fullMotion = useFullMotion();
   const richMotion = useRichMotion();
   const [introReady, setIntroReady] = useState(false);
@@ -131,6 +133,53 @@ export function Hero() {
     return () => ctx.revert();
   }, [fullMotion, introReady, motionAllowed, reducedMotion]);
 
+  useIsomorphicLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || reducedMotion || compactMotion !== true) return;
+
+    const art = root.querySelector<HTMLElement>('[data-hero-mobile-art]');
+    const heading = root.querySelector<HTMLElement>('[data-hero-heading]');
+    const status = root.querySelector<HTMLElement>('[data-hero-status]');
+    if (!art || !heading || !status) return;
+
+    let frame = 0;
+    let activeState: boolean | null = null;
+    const paint = () => {
+      frame = 0;
+      const rect = root.getBoundingClientRect();
+      const isActive = rect.bottom > -80 && rect.top < window.innerHeight + 80;
+      if (activeState !== isActive) {
+        activeState = isActive;
+        root.setAttribute('data-mobile-active', isActive ? 'true' : 'false');
+      }
+      const travel = Math.max(0, -rect.top);
+      const range = Math.max(root.offsetHeight - window.innerHeight * 0.38, 1);
+      const progress = Math.min(travel / range, 1);
+
+      art.style.transform = `translate3d(${progress * 10}px, ${progress * -18}px, 0) scale(${1 - progress * 0.04})`;
+      art.style.opacity = String(1 - progress * 0.2);
+      heading.style.transform = `translate3d(0, ${progress * -8}px, 0)`;
+      status.style.opacity = String(1 - progress * 0.28);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+
+    paint();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      cancelAnimationFrame(frame);
+      art.style.removeProperty('transform');
+      art.style.removeProperty('opacity');
+      heading.style.removeProperty('transform');
+      status.style.removeProperty('opacity');
+      root.removeAttribute('data-mobile-active');
+    };
+  }, [compactMotion, reducedMotion]);
+
   return (
     <section
       ref={rootRef}
@@ -148,8 +197,8 @@ export function Hero() {
             <HeroParticles className="absolute inset-0 h-full w-full" />
           ) : null}
 
-          {/* Phones use the real CE mark plus a finite 2D field. It assembles
-              once, stops at rest, and wakes only for a short tap response. */}
+          {/* Phones use the real CE mark plus a lightweight living field. The
+              crisp image carries the brand while the canvas supplies energy. */}
           <div
             data-hero-mobile-art
             className="absolute inset-x-0 top-[calc(64px+env(safe-area-inset-top))] h-[clamp(192px,32svh,256px)]"
@@ -167,16 +216,19 @@ export function Hero() {
             that the particle field still reads through it. */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 z-[3] bg-[radial-gradient(72%_70%_at_0%_62%,var(--color-ink-950)_12%,color-mix(in_srgb,var(--color-ink-950)_72%,transparent)_44%,transparent_74%)]"
+          className="pointer-events-none absolute inset-0 z-[3] bg-[radial-gradient(72%_70%_at_0%_62%,var(--color-ink-950)_12%,color-mix(in_srgb,var(--color-ink-950)_72%,transparent)_44%,transparent_74%)]"
         />
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 z-[3] h-1/3 bg-linear-to-t from-ink-950 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-1/3 bg-linear-to-t from-ink-950 to-transparent"
         />
         <div
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 z-[3] h-px bg-linear-to-r from-transparent via-power/80 to-transparent"
-        />
+          data-hero-current
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] h-px overflow-hidden bg-linear-to-r from-transparent via-power/45 to-transparent"
+        >
+          <span className="mobile-current-pulse absolute inset-y-0 left-0 w-24 bg-linear-to-r from-transparent via-power to-transparent" />
+        </div>
 
         <div data-hero-shift className="shell relative z-10">
           <div className="flex items-start gap-3 sm:items-center sm:gap-4" data-hero-status>

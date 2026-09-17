@@ -6,6 +6,7 @@ import { SectionTag } from '@/components/ui/SectionTag';
 import { capabilities } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
+  useCompactMotion,
   useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
@@ -16,6 +17,7 @@ export function Capabilities() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const compactMotion = useCompactMotion();
   const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
@@ -81,29 +83,91 @@ export function Capabilities() {
     // so it stays correct regardless of smooth-scroll or resize behaviour.
     const rail = root.querySelector<HTMLElement>('[data-cap-rail]');
     const readout = root.querySelector<HTMLElement>('[data-cap-readout]');
+    const progress = root.querySelector<HTMLElement>('[data-cap-progress]');
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-cap-card]'));
     let frame = 0;
+    let settleTimer = 0;
     let lastIndex = 1;
+    let readoutAnimation: Animation | null = null;
     const updateRail = () => {
       frame = 0;
-      if (!rail || !readout) return;
+      if (!rail) return;
       const max = rail.scrollWidth - rail.clientWidth;
       const p = max > 0 ? rail.scrollLeft / max : 0;
       const index = Math.min(capabilities.length, Math.floor(p * capabilities.length) + 1);
-      if (index === lastIndex) return;
-      lastIndex = index;
-      readout.textContent = String(index).padStart(2, '0');
+      let states: Array<{ card: HTMLElement; weight: number }> = [];
+
+      if (compactMotion === true) {
+        const railRect = rail.getBoundingClientRect();
+        const focusX = railRect.left + railRect.width / 2;
+        const falloff = Math.max(railRect.width * 0.72, 1);
+        states = cards.map((card) => {
+          const rect = card.getBoundingClientRect();
+          const offset = Math.min(Math.abs(rect.left + rect.width / 2 - focusX) / falloff, 1);
+          return { card, weight: 1 - offset };
+        });
+      }
+
+      if (progress) progress.style.transform = `scaleX(${Math.max(p, 0.03)})`;
+
+      if (readout && index !== lastIndex) {
+        lastIndex = index;
+        readout.textContent = String(index).padStart(2, '0');
+        if (!reducedMotion && motionAllowed === true) {
+          readoutAnimation?.cancel();
+          readoutAnimation = readout.animate(
+            [
+              { transform: 'translate3d(0, 55%, 0)', opacity: 0 },
+              { transform: 'translate3d(0, 0, 0)', opacity: 1 },
+            ],
+            { duration: 180, easing: 'cubic-bezier(.16,1,.3,1)' },
+          );
+        }
+      }
+
+      if (compactMotion === true) {
+        states.forEach(({ card, weight }) => {
+          card.style.setProperty('--cap-scale', String(0.95 + weight * 0.05));
+          card.style.setProperty('--cap-y', `${6 - weight * 10}px`);
+          card.style.setProperty('--cap-opacity', String(0.76 + weight * 0.24));
+          card.style.setProperty('--cap-rule', String(0.18 + weight * 0.82));
+          card.toggleAttribute('data-current', weight > 0.72);
+        });
+      }
     };
     const onRail = () => {
+      if (rail && compactMotion === true) {
+        rail.setAttribute('data-moving', 'true');
+        window.clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(() => {
+          rail.removeAttribute('data-moving');
+          if (!frame) frame = window.requestAnimationFrame(updateRail);
+        }, 90);
+      }
       if (!frame) frame = window.requestAnimationFrame(updateRail);
     };
     rail?.addEventListener('scroll', onRail, { passive: true });
+    window.addEventListener('resize', onRail, { passive: true });
+    frame = window.requestAnimationFrame(updateRail);
 
     return () => {
       rail?.removeEventListener('scroll', onRail);
+      window.removeEventListener('resize', onRail);
+      window.clearTimeout(settleTimer);
+      readoutAnimation?.cancel();
+      rail?.removeAttribute('data-moving');
       window.cancelAnimationFrame(frame);
+      progress?.style.removeProperty('transform');
+      cards.forEach((card) => {
+        card.style.removeProperty('--cap-scale');
+        card.style.removeProperty('--cap-y');
+        card.style.removeProperty('--cap-opacity');
+        card.style.removeProperty('--cap-rule');
+        card.removeAttribute('data-current');
+      });
       ctx.revert();
     };
-  }, [fullMotion, motionAllowed, reducedMotion]);
+  }, [compactMotion, fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} id="capabilities" className="relative z-10 bg-surface-intermediate py-20 text-foreground-secondary md:py-28 lg:py-36">
@@ -120,7 +184,7 @@ export function Capabilities() {
               Each service line is scoped to the requirement and held to the same performance
               standard.
             </p>
-            <p className="label-mono text-[0.6rem] text-foreground-secondary">
+            <p className="flex items-center label-mono text-[0.6rem] text-foreground-secondary">
               <span data-cap-readout className="text-power-bright tabular-nums">
                 01
               </span>
@@ -129,6 +193,12 @@ export function Capabilities() {
                 {String(capabilities.length).padStart(2, '0')}
               </span>
               <span className="ml-3">Swipe / scroll</span>
+              <span aria-hidden="true" className="relative ml-4 h-px w-14 overflow-hidden bg-border-command/55 lg:hidden">
+                <span
+                  data-cap-progress
+                  className="absolute inset-0 origin-left scale-x-[0.03] bg-power"
+                />
+              </span>
             </p>
           </div>
         </div>
@@ -162,6 +232,7 @@ export function Capabilities() {
                     className="absolute inset-x-0 top-0 h-px origin-left bg-border-command/55"
                   />
                   <span
+                    data-cap-current
                     aria-hidden="true"
                     className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-power transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
                   />

@@ -61,7 +61,7 @@
 
   /* Functional only — validation and destructive states. */
   --color-signal: #e77f85;
-  --color-signal-bright: #f09ca0;
+  --color-signal-bright: #ffb8bc;
   --color-signal-dim: #7d2a2d;
   --color-signal-ink: #a33236;
 
@@ -288,12 +288,110 @@
   flex: none;
 }
 
+.mission-mark-icon > svg {
+  animation: mission-icon-current 8.4s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  animation-delay: var(--mission-delay, 0s);
+}
+
+.mission-belt[data-paused='true'] .mission-mark-icon > svg {
+  animation-play-state: paused;
+}
+
 @keyframes mission-band-scroll {
   from {
     transform: translate3d(0, 0, 0);
   }
   to {
     transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes mission-icon-current {
+  0%,
+  10%,
+  100% {
+    opacity: 0.76;
+    transform: translate3d(0, 0, 0);
+  }
+  4% {
+    opacity: 1;
+    transform: translate3d(0, -3px, 0);
+  }
+}
+
+.mobile-current-pulse {
+  animation: hero-current-pass 2.8s linear infinite;
+  animation-play-state: paused;
+  will-change: transform;
+}
+
+[data-hero-root][data-mobile-active='true'] .mobile-current-pulse {
+  animation-play-state: running;
+}
+
+.mobile-logo-energy-pass {
+  animation: mobile-logo-energy 4.6s linear infinite;
+  animation-play-state: paused;
+  will-change: transform, opacity;
+}
+
+[data-hero-root][data-mobile-active='true'] .mobile-logo-energy-pass {
+  animation-play-state: running;
+}
+
+.nav-progress-tip {
+  animation: nav-current-tip 1.35s ease-in-out infinite alternate;
+}
+
+@keyframes hero-current-pass {
+  from {
+    transform: translate3d(-110%, 0, 0);
+  }
+  to {
+    transform: translate3d(calc(100vw + 110%), 0, 0);
+  }
+}
+
+@keyframes nav-current-tip {
+  from {
+    opacity: 0.48;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mobile-logo-energy {
+  0% {
+    opacity: 0;
+    transform: translate3d(-160%, 0, 0) rotate(12deg);
+  }
+  4% {
+    opacity: 0.82;
+  }
+  25% {
+    opacity: 0.82;
+    transform: translate3d(650%, 0, 0) rotate(12deg);
+  }
+  29%,
+  100% {
+    opacity: 0;
+    transform: translate3d(650%, 0, 0) rotate(12deg);
+  }
+}
+
+@keyframes stat-lock {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  45% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0.14);
+    opacity: 0.72;
   }
 }
 
@@ -324,6 +422,99 @@
   .mission-set[data-duplicate='true'],
   .mission-band-control {
     display: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Compact motion tier
+ *
+ * Phones keep native scrolling. Their depth is derived from native scroll
+ * positions and applied only as transform/opacity variables, so touch input
+ * remains immediate and text stays sharp.
+ * ------------------------------------------------------------------ */
+@media (width < 64rem), (hover: none), (pointer: coarse) {
+  .mission-track {
+    animation-duration: 32s;
+  }
+
+  [data-hero-mobile-art] {
+    transform-origin: 70% 42%;
+    will-change: transform, opacity;
+  }
+
+  [data-hero-heading],
+  [data-hero-status] {
+    will-change: transform, opacity;
+  }
+
+  [data-cap-card] {
+    --cap-scale: 1;
+    --cap-y: 0px;
+    --cap-opacity: 1;
+    transform: translate3d(0, var(--cap-y), 0) scale(var(--cap-scale));
+    opacity: var(--cap-opacity);
+    transition:
+      transform 220ms var(--ease-spring),
+      opacity 220ms var(--ease-precise),
+      border-color var(--motion-ui) var(--ease-precise),
+      background-color var(--motion-ui) var(--ease-precise);
+  }
+
+  [data-cap-card]:active {
+    transform: translate3d(0, var(--cap-y), 0) scale(calc(var(--cap-scale) * 0.985));
+    transition-duration: var(--motion-press);
+  }
+
+  [data-cap-rail][data-moving='true'] [data-cap-card] {
+    transition: none;
+  }
+
+  [data-cap-card][data-current] {
+    border-color: color-mix(in srgb, var(--color-power) 58%, var(--color-border-command));
+    will-change: transform, opacity;
+  }
+
+  [data-cap-current] {
+    transform: scaleX(var(--cap-rule, 0));
+  }
+
+  [data-market-card] {
+    --market-scale: 1;
+    --market-opacity: 1;
+    --market-art-x: 0px;
+    --market-art-scale: 1;
+    transform: translate3d(0, 0, 0) scale(var(--market-scale));
+    opacity: var(--market-opacity);
+    transition:
+      transform 220ms var(--ease-spring),
+      opacity 220ms var(--ease-precise);
+  }
+
+  [data-market-card]:active {
+    transform: translate3d(0, 0, 0) scale(calc(var(--market-scale) * 0.985));
+    transition-duration: var(--motion-press);
+  }
+
+  [data-market-rail][data-moving='true'] [data-market-card],
+  [data-market-rail][data-moving='true'] [data-plate-art] {
+    transition: none;
+  }
+
+  [data-market-card][data-current] {
+    will-change: transform, opacity;
+  }
+
+  [data-market-card] [data-plate-art] {
+    transform: translate3d(var(--market-art-x), 0, 0) scale(var(--market-art-scale));
+    transition: transform 220ms var(--ease-spring);
+  }
+
+  [data-market-rule] {
+    transform: scaleX(var(--market-rule, 1));
+  }
+
+  [data-stat][data-counted='true'] [data-stat-lock] {
+    animation: stat-lock 680ms var(--ease-spring);
   }
 }
 
@@ -549,6 +740,28 @@
   }
 }
 
+/* Phone landscape: use the horizontal room instead of preserving portrait
+   ceremony above the headline. The document remains naturally scrollable. */
+@media (width >= 40rem) and (width < 64rem) and (max-height: 500px) {
+  [data-hero-viewport] {
+    padding-top: 190px;
+  }
+
+  [data-hero-mobile-art] {
+    height: 150px;
+  }
+
+  [data-hero-heading] {
+    margin-top: 0.9rem;
+    font-size: clamp(2.4rem, 6.8vw, 3.45rem);
+  }
+
+  [data-hero-details] {
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+  }
+}
+
 /* Brand graphics and the menu control keep physical, touch-safe dimensions
    when users enlarge text. Copy still reflows, but navigation never leaves the
    viewport because rem-based gutters or icons have doubled. */
@@ -599,13 +812,6 @@
     overflow-wrap: anywhere;
     font-size: 32px;
     line-height: 1.05;
-  }
-}
-
-@media (width < 64rem), (hover: none), (pointer: coarse) {
-  [data-kinetic-ghost],
-  [data-instrument-sweep] {
-    display: none !important;
   }
 }
 
