@@ -134,7 +134,7 @@ export function Hero() {
           <span className="absolute inset-[28%] rotate-[32deg] rounded-[50%] border border-accent/20" />
           <span className="absolute left-1/2 top-0 h-full w-px bg-linear-to-b from-transparent via-ink-600/70 to-transparent" />
           <span className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-ink-600/70 to-transparent" />
-          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_18px_rgba(141,175,192,0.48)]" />
+          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_14px_rgba(93,192,209,0.28)]" />
         </div>
 
         {/* Contrast behind the left-aligned type only, and kept light enough

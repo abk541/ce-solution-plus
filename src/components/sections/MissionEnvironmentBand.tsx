@@ -24,28 +24,28 @@ export function MissionEnvironmentBand() {
     <section
       id="mission-environments"
       aria-labelledby="mission-environments-title"
-      className="relative z-10 overflow-hidden border-y border-field-300 bg-field-50 text-ink-950"
+      className="relative z-10 overflow-hidden border-y border-border-command/35 bg-surface-canvas text-foreground-primary"
     >
       <div className="shell py-14 md:py-18 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
           <div className="max-w-3xl">
-            <SectionTag tone="light">
+            <SectionTag>
               Mission environments
             </SectionTag>
             <h2
               id="mission-environments-title"
-              className="mt-6 display-editorial text-[clamp(2rem,4.2vw,3.5rem)] text-ink-950"
+              className="mt-6 display-editorial text-[clamp(2rem,4.2vw,3.5rem)] text-foreground-primary"
             >
               Built for federal mission environments.
             </h2>
-            <p className="mt-5 max-w-2xl text-[1.02rem] leading-relaxed text-ink-800">
+            <p className="mt-5 max-w-2xl text-[1.02rem] leading-relaxed text-foreground-secondary">
               Capabilities designed for defense and federal programs.
             </p>
           </div>
 
           <button
             type="button"
-            className="mission-band-control inline-flex min-h-11 w-fit items-center justify-center gap-3 justify-self-start border border-ink-800 bg-field-100 px-4 py-2.5 label-mono text-[0.62rem] text-ink-950 transition-colors hover:bg-field-200 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-ink lg:justify-self-end lg:self-end"
+            className="mission-band-control inline-flex min-h-11 w-fit items-center justify-center gap-3 justify-self-start border border-border-command/70 bg-surface-panel px-4 py-2.5 label-mono text-[0.62rem] text-foreground-primary transition-colors hover:border-accent hover:bg-surface-intermediate focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground-primary lg:justify-self-end lg:self-end"
             aria-controls="mission-environments-track"
             aria-label={isPaused ? 'Resume mission environment band' : 'Pause mission environment band'}
             aria-pressed={isPaused}
@@ -58,16 +58,16 @@ export function MissionEnvironmentBand() {
       </div>
 
       <div
-        className={`mission-belt relative border-y border-field-300 bg-field-100${isPaused ? ' is-paused' : ''}`}
+        className={`mission-belt relative border-y border-border-command/40 bg-surface-panel${isPaused ? ' is-paused' : ''}`}
         data-paused={isPaused ? 'true' : 'false'}
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-linear-to-r from-field-100 to-transparent md:w-24"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-linear-to-r from-surface-panel to-transparent md:w-24"
         />
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-linear-to-l from-field-100 to-transparent md:w-24"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-linear-to-l from-surface-panel to-transparent md:w-24"
         />
 
         <div
@@ -81,7 +81,7 @@ export function MissionEnvironmentBand() {
       </div>
 
       <div className="shell py-5 md:py-6">
-        <p className="max-w-3xl text-xs leading-relaxed text-ink-800">
+        <p className="max-w-3xl text-xs leading-relaxed text-foreground-muted">
           Representative mission environments — not a customer list or government endorsement.
         </p>
       </div>
@@ -100,19 +100,19 @@ function MissionSet({ duplicate = false }: { duplicate?: boolean }) {
       {missionEnvironments.map((mission, index) => (
         <li
           key={mission.icon}
-          className="mission-mark flex min-w-[15rem] shrink-0 items-center gap-4 border-r border-field-300 px-6 py-7 text-ink-950 sm:min-w-[17rem] sm:px-8 md:py-8"
+          className="mission-mark flex min-w-[15rem] shrink-0 items-center gap-4 border-r border-border-command/40 px-6 py-7 text-foreground-primary sm:min-w-[17rem] sm:px-8 md:py-8"
         >
           <span
             aria-hidden="true"
-            className="mission-mark-icon grid size-12 shrink-0 place-items-center border border-field-300 bg-field-50 text-accent-ink"
+            className="mission-mark-icon grid size-12 shrink-0 place-items-center border border-border-command/55 bg-surface-canvas text-accent"
           >
             <MissionIcon name={mission.icon} />
           </span>
           <span className="flex min-w-0 flex-col gap-1.5">
-            <span aria-hidden="true" className="label-mono text-[0.52rem] text-accent-ink tabular-nums">
+            <span aria-hidden="true" className="label-mono text-[0.52rem] text-accent tabular-nums">
               {String(index + 1).padStart(2, '0')}
             </span>
-            <span className="text-sm font-semibold leading-tight tracking-[-0.01em] text-ink-950">
+            <span className="text-sm font-semibold leading-tight tracking-[-0.01em] text-foreground-primary">
               {mission.label}
             </span>
           </span>

@@ -1,53 +1,62 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ *
- * CE Solution Plus — design tokens
+ * CE Solution Plus — Atlantic Command design tokens
  *
- * An institutional daylight system: mist and equipment steel carry the
- * majority of the page, Federal Navy anchors high-emphasis sections, and
- * Sky Steel is the restrained service accent. Existing ink/steel aliases are
- * retained so established components inherit the new system safely.
+ * A medium-dark federal system derived from USWDS blue-warm and cyan roles:
+ * charcoal navy carries the page, layered command blues create depth, and a
+ * restrained cyan signal marks action. Existing ink/steel aliases remain as
+ * compatibility tokens while semantic roles describe the intended use.
  * ------------------------------------------------------------------ */
 @theme {
-  /* Federal Navy and its service-dark working shades. */
-  --color-ink-950: #18334a;
-  --color-ink-900: #1f3d54;
-  --color-ink-850: #26475e;
-  --color-ink-800: #2e5269;
-  --color-ink-700: #3b6074;
-  --color-ink-600: #4c7182;
-  --color-ink-500: #63808d;
+  /* Semantic roles: 60% canvas, 30% command surfaces, <10% signal cyan. */
+  --color-surface-canvas: #252f3e;
+  --color-surface-intermediate: #2a3b55;
+  --color-surface-panel: #2f4668;
+  --color-surface-strong: #345d96;
+  --color-foreground-primary: #ecf1f7;
+  --color-foreground-secondary: #bbcae4;
+  --color-foreground-muted: #a3b5d2;
+  --color-border-command: #7292c7;
+  --color-detail-signal: #5dc0d1;
 
-  /* Daylight fields. Named tokens are the preferred surface contract. */
-  --color-field-50: #eaf0f1;
-  --color-field-100: #d7e1e4;
-  --color-field-200: #c5d2d7;
-  --color-field-300: #afc2c9;
-  --color-mission-mist: #d7e1e4;
-  --color-equipment-steel: #c5d2d7;
-  --color-field-mist: #d7e1e4;
-  --color-field-steel: #c5d2d7;
+  /* Compatibility ramp for established components. */
+  --color-ink-950: #252f3e;
+  --color-ink-900: #2f4668;
+  --color-ink-850: #2a3b55;
+  --color-ink-800: #345d96;
+  --color-ink-700: #4b6f9f;
+  --color-ink-600: #7292c7;
+  --color-ink-500: #9ab2d4;
 
-  /* Compatibility ramp for existing copy and controls on navy anchors. */
-  --color-steel-400: #b3c3c9;
-  --color-steel-300: #c5d2d7;
-  --color-steel-200: #d7e1e4;
-  --color-steel-100: #eaf0f1;
+  /* Legacy field names now resolve to command surfaces, never pale sheets. */
+  --color-field-50: #252f3e;
+  --color-field-100: #2a3b55;
+  --color-field-200: #2f4668;
+  --color-field-300: #7292c7;
+  --color-mission-mist: #252f3e;
+  --color-equipment-steel: #2f4668;
+  --color-field-mist: #2a3b55;
+  --color-field-steel: #2f4668;
 
-  /* Raised and document-like surfaces; intentionally cool, never white. */
-  --color-paper: #eaf0f1;
-  --color-paper-dim: #d7e1e4;
-  --color-paper-line: #c5d2d7;
+  /* Copy on command surfaces. The lightest value is icy blue, not white. */
+  --color-steel-400: #a3b5d2;
+  --color-steel-300: #bbcae4;
+  --color-steel-200: #d8e2f0;
+  --color-steel-100: #ecf1f7;
+  --color-paper: #ecf1f7;
+  --color-paper-dim: #d8e2f0;
+  --color-paper-line: #bbcae4;
 
-  /* Sky Steel reads on Federal Navy; accent-ink carries links on light fields. */
-  --color-accent: #8dafc0;
-  --color-accent-bright: #b8cdd5;
-  --color-accent-dim: #678b9c;
-  --color-accent-ink: #2b516a;
+  /* Calm operational cyan, used for action and instrumentation only. */
+  --color-accent: #5dc0d1;
+  --color-accent-bright: #9bdce7;
+  --color-accent-dim: #46a7ba;
+  --color-accent-ink: #5dc0d1;
 
   /* Functional only — validation and destructive states. */
-  --color-signal: #d0565a;
-  --color-signal-bright: #e57e81;
+  --color-signal: #e77f85;
+  --color-signal-bright: #f09ca0;
   --color-signal-dim: #7d2a2d;
   --color-signal-ink: #a33236;
 
@@ -93,8 +102,8 @@
   }
 
   body {
-    background-color: var(--color-mission-mist);
-    color: var(--color-ink-900);
+    background-color: var(--color-surface-canvas);
+    color: var(--color-foreground-secondary);
     font-family: var(--font-sans);
     font-feature-settings: 'cv05' 1, 'ss03' 1;
     overflow-x: hidden;
@@ -106,10 +115,10 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent-ink);
+    outline: 2px solid var(--color-foreground-primary);
     outline-offset: 3px;
     border-radius: var(--radius-xs);
-    box-shadow: 0 0 0 4px var(--color-paper);
+    box-shadow: 0 0 0 5px var(--color-surface-canvas);
   }
 
   h1,
@@ -122,7 +131,7 @@
     font-weight: 700;
     letter-spacing: -0.03em;
     text-wrap: balance;
-    color: var(--color-ink-950);
+    color: var(--color-foreground-primary);
   }
 
   p {
@@ -177,8 +186,8 @@
 
 @utility grid-lines-light {
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-ink-950) 9%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-ink-950) 9%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--color-accent) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 10%, transparent) 1px, transparent 1px);
   background-size: 72px 72px;
 }
 

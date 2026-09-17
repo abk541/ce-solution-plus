@@ -17,12 +17,12 @@ import { fileURLToPath } from 'node:url';
 
 const OUT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../public/images');
 
-const INK = '#060b18';
-const NAVY = '#0a1224';
-const NAVY_LIGHT = '#1a2a4d';
-const STEEL = '#9aa3b5';
-const BRASS = '#c9a54e';
-const SIGNAL = '#dee3eb';
+const INK = '#252f3e';
+const NAVY = '#2a3b55';
+const NAVY_LIGHT = '#2f4668';
+const STEEL = '#bbcae4';
+const ACCENT = '#5dc0d1';
+const SIGNAL = '#ecf1f7';
 
 /** Deterministic PRNG so regenerating never churns the files. */
 function rng(seed) {
@@ -69,7 +69,7 @@ function contour(w, h, seed) {
     }
     const accent = i % 13 === 6;
     lines.push(
-      `<polyline points="${pts.join(' ')}" fill="none" stroke="${accent ? BRASS : STEEL}" stroke-width="${accent ? 1.6 : 1}" stroke-opacity="${n((accent ? 0.34 : 0.13) * envelope + 0.03)}"/>`,
+      `<polyline points="${pts.join(' ')}" fill="none" stroke="${accent ? ACCENT : STEEL}" stroke-width="${accent ? 1.6 : 1}" stroke-opacity="${n((accent ? 0.34 : 0.13) * envelope + 0.03)}"/>`,
     );
   }
   return lines.join('');
@@ -97,7 +97,7 @@ function lattice(w, h, seed) {
       }
       if (rand() > 0.965) {
         parts.push(
-          `<rect x="${n(x + cw * 0.38)}" y="${n(y + ch * 0.38)}" width="${n(cw * 0.24)}" height="${n(ch * 0.24)}" fill="${BRASS}" fill-opacity="0.55"/>`,
+          `<rect x="${n(x + cw * 0.38)}" y="${n(y + ch * 0.38)}" width="${n(cw * 0.24)}" height="${n(ch * 0.24)}" fill="${ACCENT}" fill-opacity="0.55"/>`,
         );
       }
     }
@@ -117,7 +117,7 @@ function strata(w, h, seed) {
       `<rect x="0" y="${n(y)}" width="${w}" height="${n(Math.min(bh, h - y))}" fill="${NAVY_LIGHT}" fill-opacity="${n(0.08 + rand() * 0.24)}"/>`,
     );
     parts.push(
-      `<line x1="0" y1="${n(y)}" x2="${w}" y2="${n(y)}" stroke="${accent ? BRASS : STEEL}" stroke-opacity="${accent ? 0.34 : 0.12}" stroke-width="1"/>`,
+      `<line x1="0" y1="${n(y)}" x2="${w}" y2="${n(y)}" stroke="${accent ? ACCENT : STEEL}" stroke-opacity="${accent ? 0.34 : 0.12}" stroke-width="1"/>`,
     );
     y += bh;
     band += 1;
@@ -134,7 +134,7 @@ function radial(w, h, seed) {
   for (let r = max / 26; r < max; r += max / 26) {
     const accent = Math.abs(r - max * 0.42) < max / 52;
     parts.push(
-      `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="none" stroke="${accent ? BRASS : STEEL}" stroke-opacity="${accent ? 0.42 : n(0.06 + rand() * 0.08)}" stroke-width="${accent ? 1.6 : 1}"/>`,
+      `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}" fill="none" stroke="${accent ? ACCENT : STEEL}" stroke-opacity="${accent ? 0.42 : n(0.06 + rand() * 0.08)}" stroke-width="${accent ? 1.6 : 1}"/>`,
     );
   }
   for (let a = 0; a < 360; a += 15) {
@@ -165,7 +165,7 @@ function nodes(w, h, seed) {
   points.forEach((p, i) => {
     const accent = i % 13 === 4;
     parts.push(
-      `<circle cx="${n(p.x)}" cy="${n(p.y)}" r="${accent ? 4 : 2}" fill="${accent ? BRASS : STEEL}" fill-opacity="${accent ? 0.7 : 0.26}"/>`,
+      `<circle cx="${n(p.x)}" cy="${n(p.y)}" r="${accent ? 4 : 2}" fill="${accent ? ACCENT : STEEL}" fill-opacity="${accent ? 0.7 : 0.26}"/>`,
     );
   });
   return parts.join('');
@@ -192,7 +192,7 @@ function blueprint(w, h, seed) {
     const rh = step * (1 + Math.floor(rand() * 3));
     const accent = i === 3;
     parts.push(
-      `<rect x="${n(rx)}" y="${n(ry)}" width="${n(rw)}" height="${n(rh)}" fill="${NAVY_LIGHT}" fill-opacity="${n(0.35 + rand() * 0.35)}" stroke="${accent ? BRASS : STEEL}" stroke-opacity="${accent ? 0.55 : 0.18}" stroke-width="1.2"/>`,
+      `<rect x="${n(rx)}" y="${n(ry)}" width="${n(rw)}" height="${n(rh)}" fill="${NAVY_LIGHT}" fill-opacity="${n(0.35 + rand() * 0.35)}" stroke="${accent ? ACCENT : STEEL}" stroke-opacity="${accent ? 0.55 : 0.18}" stroke-width="1.2"/>`,
     );
   }
   return parts.join('');
@@ -206,7 +206,7 @@ const GENERATORS = { contour, lattice, strata, radial, nodes, blueprint };
  * Depth comes from stacked light, not from more geometry:
  *   base navy -> fill light -> motif -> key light -> haze -> vignette -> grain
  * ------------------------------------------------------------------ */
-function plate({ w, h, type, seed, key = BRASS, keyAt = [0.72, 0.3] }) {
+function plate({ w, h, type, seed, key = ACCENT, keyAt = [0.72, 0.3] }) {
   const body = GENERATORS[type](w, h, seed);
   const m = Math.min(w, h) * 0.035;
   const tick = m * 0.55;

@@ -7,8 +7,8 @@ import { useRichMotion } from '@/hooks/usePrefersReducedMotion';
 import { sitePath } from '@/lib/site-path';
 
 /**
- * Persistent daylight substrate: a fine navy schematic grid, four full-height
- * column rules, and a static film grain over Mission Mist. Fixed,
+ * Persistent command substrate: a fine cyan schematic grid, four full-height
+ * column rules, and a static film grain over Atlantic Navy. Fixed,
  * non-interactive, and quiet enough to register as texture, not decoration.
  */
 export function Backdrop() {
@@ -46,11 +46,11 @@ export function Backdrop() {
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{ '--ambient-x': '50%', '--ambient-y': '26%' } as CSSProperties}
     >
-      <div className="absolute inset-0 grid-lines-light opacity-80" />
+      <div className="absolute inset-0 grid-lines opacity-55" />
 
       {/* Desktop-only pointer light. Touch and reduced-motion users see the
           same field held at its calm default position. */}
-      <div className="absolute inset-0 opacity-75 [background:radial-gradient(34rem_circle_at_var(--ambient-x)_var(--ambient-y),rgba(141,175,192,0.24),transparent_72%)]" />
+      <div className="absolute inset-0 opacity-70 [background:radial-gradient(34rem_circle_at_var(--ambient-x)_var(--ambient-y),rgba(93,192,209,0.12),transparent_72%)]" />
 
       {/* Column rules — anchor the schematic grid the sections are laid out on. */}
       <div className="shell absolute inset-x-0 top-0 h-full">
@@ -58,7 +58,7 @@ export function Backdrop() {
           {[0, 25, 50, 75, 100].map((left) => (
             <span
               key={left}
-              className="absolute top-0 h-full w-px bg-linear-to-b from-transparent via-ink-950/16 to-transparent"
+              className="absolute top-0 h-full w-px bg-linear-to-b from-transparent via-ink-600/14 to-transparent"
               style={{ left: `${left}%` }}
             />
           ))}
@@ -66,10 +66,10 @@ export function Backdrop() {
       </div>
 
       {/* Radial falloff keeps the grid from competing with body copy. */}
-      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_50%_0%,transparent_0%,rgba(215,225,228,0.88)_82%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_50%_0%,transparent_0%,rgba(37,47,62,0.78)_82%)]" />
 
       <div
-        className="absolute inset-0 hidden opacity-[0.025] mix-blend-multiply [background-size:180px_180px] md:block"
+        className="absolute inset-0 hidden opacity-[0.035] mix-blend-soft-light [background-size:180px_180px] md:block"
         style={{ backgroundImage: `url("${sitePath('/images/grain.svg')}")` }}
       />
     </div>

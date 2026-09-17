@@ -165,10 +165,10 @@ export function LogoPreloader() {
         (particle.accent ? accentPath : paperPath).rect(x, y, size, size);
       }
       context.globalAlpha = 0.88 * (1 - disperse);
-      context.fillStyle = '#eaf0f1';
+      context.fillStyle = '#ECF1F7';
       context.fill(paperPath);
-      context.globalAlpha = 0.82 * (1 - disperse);
-      context.fillStyle = '#8dafc0';
+      context.globalAlpha = 0.68 * (1 - disperse);
+      context.fillStyle = '#5DC0D1';
       context.fill(accentPath);
       context.globalAlpha = 1;
 
@@ -245,7 +245,7 @@ export function LogoPreloader() {
       aria-label={`${company.name} — preparing site`}
       className={[
         'fixed inset-0 z-100 h-[100dvh] min-h-[100svh] touch-none overflow-hidden overscroll-none',
-        'bg-[linear-gradient(180deg,#2b516a_0%,#18334a_52%,#102638_100%)]',
+        'bg-[linear-gradient(180deg,#2F4668_0%,#252F3E_58%,#252F3E_100%)]',
         'transition-[opacity,transform] duration-[360ms] ease-[var(--ease-spring)]',
         leaving ? 'pointer-events-none -translate-y-[1.5%] opacity-0' : 'opacity-100',
       ].join(' ')}
@@ -260,7 +260,7 @@ export function LogoPreloader() {
         className={[
           'pointer-events-none absolute inset-0 transition-opacity duration-[560ms]',
           flaring ? 'opacity-100' : 'opacity-55',
-          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(141,175,192,0.2),transparent_70%)]',
+          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(93,192,209,0.12),transparent_70%)]',
         ].join(' ')}
       />
 
@@ -275,7 +275,7 @@ export function LogoPreloader() {
           leaving ? 'scale-[1.015] opacity-0' : '',
         ].join(' ')}
         style={{
-          backgroundColor: 'var(--color-paper)',
+          backgroundColor: '#ECF1F7',
           WebkitMaskImage: `url("${LOCKUP_SRC}")`,
           maskImage: `url("${LOCKUP_SRC}")`,
           WebkitMaskPosition: 'center',

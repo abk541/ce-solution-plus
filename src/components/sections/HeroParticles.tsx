@@ -115,7 +115,8 @@ const FRAGMENT = /* glsl */ `
     float halo = pow(f, 1.8) * mix(0.12, 0.24, vBlur);
     float alpha = min(core + halo, 1.0);
 
-    // Larger points lift toward the mist tone; small ones keep the steel tint.
+    // Larger points lift toward the primary tone; small ones keep the softer
+    // secondary tint so additive blending never turns into a neon cyan bloom.
     vec3 col = mix(uColorEdge, uColorCore, smoothstep(0.9, 3.0, vSize));
     col += core * 0.12;
 
@@ -255,9 +256,10 @@ export function HeroParticles({ className }: { className?: string }) {
         uBurstAt: { value: [0, 0] },
         uBurst: { value: 1 },
         uOpacity: { value: reducedMotion ? 0.95 : 0 },
-        // Steel field with a cool signal-blue glint on larger particles.
-        uColorEdge: { value: new Color('#8dafc0') },
-        uColorCore: { value: new Color('#eaf0f1') },
+        // Atlantic Command neutrals keep the constellation crisp; cyan remains
+        // reserved for the smaller signal details around it.
+        uColorEdge: { value: new Color('#BBCAE4') },
+        uColorCore: { value: new Color('#ECF1F7') },
       },
     });
 

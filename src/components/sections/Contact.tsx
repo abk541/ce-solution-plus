@@ -50,19 +50,19 @@ export function Contact() {
   }, [motionAllowed, reducedMotion]);
 
   return (
-    <section ref={rootRef} id="contact" className="relative z-10 bg-field-100 py-20 text-ink-800 md:py-28 lg:py-36">
+    <section ref={rootRef} id="contact" className="relative z-10 bg-surface-panel py-20 text-foreground-secondary md:py-28 lg:py-36">
       <div className="shell">
         <div className="max-w-3xl">
-          <SectionTag index="06" tone="light">{contact.label}</SectionTag>
-          <h2 className="mt-7 display-editorial text-[clamp(2.2rem,5vw,4rem)] text-ink-950">{contact.headline}</h2>
-          <p className="mt-6 max-w-xl text-[1.02rem] leading-relaxed text-ink-700">
+          <SectionTag index="06">{contact.label}</SectionTag>
+          <h2 className="mt-7 display-editorial text-[clamp(2.2rem,5vw,4rem)] text-foreground-primary">{contact.headline}</h2>
+          <p className="mt-6 max-w-xl text-[1.02rem] leading-relaxed text-foreground-secondary">
             {contact.lede}
           </p>
         </div>
 
         <div
           data-contact-panel
-          className="relative mt-12 border border-field-300 bg-field-50"
+          className="relative mt-12 border border-border-command/45 bg-surface-canvas/72"
         >
           <CornerTicks size={12} />
 
@@ -70,7 +70,7 @@ export function Contact() {
           <span
             data-panel-edge
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-px origin-left bg-accent-ink/60"
+            className="absolute inset-x-0 top-0 h-px origin-left bg-accent/70"
           />
           <span
             data-instrument-sweep
@@ -81,25 +81,25 @@ export function Contact() {
           <div className="grid lg:grid-cols-12">
             <div
               data-panel-column
-              className="border-b border-field-300 p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r"
+              className="border-b border-border-command/40 p-6 md:p-8 lg:col-span-5 lg:border-b-0 lg:border-r"
             >
-              <p className="label-mono text-[0.6rem] text-ink-700">Station</p>
+              <p className="label-mono text-[0.6rem] text-foreground-muted">Station</p>
 
               <dl className="mt-8 space-y-7">
                 <div>
-                  <dt className="label-mono text-[0.56rem] text-ink-700">Location</dt>
-                  <dd className="mt-2 text-[0.95rem] leading-relaxed text-ink-950">
+                  <dt className="label-mono text-[0.56rem] text-foreground-muted">Location</dt>
+                  <dd className="mt-2 text-[0.95rem] leading-relaxed text-foreground-primary">
                     {company.address.street}
                     <br />
                     {company.address.city}, {company.address.state} {company.address.zip}
                   </dd>
                 </div>
                 <div>
-                  <dt className="label-mono text-[0.56rem] text-ink-700">Email</dt>
+                  <dt className="label-mono text-[0.56rem] text-foreground-muted">Email</dt>
                   <dd className="mt-2">
                     <a
                       href={`mailto:${company.email}`}
-                      className="group inline-flex items-center gap-2 text-[0.95rem] text-ink-950 transition-colors duration-[var(--motion-micro)] hover:text-accent-ink"
+                      className="group inline-flex items-center gap-2 text-[0.95rem] text-foreground-primary transition-colors duration-[var(--motion-micro)] hover:text-accent"
                     >
                       {company.email}
                       <span
@@ -110,11 +110,11 @@ export function Contact() {
                   </dd>
                 </div>
                 <div>
-                  <dt className="label-mono text-[0.56rem] text-ink-700">Voice</dt>
+                  <dt className="label-mono text-[0.56rem] text-foreground-muted">Voice</dt>
                   <dd className="mt-2">
                     <a
                       href={`tel:${company.phoneHref}`}
-                      className="font-mono text-[1.6rem] font-medium tracking-[-0.03em] text-ink-950 tabular-nums transition-colors duration-[var(--motion-micro)] hover:text-accent-ink"
+                      className="font-mono text-[1.6rem] font-medium tracking-[-0.03em] text-foreground-primary tabular-nums transition-colors duration-[var(--motion-micro)] hover:text-accent"
                     >
                       {company.phone}
                     </a>
@@ -122,13 +122,13 @@ export function Contact() {
                 </div>
               </dl>
 
-              <div className="mt-10 border-t border-field-300 pt-7">
-                <p className="label-mono text-[0.56rem] text-ink-700">Designation</p>
+              <div className="mt-10 border-t border-border-command/40 pt-7">
+                <p className="label-mono text-[0.56rem] text-foreground-muted">Designation</p>
                 <ul className="mt-4 flex flex-wrap gap-2">
                   {['VOSB', 'WOSB', 'Small Business'].map((item) => (
                     <li
                       key={item}
-                      className="rounded-xs border border-field-300 px-3 py-2 label-mono text-[0.55rem] text-ink-700"
+                      className="rounded-xs border border-border-command/45 px-3 py-2 label-mono text-[0.55rem] text-foreground-secondary"
                     >
                       {item}
                     </li>
@@ -144,7 +144,7 @@ export function Contact() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="label-mono text-[0.58rem] text-ink-700 underline underline-offset-8 transition-colors duration-[var(--motion-micro)] hover:text-accent-ink"
+                    className="label-mono text-[0.58rem] text-foreground-secondary underline underline-offset-8 transition-colors duration-[var(--motion-micro)] hover:text-accent"
                   >
                     {link.label}
                   </a>

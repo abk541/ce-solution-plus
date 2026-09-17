@@ -181,7 +181,7 @@ export function Nav() {
                   href={link.href}
                   aria-current={isActive ? 'location' : undefined}
                   className={cn(
-                    'group relative px-3 py-3 label-mono text-[0.61rem] transition-colors duration-[var(--motion-micro)]',
+                    'group relative shrink-0 whitespace-nowrap px-2 py-3 label-mono text-[0.61rem] transition-colors duration-[var(--motion-micro)] xl:px-3',
                     isActive ? 'text-paper' : 'text-steel-400 hover:text-steel-100',
                   )}
                 >
@@ -204,7 +204,7 @@ export function Nav() {
               href="#contact"
               variant="outline"
               strength={6}
-              className="hidden border-accent/40 px-5 py-3 text-[0.62rem] text-accent hover:border-accent hover:text-accent-bright sm:inline-flex"
+              className="hidden border-accent/40 px-5 py-3 text-[0.62rem] text-accent hover:border-accent hover:text-accent-bright sm:inline-flex lg:hidden xl:inline-flex"
             >
               Request capabilities
             </MagneticAction>

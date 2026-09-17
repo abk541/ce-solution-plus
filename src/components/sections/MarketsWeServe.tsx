@@ -89,7 +89,7 @@ export function MarketsWeServe() {
   }, [fullMotion, motionAllowed, reducedMotion]);
 
   return (
-    <section ref={rootRef} id="markets" className="relative z-10 overflow-hidden bg-field-200 text-ink-800">
+    <section ref={rootRef} id="markets" className="relative z-10 overflow-hidden bg-surface-intermediate text-foreground-secondary">
       <div
         ref={stageRef}
         className="relative flex flex-col justify-center py-20 md:py-28 lg:h-screen lg:py-0"
@@ -97,12 +97,12 @@ export function MarketsWeServe() {
         <div className="shell">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <SectionTag index="04" tone="light">{markets.label}</SectionTag>
-              <h2 className="mt-6 display-editorial text-[clamp(1.9rem,3.6vw,3rem)] text-ink-950">
+              <SectionTag index="04">{markets.label}</SectionTag>
+              <h2 className="mt-6 display-editorial text-[clamp(1.9rem,3.6vw,3rem)] text-foreground-primary">
                 {markets.headline}
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-ink-700">{markets.lede}</p>
+            <p className="max-w-sm text-sm leading-relaxed text-foreground-secondary">{markets.lede}</p>
           </div>
         </div>
 
@@ -113,7 +113,7 @@ export function MarketsWeServe() {
         >
           <div
             ref={trackRef}
-            className="flex w-max snap-x snap-mandatory gap-px bg-field-300 px-5 md:px-10 lg:snap-none lg:will-change-transform xl:px-14"
+            className="flex w-max snap-x snap-mandatory gap-px bg-border-command/45 px-5 md:px-10 lg:snap-none lg:will-change-transform xl:px-14"
           >
             {markets.items.map((market, index) => (
               <MarketCard key={market.id} market={market} index={index} />
@@ -122,14 +122,14 @@ export function MarketsWeServe() {
         </div>
 
         <div className="shell mt-8 hidden items-center gap-5 lg:flex">
-          <span className="label-mono text-[0.6rem] text-ink-700">Scroll</span>
-          <span className="relative h-px flex-1 bg-field-300">
+          <span className="label-mono text-[0.6rem] text-foreground-secondary">Scroll</span>
+          <span className="relative h-px flex-1 bg-border-command/45">
             <span
               ref={progressBarRef}
-              className="absolute inset-y-0 left-0 w-full origin-left scale-x-[0.02] bg-accent-ink"
+              className="absolute inset-y-0 left-0 w-full origin-left scale-x-[0.02] bg-accent"
             />
           </span>
-          <span ref={progressValueRef} className="label-mono text-[0.6rem] text-ink-700 tabular-nums">
+          <span ref={progressValueRef} className="label-mono text-[0.6rem] text-foreground-secondary tabular-nums">
             000%
           </span>
         </div>

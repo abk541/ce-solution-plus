@@ -89,8 +89,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#D7E1E4',
-  colorScheme: 'light',
+  themeColor: '#252F3E',
+  colorScheme: 'dark',
 };
 
 // Structured data helps procurement staff and search engines resolve the entity.
@@ -150,7 +150,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="bg-mission-mist text-ink-900 antialiased">{children}</body>
+      <body className="bg-surface-canvas text-foreground-secondary antialiased">{children}</body>
     </html>
   );
 }
