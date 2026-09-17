@@ -19,8 +19,6 @@ const DISPERSE_MS = 360;
 const EXIT_AT_MS = 1000;
 const FINISH_AT_MS = 1400;
 const HARD_STOP_MS = 1750;
-const MOBILE_EXIT_AT_MS = 620;
-const MOBILE_FINISH_AT_MS = 900;
 
 type Particle = {
   tx: number;
@@ -77,10 +75,16 @@ export function LogoPreloader() {
       return;
     }
 
-    const startedAt = performance.now();
+    // Keep the animation clock anchored to the prepaint script. On a busy
+    // phone, hydration can arrive partway through the intro; resuming from the
+    // current phase avoids restarting the curtain and locking the page again.
+    const prepaintStart = Number(document.documentElement.dataset.entryStart);
+    const startedAt = Number.isFinite(prepaintStart) ? prepaintStart : performance.now();
+    const elapsedAtMount = Math.max(0, performance.now() - startedAt);
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const compact = matchMedia('(max-width: 1023px), (hover: none), (pointer: coarse)').matches;
+    const coarsePointer = matchMedia('(hover: none), (pointer: coarse)').matches;
+    const compactLayout = width < 1024 || coarsePointer;
     const timers: number[] = [];
     let animationFrame = 0;
     let stopped = false;
@@ -109,30 +113,13 @@ export function LogoPreloader() {
       window.dispatchEvent(new CustomEvent('ce:intro-exit'));
     };
 
-    // The phone intro is a prepaint-anchored, crisp brand reveal. Its deadline
-    // is measured from the inline script rather than hydration, so slow mobile
-    // JS can never restart or extend the curtain after the hero is visible.
-    if (compact) {
-      const entryStart = Number(document.documentElement.dataset.entryStart) || startedAt;
-      const elapsed = performance.now() - entryStart;
-      setFormed(true);
-      setFlaring(true);
-
-      if (!document.documentElement.classList.contains('motion-entry')) {
-        beginExit();
-        finish();
-        return;
-      }
-
-      timers.push(
-        window.setTimeout(beginExit, Math.max(0, MOBILE_EXIT_AT_MS - elapsed)),
-        window.setTimeout(finish, Math.max(0, MOBILE_FINISH_AT_MS - elapsed)),
-      );
-
-      return () => {
-        stopped = true;
-        timers.forEach(window.clearTimeout);
-      };
+    if (
+      !document.documentElement.classList.contains('motion-entry') ||
+      elapsedAtMount >= FINISH_AT_MS
+    ) {
+      beginExit();
+      finish();
+      return;
     }
 
     const canvas = canvasRef.current;
@@ -144,8 +131,8 @@ export function LogoPreloader() {
       return;
     }
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const particleLimit = 1600;
+    const dpr = Math.min(window.devicePixelRatio || 1, coarsePointer ? 1.5 : 2);
+    const particleLimit = coarsePointer ? 900 : 1600;
     const cell = 1.4;
 
     canvas.width = Math.round(width * dpr);
@@ -155,12 +142,18 @@ export function LogoPreloader() {
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     document.documentElement.style.overflow = 'hidden';
 
+    if (elapsedAtMount >= 420) setFormed(true);
+    else timers.push(window.setTimeout(() => setFormed(true), 420 - elapsedAtMount));
+
+    if (elapsedAtMount >= 760) setFlaring(true);
+    else timers.push(window.setTimeout(() => setFlaring(true), 760 - elapsedAtMount));
+
+    if (elapsedAtMount >= EXIT_AT_MS) beginExit();
+    else timers.push(window.setTimeout(beginExit, EXIT_AT_MS - elapsedAtMount));
+
     timers.push(
-      window.setTimeout(() => setFormed(true), 420),
-      window.setTimeout(() => setFlaring(true), 760),
-      window.setTimeout(beginExit, EXIT_AT_MS),
-      window.setTimeout(finish, FINISH_AT_MS),
-      window.setTimeout(finish, HARD_STOP_MS),
+      window.setTimeout(finish, FINISH_AT_MS - elapsedAtMount),
+      window.setTimeout(finish, HARD_STOP_MS - elapsedAtMount),
     );
 
     const draw = (now: number) => {
@@ -211,7 +204,7 @@ export function LogoPreloader() {
       })
       .then((buffer) => {
         if (stopped) return;
-        const targetWidth = Math.min(width * (compact ? 0.8 : 0.58), 760);
+        const targetWidth = Math.min(width * (compactLayout ? 0.8 : 0.58), 760);
         const targetHeight = targetWidth * (304 / 1590);
         const view = new DataView(buffer);
         const pointCount = Math.floor(view.byteLength / 4);
@@ -272,7 +265,7 @@ export function LogoPreloader() {
       className={[
         'fixed inset-x-0 top-0 z-100 h-[100dvh] min-h-[100svh] touch-none overflow-hidden overscroll-none',
         'bg-[linear-gradient(180deg,#163B5C_0%,#10283E_58%,#10283E_100%)]',
-        'transition-opacity duration-[240ms] ease-[var(--ease-precise)] lg:duration-[360ms]',
+        'transition-opacity duration-[360ms] ease-[var(--ease-precise)]',
         leaving ? 'pointer-events-none opacity-0' : 'opacity-100',
       ].join(' ')}
     >
@@ -290,7 +283,7 @@ export function LogoPreloader() {
         ].join(' ')}
       />
 
-      <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 hidden lg:block" />
+      <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 block" />
 
       <img
         data-loader-lockup
@@ -303,26 +296,13 @@ export function LogoPreloader() {
         className={[
           'absolute left-1/2 top-1/2 aspect-[1590/304] w-[min(84vw,760px)] -translate-x-1/2 -translate-y-1/2 object-contain [filter:brightness(0.94)_sepia(0.04)]',
           'transition-[opacity,transform] duration-[420ms] ease-[var(--ease-spring)]',
-          'scale-100 opacity-100',
-          formed ? 'lg:scale-100 lg:opacity-100' : 'lg:scale-[0.985] lg:opacity-0',
+          formed ? 'scale-100 opacity-100' : 'scale-[0.985] opacity-0',
         ].join(' ')}
       />
 
       <div
-        data-loader-mobile-status
-        className="absolute left-1/2 top-[calc(50%+4.5rem)] flex -translate-x-1/2 flex-col items-center gap-3 transition-opacity duration-200 lg:hidden"
-      >
-        <span className="whitespace-nowrap label-mono text-[0.52rem] tracking-[0.19em] text-steel-200">
-          Mission support systems
-        </span>
-        <span aria-hidden="true" className="relative h-px w-28 overflow-hidden bg-paper/20">
-          <span className="absolute inset-y-0 w-10 bg-linear-to-r from-transparent via-power to-transparent [animation:loader-scan_720ms_var(--ease-precise)_infinite]" />
-        </span>
-      </div>
-
-      <div
         className={[
-          'absolute inset-x-0 bottom-[max(2rem,env(safe-area-inset-bottom))] hidden flex-col items-center gap-3 lg:flex',
+          'absolute inset-x-0 bottom-[max(2rem,env(safe-area-inset-bottom))] flex flex-col items-center gap-3',
           'transition-opacity duration-[200ms]',
           leaving ? 'opacity-0' : 'opacity-100',
         ].join(' ')}

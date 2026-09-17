@@ -45,7 +45,7 @@ function useMagnet(strength: number, enabled: boolean) {
   useIsomorphicLayoutEffect(() => {
     const node = ref.current;
     if (!node || !enabled) return;
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     const label = node.querySelector<HTMLElement>('[data-magnet-label]');
     const xTo = gsap.quickTo(node, 'x', { duration: duration.ui, ease: 'power3.out' });
@@ -68,11 +68,21 @@ function useMagnet(strength: number, enabled: boolean) {
       if (label) gsap.to(label, { x: 0, y: 0, duration: duration.feature, ease: 'ce-spring' });
     };
 
-    node.addEventListener('pointermove', onMove);
+    const onPress = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') onMove(event);
+    };
+
+    if (finePointer) node.addEventListener('pointermove', onMove);
     node.addEventListener('pointerleave', onLeave);
+    node.addEventListener('pointerdown', onPress, { passive: true });
+    node.addEventListener('pointerup', onLeave, { passive: true });
+    node.addEventListener('pointercancel', onLeave, { passive: true });
     return () => {
       node.removeEventListener('pointermove', onMove);
       node.removeEventListener('pointerleave', onLeave);
+      node.removeEventListener('pointerdown', onPress);
+      node.removeEventListener('pointerup', onLeave);
+      node.removeEventListener('pointercancel', onLeave);
       gsap.set(node, { x: 0, y: 0 });
     };
   }, [strength, enabled]);
@@ -98,13 +108,13 @@ export function MagneticAction({
       <span
         data-action-sheen
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-mission-mist/30 to-transparent transition-[left] duration-[var(--motion-reveal)] ease-[var(--ease-precise)] group-hover:left-[150%]"
+        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-mission-mist/30 to-transparent transition-[left] duration-[var(--motion-reveal)] ease-[var(--ease-precise)] group-hover:left-[150%] group-active:left-[150%]"
       />
       <span data-magnet-label className="relative flex items-center gap-3">
         {children}
         <svg
           viewBox="0 0 16 10"
-          className="h-2.5 w-4 shrink-0 transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:translate-x-1"
+          className="h-2.5 w-4 shrink-0 transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:translate-x-1 group-active:translate-x-1"
           fill="none"
           aria-hidden="true"
         >

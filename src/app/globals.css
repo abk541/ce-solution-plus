@@ -433,10 +433,6 @@
  * remains immediate and text stays sharp.
  * ------------------------------------------------------------------ */
 @media (width < 64rem), (hover: none), (pointer: coarse) {
-  .mission-track {
-    animation-duration: 32s;
-  }
-
   [data-hero-mobile-art] {
     transform-origin: 70% 42%;
     will-change: transform, opacity;
@@ -507,6 +503,20 @@
   [data-market-card] [data-plate-art] {
     transform: translate3d(var(--market-art-x), 0, 0) scale(var(--market-art-scale));
     transition: transform 220ms var(--ease-spring);
+  }
+
+  /* Full choreography writes these transforms every frame. Let GSAP own the
+     interpolation so a trailing CSS transition cannot soften or lag the
+     desktop-identical motion on touch devices. */
+  .motion-on [data-cap-card] {
+    transition:
+      border-color var(--motion-ui) var(--ease-precise),
+      background-color var(--motion-ui) var(--ease-precise);
+  }
+
+  .motion-on [data-market-card],
+  .motion-on [data-market-card] [data-plate-art] {
+    transition: none;
   }
 
   [data-market-rule] {
@@ -581,13 +591,7 @@
 }
 
 [data-action-sheen] {
-  display: none;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  [data-action-sheen] {
-    display: block;
-  }
+  display: block;
 }
 
 /* Section-specific timeline targets, pre-hidden to kill the hydration flash. */
@@ -646,6 +650,10 @@
     transition-duration: 0.001ms !important;
   }
 
+  .mission-mark-icon > svg {
+    animation: none !important;
+  }
+
   [data-logo-preloader] {
     display: none !important;
   }
@@ -661,21 +669,8 @@
   display: block;
 }
 
-/* The compact intro owns one prepaint-anchored timeline. The readable image is
-   present from frame one and the curtain exits without waiting for hydration. */
-@media (width < 64rem), (hover: none), (pointer: coarse) {
-  .motion-entry [data-logo-preloader] {
-    animation: mobile-loader-curtain 940ms var(--ease-precise) both;
-  }
-
-  [data-loader-lockup] {
-    opacity: 1 !important;
-    scale: 1 !important;
-  }
-}
-
-/* Fine-pointer desktops use the full Three.js constellation. Touch-first
-   layouts keep the finite 2D mark, including large landscape tablets. */
+/* Fine-pointer desktops use the full-scene WebGL constellation. Compact
+   layouts keep their correctly sized hero-art anchor for the mobile field. */
 @media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   [data-hero-mobile-art] {
     display: none;
@@ -744,21 +739,53 @@
    ceremony above the headline. The document remains naturally scrollable. */
 @media (width >= 40rem) and (width < 64rem) and (max-height: 500px) {
   [data-hero-viewport] {
-    padding-top: 190px;
+    padding-top: 145px;
   }
 
   [data-hero-mobile-art] {
-    height: 150px;
+    height: 130px;
   }
 
   [data-hero-heading] {
-    margin-top: 0.9rem;
-    font-size: clamp(2.4rem, 6.8vw, 3.45rem);
+    margin-top: 0.7rem;
+    font-size: clamp(2.25rem, 5.4vw, 3rem);
   }
 
   [data-hero-details] {
-    margin-top: 1.1rem;
-    padding-top: 1.1rem;
+    margin-top: 0.75rem;
+    gap: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+  [data-mobile-menu-sheet] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    justify-content: initial;
+    column-gap: 20px;
+    row-gap: 0;
+    padding-top: max(88px, calc(env(safe-area-inset-top) + 76px));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  [data-mobile-menu-link] {
+    gap: 14px;
+    padding-block: 8px;
+  }
+
+  [data-mobile-menu-label] {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  [data-mobile-menu-cta] {
+    grid-column: 1 / -1;
+  }
+
+  [data-mobile-menu-cta] a {
+    min-height: 44px;
+    margin-top: 8px;
+    padding-block: 10px;
   }
 }
 
@@ -821,16 +848,6 @@
   }
   to {
     transform: translateX(300%);
-  }
-}
-
-@keyframes mobile-loader-curtain {
-  0%,
-  66% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
   }
 }
 

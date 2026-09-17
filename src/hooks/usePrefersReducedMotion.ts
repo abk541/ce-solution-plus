@@ -10,17 +10,15 @@ const QUERY = '(prefers-reduced-motion: reduce)';
 /** Lightweight, finite motion is available on every non-reduced device. */
 export const MOTION_ALLOWED_QUERY = '(prefers-reduced-motion: no-preference)';
 
-/**
- * Full page choreography is reserved for roomier layouts with a precise
- * pointer. Phones and touch-first tablets keep native scrolling and render
- * section content in its final state.
- */
-export const FULL_MOTION_QUERY =
-  '(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
+/** Full page choreography runs everywhere the visitor allows motion. */
+export const FULL_MOTION_QUERY = MOTION_ALLOWED_QUERY;
 
 /** The WebGL field and entry curtain are desktop-only enhancements. */
 export const RICH_MOTION_QUERY =
   '(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)';
+
+/** WebGL choreography is viewport-agnostic, but always respects reduced motion. */
+export const WEBGL_MOTION_QUERY = MOTION_ALLOWED_QUERY;
 
 /**
  * Touch-first choreography keeps native scrolling but still enables the
@@ -57,6 +55,11 @@ export function useMotionAllowed(): boolean | null {
 /** `null` only during SSR/the first hydration pass. */
 export function useRichMotion(): boolean | null {
   return useMediaQuery(RICH_MOTION_QUERY);
+}
+
+/** `null` only during SSR/the first hydration pass. */
+export function useWebGLMotion(): boolean | null {
+  return useMediaQuery(WEBGL_MOTION_QUERY);
 }
 
 /** `null` only during SSR/the first hydration pass. */

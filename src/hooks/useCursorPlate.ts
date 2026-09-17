@@ -21,7 +21,7 @@ export function useCursorPlate<T extends HTMLElement>(strength = 1) {
   useEffect(() => {
     const node = ref.current;
     if (!node || reducedMotion) return;
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     const art = node.querySelector<HTMLElement>('[data-plate-art]');
     const sheen = node.querySelector<HTMLElement>('[data-plate-sheen]');
@@ -40,17 +40,17 @@ export function useCursorPlate<T extends HTMLElement>(strength = 1) {
         ` translate(${target.ax}%, ${target.ay}%)`;
     };
 
-    const onMove = (event: PointerEvent) => {
+    const applyPoint = (clientX: number, clientY: number) => {
       const rect = node.getBoundingClientRect();
       const cx = gsap.utils.clamp(
         -1,
         1,
-        (event.clientX - (rect.left + rect.width / 2)) / (rect.width / 2),
+        (clientX - (rect.left + rect.width / 2)) / (rect.width / 2),
       );
       const cy = gsap.utils.clamp(
         -1,
         1,
-        (event.clientY - (rect.top + rect.height / 2)) / (rect.height / 2),
+        (clientY - (rect.top + rect.height / 2)) / (rect.height / 2),
       );
 
       // Artwork leads the cursor while the panel counter-rotates — that
@@ -68,7 +68,7 @@ export function useCursorPlate<T extends HTMLElement>(strength = 1) {
       }
     };
 
-    const onLeave = () => {
+    const reset = () => {
       target.ax = 0;
       target.ay = 0;
       target.rx = 0;
@@ -77,12 +77,80 @@ export function useCursorPlate<T extends HTMLElement>(strength = 1) {
       if (sheen) sheen.style.opacity = '0';
     };
 
-    node.addEventListener('pointermove', onMove);
-    node.addEventListener('pointerleave', onLeave);
+    const onMouseMove = (event: PointerEvent) => applyPoint(event.clientX, event.clientY);
+
+    let touchActive = false;
+    let touchEngaged = false;
+    let touchPointerId = -1;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchX = 0;
+    let touchY = 0;
+    let holdTimer = 0;
+
+    const engageTouch = () => {
+      holdTimer = 0;
+      if (!touchActive) return;
+      touchEngaged = true;
+      applyPoint(touchX, touchY);
+    };
+
+    const onTouchDown = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse' || touchActive) return;
+      touchActive = true;
+      touchEngaged = false;
+      touchPointerId = event.pointerId;
+      touchStartX = touchX = event.clientX;
+      touchStartY = touchY = event.clientY;
+      // A brief hold separates an intentional plate interaction from the
+      // beginning of a vertical page swipe. No pointer capture or preventDefault
+      // is used, so the browser always retains ownership of touch scrolling.
+      holdTimer = window.setTimeout(engageTouch, 80);
+    };
+
+    const onTouchMove = (event: PointerEvent) => {
+      if (!touchActive || event.pointerId !== touchPointerId) return;
+      touchX = event.clientX;
+      touchY = event.clientY;
+      if (!touchEngaged) {
+        const travel = Math.hypot(touchX - touchStartX, touchY - touchStartY);
+        if (travel > 10) {
+          window.clearTimeout(holdTimer);
+          holdTimer = 0;
+        }
+        return;
+      }
+      applyPoint(touchX, touchY);
+    };
+
+    const finishTouch = (event: PointerEvent) => {
+      if (!touchActive || event.pointerId !== touchPointerId) return;
+      window.clearTimeout(holdTimer);
+      holdTimer = 0;
+      touchActive = false;
+      touchEngaged = false;
+      touchPointerId = -1;
+      reset();
+    };
+
+    if (finePointer) {
+      node.addEventListener('pointermove', onMouseMove, { passive: true });
+      node.addEventListener('pointerleave', reset);
+    } else {
+      node.addEventListener('pointerdown', onTouchDown, { passive: true });
+      node.addEventListener('pointermove', onTouchMove, { passive: true });
+      window.addEventListener('pointerup', finishTouch, { passive: true });
+      window.addEventListener('pointercancel', finishTouch, { passive: true });
+    }
 
     return () => {
-      node.removeEventListener('pointermove', onMove);
-      node.removeEventListener('pointerleave', onLeave);
+      window.clearTimeout(holdTimer);
+      node.removeEventListener('pointermove', onMouseMove);
+      node.removeEventListener('pointerleave', reset);
+      node.removeEventListener('pointerdown', onTouchDown);
+      node.removeEventListener('pointermove', onTouchMove);
+      window.removeEventListener('pointerup', finishTouch);
+      window.removeEventListener('pointercancel', finishTouch);
       art.style.transform = '';
       art.style.transition = '';
       art.style.willChange = '';

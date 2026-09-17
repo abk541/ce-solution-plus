@@ -124,10 +124,10 @@ const organizationJsonLd = {
 
 /**
  * Opts into motion before first paint so animated targets never flash in their
- * final position. The intro is device-aware, session-scoped, and has its own
+ * final position. The intro is session-scoped and has its own
  * fail-safe so a hydration error can never leave an opaque curtain on screen.
  */
-const noFlashScript = `(function(){try{var d=document.documentElement,r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(r)return;d.classList.add('motion-hero','motion-on');var s=false,f=new URLSearchParams(location.search).get('intro')==='1',c=window.matchMedia('(max-width:1023px),(hover:none),(pointer:coarse)').matches;try{s=sessionStorage.getItem('ce-entry-seen')==='1';}catch(x){}if(f||!s){d.classList.add('motion-entry');d.dataset.entryStart=String(performance.now());if(c){setTimeout(function(){window.dispatchEvent(new CustomEvent('ce:intro-exit'));},620);setTimeout(function(){d.classList.remove('motion-entry','motion-hero');try{sessionStorage.setItem('ce-entry-seen','1');}catch(x){}},940);}else{setTimeout(function(){d.classList.remove('motion-entry','motion-hero');},1900);}}setTimeout(function(){if(!d.dataset.motionReady)d.classList.remove('motion-entry','motion-hero','motion-on');},3000);}catch(e){}})();`;
+const noFlashScript = `(function(){try{var d=document.documentElement,r=window.matchMedia('(prefers-reduced-motion: reduce)').matches;if(r)return;d.classList.add('motion-hero','motion-on');var s=false,f=new URLSearchParams(location.search).get('intro')==='1';try{s=sessionStorage.getItem('ce-entry-seen')==='1';}catch(x){}if(f||!s){d.classList.add('motion-entry');d.dataset.entryStart=String(performance.now());setTimeout(function(){d.classList.remove('motion-entry','motion-hero');},1900);}setTimeout(function(){if(!d.dataset.motionReady)d.classList.remove('motion-entry','motion-hero','motion-on');},3000);}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

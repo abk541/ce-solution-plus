@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { MobileLogoField } from '@/components/sections/MobileLogoField';
 import { MagneticAction } from '@/components/ui/MagneticAction';
@@ -14,6 +14,7 @@ import {
   useMotionAllowed,
   usePrefersReducedMotion,
   useRichMotion,
+  useWebGLMotion,
 } from '@/hooks/usePrefersReducedMotion';
 
 // Three.js is purely decorative, so the reactive logo loads after first paint
@@ -31,7 +32,14 @@ export function Hero() {
   const compactMotion = useCompactMotion();
   const fullMotion = useFullMotion();
   const richMotion = useRichMotion();
+  const webGLMotion = useWebGLMotion();
   const [introReady, setIntroReady] = useState(false);
+  const [particleReady, setParticleReady] = useState(false);
+  const handleParticleReady = useCallback(() => setParticleReady(true), []);
+
+  useEffect(() => {
+    if (webGLMotion !== true || !introReady) setParticleReady(false);
+  }, [introReady, webGLMotion]);
 
   useIsomorphicLayoutEffect(() => {
     const reveal = () => setIntroReady(true);
@@ -118,16 +126,6 @@ export function Hero() {
           0.42,
         );
 
-      // The scrubbed exit belongs to the desktop composition. Native phone
-      // scrolling should stop exactly when the user's finger stops.
-      if (fullMotion === true) {
-        gsap.to('[data-hero-shift]', {
-          yPercent: -12,
-          opacity: 0,
-          ease: 'none',
-          scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.4 },
-        });
-      }
     }, root);
 
     return () => ctx.revert();
@@ -135,23 +133,44 @@ export function Hero() {
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
-    if (!root || reducedMotion || compactMotion !== true) return;
+    if (!root || reducedMotion || fullMotion !== true) return;
+
+    const ctx = gsap.context(() => {
+      gsap.to('[data-hero-shift]', {
+        yPercent: -12,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: { trigger: root, start: 'top top', end: 'bottom top', scrub: 0.4 },
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, [fullMotion, reducedMotion]);
+
+  useIsomorphicLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || reducedMotion || compactMotion !== true || fullMotion === true) return;
+
+    const activeObserver = new IntersectionObserver(
+      ([entry]) => {
+        root.setAttribute('data-mobile-active', entry?.isIntersecting ? 'true' : 'false');
+      },
+      { rootMargin: '80px 0px' },
+    );
+    activeObserver.observe(root);
 
     const art = root.querySelector<HTMLElement>('[data-hero-mobile-art]');
     const heading = root.querySelector<HTMLElement>('[data-hero-heading]');
     const status = root.querySelector<HTMLElement>('[data-hero-status]');
-    if (!art || !heading || !status) return;
+    if (!art || !heading || !status) {
+      activeObserver.disconnect();
+      return;
+    }
 
     let frame = 0;
-    let activeState: boolean | null = null;
     const paint = () => {
       frame = 0;
       const rect = root.getBoundingClientRect();
-      const isActive = rect.bottom > -80 && rect.top < window.innerHeight + 80;
-      if (activeState !== isActive) {
-        activeState = isActive;
-        root.setAttribute('data-mobile-active', isActive ? 'true' : 'false');
-      }
       const travel = Math.max(0, -rect.top);
       const range = Math.max(root.offsetHeight - window.innerHeight * 0.38, 1);
       const progress = Math.min(travel / range, 1);
@@ -172,13 +191,14 @@ export function Hero() {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
       cancelAnimationFrame(frame);
+      activeObserver.disconnect();
       art.style.removeProperty('transform');
       art.style.removeProperty('opacity');
       heading.style.removeProperty('transform');
       status.style.removeProperty('opacity');
       root.removeAttribute('data-mobile-active');
     };
-  }, [compactMotion, reducedMotion]);
+  }, [compactMotion, fullMotion, reducedMotion]);
 
   return (
     <section
@@ -193,7 +213,7 @@ export function Hero() {
         className="relative flex flex-col overflow-hidden pb-[max(40px,env(safe-area-inset-bottom))] pt-[clamp(272px,40svh,336px)]"
       >
         <div data-hero-scene aria-hidden="true" className="absolute inset-0 z-[2]">
-          {richMotion === true && introReady ? (
+          {richMotion === true && webGLMotion === true && introReady ? (
             <HeroParticles className="absolute inset-0 h-full w-full" />
           ) : null}
 
@@ -204,7 +224,17 @@ export function Hero() {
             className="absolute inset-x-0 top-[calc(64px+env(safe-area-inset-top))] h-[clamp(192px,32svh,256px)]"
           >
             <span className="absolute right-[-40px] top-1/2 h-[224px] w-[224px] -translate-y-1/2 bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-surface-strong)_34%,transparent)_0%,transparent_70%)] blur-2xl" />
-            <MobileLogoField className="pointer-events-auto absolute right-[-12px] top-0 h-[calc(100%_-_28px)] w-[clamp(208px,64vw,272px)]" />
+            <MobileLogoField
+              webGLActive={particleReady}
+              className="pointer-events-auto absolute right-[-12px] top-0 h-[calc(100%_-_28px)] w-[clamp(208px,64vw,272px)]"
+            />
+            {compactMotion === true && webGLMotion === true && introReady ? (
+              <HeroParticles
+                compact
+                onReady={handleParticleReady}
+                className="absolute right-[-12px] top-0 h-[calc(100%_-_28px)] w-[clamp(208px,64vw,272px)]"
+              />
+            ) : null}
             <span className="absolute bottom-[12px] right-[20px] flex items-center gap-[8px] label-mono text-[10px] tracking-[1.3px] text-steel-200">
               <span className="h-[6px] w-[6px] bg-power" />
               Mission support / active

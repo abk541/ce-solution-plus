@@ -6,6 +6,7 @@ import { cn } from '@/lib/cn';
 import { ScrollTrigger } from '@/lib/gsap';
 import {
   useCompactMotion,
+  useFullMotion,
   useMotionAllowed,
   usePrefersReducedMotion,
 } from '@/hooks/usePrefersReducedMotion';
@@ -33,6 +34,7 @@ export function ScrambleText({
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
   const compactMotion = useCompactMotion();
+  const fullMotion = useFullMotion();
 
   useEffect(() => {
     const node = ref.current;
@@ -42,6 +44,7 @@ export function ScrambleText({
     // Each character gets a settle point; later characters resolve later.
     const settleAt = chars.map((_, i) => (i / Math.max(chars.length - 1, 1)) * 0.62 + Math.random() * 0.3);
     const total = 560 * speed;
+    const compactFallback = compactMotion === true && fullMotion !== true;
     let raf = 0;
     let interval = 0;
     let startedAt = 0;
@@ -69,7 +72,7 @@ export function ScrambleText({
     };
     const start = () => {
       startedAt = performance.now();
-      if (compactMotion === true) {
+      if (compactFallback) {
         render(startedAt);
         interval = window.setInterval(() => {
           if (render(performance.now())) window.clearInterval(interval);
@@ -81,7 +84,7 @@ export function ScrambleText({
 
     let observer: IntersectionObserver | null = null;
     let trigger: ScrollTrigger | null = null;
-    if (compactMotion === true) {
+    if (fullMotion !== true) {
       observer = new IntersectionObserver(
         ([entry]) => {
           if (!entry?.isIntersecting) return;
@@ -107,7 +110,7 @@ export function ScrambleText({
       window.clearInterval(interval);
       node.textContent = text;
     };
-  }, [compactMotion, text, speed, motionAllowed, reducedMotion]);
+  }, [compactMotion, fullMotion, text, speed, motionAllowed, reducedMotion]);
 
   return (
     <span className={cn('inline-block', className)}>

@@ -8,6 +8,7 @@ import { about } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
   useCompactMotion,
+  useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -18,6 +19,7 @@ export function About() {
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
   const compactMotion = useCompactMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
@@ -65,7 +67,7 @@ export function About() {
         }, 0);
       });
 
-      if (compactMotion === true) {
+      if (compactMotion === true && fullMotion !== true) {
         gsap.fromTo(
           '[data-about-grid]',
           { x: -7, y: -5 },
@@ -106,7 +108,7 @@ export function About() {
     }, root);
 
     return () => ctx.revert();
-  }, [compactMotion, motionAllowed, reducedMotion]);
+  }, [compactMotion, fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section

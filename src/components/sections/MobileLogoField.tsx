@@ -49,7 +49,13 @@ function seededRandom(seed: number) {
  * keeps the mark visibly powered. Work pauses whenever the hero leaves the
  * viewport or the document is hidden.
  */
-export function MobileLogoField({ className }: { className?: string }) {
+export function MobileLogoField({
+  className,
+  webGLActive = false,
+}: {
+  className?: string;
+  webGLActive?: boolean;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reducedMotion = usePrefersReducedMotion();
@@ -57,7 +63,7 @@ export function MobileLogoField({ className }: { className?: string }) {
   useEffect(() => {
     const host = hostRef.current;
     const canvas = canvasRef.current;
-    if (!host || !canvas || reducedMotion) return;
+    if (!host || !canvas || reducedMotion || webGLActive) return;
     if (
       window.matchMedia(
         '(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
@@ -328,7 +334,7 @@ export function MobileLogoField({ className }: { className?: string }) {
       host.removeEventListener('pointerleave', cancelPointer);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, webGLActive]);
 
   return (
     <div
@@ -338,10 +344,16 @@ export function MobileLogoField({ className }: { className?: string }) {
     >
       <LogoMark
         tone="light"
-        className="pointer-events-none absolute left-[55%] top-1/2 w-[72%] -translate-x-1/2 -translate-y-1/2 opacity-90 motion-reduce:opacity-100"
+        className={cn(
+          'pointer-events-none absolute left-[55%] top-1/2 w-[72%] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-[var(--motion-feature)] motion-reduce:opacity-100',
+          webGLActive ? 'opacity-0' : 'opacity-90',
+        )}
       />
       <span
-        className="pointer-events-none absolute left-[55%] top-1/2 aspect-[340/304] w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden"
+        className={cn(
+          'pointer-events-none absolute left-[55%] top-1/2 aspect-[340/304] w-[72%] -translate-x-1/2 -translate-y-1/2 overflow-hidden',
+          webGLActive && 'hidden',
+        )}
         style={
           {
             WebkitMaskImage: `url("${MARK_SRC}")`,
@@ -357,7 +369,13 @@ export function MobileLogoField({ className }: { className?: string }) {
       >
         <span className="mobile-logo-energy-pass absolute -bottom-1/4 -top-1/4 -left-1/3 w-[22%] rotate-12 bg-linear-to-r from-transparent via-power-bright/80 to-transparent" />
       </span>
-      <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 block h-full w-full" />
+      <canvas
+        ref={canvasRef}
+        className={cn(
+          'pointer-events-none absolute inset-0 h-full w-full',
+          webGLActive ? 'hidden' : 'block',
+        )}
+      />
     </div>
   );
 }

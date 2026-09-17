@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react';
 import { useEffect, useRef } from 'react';
 
-import { useRichMotion } from '@/hooks/usePrefersReducedMotion';
+import { useFullMotion } from '@/hooks/usePrefersReducedMotion';
 import { sitePath } from '@/lib/site-path';
 
 /**
@@ -13,13 +13,14 @@ import { sitePath } from '@/lib/site-path';
  */
 export function Backdrop() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const richMotion = useRichMotion();
+  const fullMotion = useFullMotion();
 
   useEffect(() => {
     const root = rootRef.current;
-    if (!root || richMotion !== true) return;
+    if (!root || fullMotion !== true) return;
 
     let frame = 0;
+    let resetTimer = 0;
     let nextX = 50;
     let nextY = 26;
     const paint = () => {
@@ -28,16 +29,34 @@ export function Backdrop() {
       root.style.setProperty('--ambient-y', `${nextY}%`);
     };
     const move = (event: PointerEvent) => {
+      // Mouse/trackpad keeps the continuous desktop light. A phone receives
+      // the same response on contact without repainting throughout a scroll.
+      if (event.pointerType === 'touch') return;
       nextX = (event.clientX / window.innerWidth) * 100;
       nextY = (event.clientY / window.innerHeight) * 100;
       if (!frame) frame = requestAnimationFrame(paint);
     };
+    const touch = (event: PointerEvent) => {
+      if (event.pointerType !== 'touch') return;
+      window.clearTimeout(resetTimer);
+      nextX = (event.clientX / window.innerWidth) * 100;
+      nextY = (event.clientY / window.innerHeight) * 100;
+      if (!frame) frame = requestAnimationFrame(paint);
+      resetTimer = window.setTimeout(() => {
+        nextX = 50;
+        nextY = 26;
+        if (!frame) frame = requestAnimationFrame(paint);
+      }, 520);
+    };
     window.addEventListener('pointermove', move, { passive: true });
+    window.addEventListener('pointerdown', touch, { passive: true });
     return () => {
       window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerdown', touch);
+      window.clearTimeout(resetTimer);
       cancelAnimationFrame(frame);
     };
-  }, [richMotion]);
+  }, [fullMotion]);
 
   return (
     <div
@@ -48,8 +67,8 @@ export function Backdrop() {
     >
       <div className="absolute inset-0 grid-lines opacity-55" />
 
-      {/* Desktop-only pointer light. Touch and reduced-motion users see the
-          same field held at its calm default position. */}
+      {/* Pointer light follows a cursor continuously and answers a phone tap
+          with a short positional pulse. */}
       <div className="absolute inset-0 opacity-70 [background:radial-gradient(34rem_circle_at_var(--ambient-x)_var(--ambient-y),rgba(93,131,161,0.15),transparent_72%)]" />
 
       {/* Column rules — anchor the schematic grid the sections are laid out on. */}

@@ -10,9 +10,11 @@ import {
   Points,
   Scene,
   ShaderMaterial,
+  Vector2,
   WebGLRenderer,
 } from 'three';
 
+import { LogoMark } from '@/components/ui/Logo';
 import { cn } from '@/lib/cn';
 import { ScrollTrigger, gsap } from '@/lib/gsap';
 import { sitePath } from '@/lib/site-path';
@@ -189,7 +191,15 @@ function buildScatter(count: number, radius: number): Float32Array {
   return out;
 }
 
-export function HeroParticles({ className }: { className?: string }) {
+export function HeroParticles({
+  className,
+  compact = false,
+  onReady,
+}: {
+  className?: string;
+  compact?: boolean;
+  onReady?: () => void;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const [mark, setMark] = useState<Float32Array | null>(null);
@@ -208,6 +218,10 @@ export function HeroParticles({ className }: { className?: string }) {
       live = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (failed) onReady?.();
+  }, [failed, onReady]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -238,6 +252,7 @@ export function HeroParticles({ className }: { className?: string }) {
     geometry.setAttribute('aScatter', new BufferAttribute(buildScatter(COUNT, 5.2), 3));
     geometry.setAttribute('aRand', new BufferAttribute(rand, 1));
     geometry.setAttribute('aSize', new BufferAttribute(size, 1));
+    geometry.setDrawRange(0, compact ? 4800 : COUNT);
 
     const material = new ShaderMaterial({
       vertexShader: VERTEX,
@@ -251,9 +266,9 @@ export function HeroParticles({ className }: { className?: string }) {
         uRelease: { value: 0 },
         uSize: { value: 26 },
         uPixelRatio: { value: 1 },
-        uPointer: { value: [999, 999] },
+        uPointer: { value: new Vector2(999, 999) },
         uPush: { value: 0 },
-        uBurstAt: { value: [0, 0] },
+        uBurstAt: { value: new Vector2(0, 0) },
         uBurst: { value: 1 },
         uOpacity: { value: reducedMotion ? 0.95 : 0 },
         // Mineral and steel keep the constellation crisp. Vermilion remains
@@ -280,24 +295,25 @@ export function HeroParticles({ className }: { className?: string }) {
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = host;
       if (!w || !h) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      const dpr = Math.min(window.devicePixelRatio || 1, coarsePointer ? 1.5 : 2);
       renderer.setPixelRatio(dpr);
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
-      camera.position.z = w < 768 ? 8.6 : 6.2;
+      camera.position.z = compact ? 4.55 : w < 768 ? 8.6 : 6.2;
       camera.updateProjectionMatrix();
 
       // Keyed off the window so it matches the `lg:` breakpoint the layout uses.
       const wide = window.innerWidth >= 1024;
-      points.scale.setScalar(wide ? 1.25 : 1);
-      points.position.x = wide ? 3.3 : 0;
-      points.position.y = wide ? -0.15 : 0.1;
+      points.scale.setScalar(compact ? 0.96 : wide ? 1.25 : 1);
+      points.position.x = compact ? 0.08 : wide ? 3.3 : 0;
+      points.position.y = compact ? 0.05 : wide ? -0.15 : 0.1;
 
       halfH = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
       halfW = halfH * camera.aspect;
 
       material.uniforms.uPixelRatio.value = dpr;
-      material.uniforms.uSize.value = w < 768 ? 20 : 26;
+      material.uniforms.uSize.value = compact ? 11 : w < 768 ? 20 : 26;
     };
     resize();
 
@@ -314,40 +330,125 @@ export function HeroParticles({ className }: { className?: string }) {
 
     const pointer = { x: 999, y: 999, tx: 999, ty: 999 };
     let burstTween: gsap.core.Tween | null = null;
-
-    const onPointerMove = (event: PointerEvent) => {
-      const [x, y] = toField(event.clientX, event.clientY);
-      pointer.tx = x;
-      pointer.ty = y;
-      gsap.to(material.uniforms.uPush, { value: 1, duration: 0.5, ease: 'power2.out', overwrite: true });
-    };
-
-    const onPointerLeave = () => {
-      gsap.to(material.uniforms.uPush, { value: 0, duration: 0.7, ease: 'power2.out', overwrite: true });
-    };
-
-    const onPointerDown = (event: PointerEvent) => {
-      const [x, y] = toField(event.clientX, event.clientY);
-      material.uniforms.uBurstAt.value = [x, y];
-      burstTween?.kill();
-      material.uniforms.uBurst.value = 0;
-      burstTween = gsap.to(material.uniforms.uBurst, { value: 1, duration: 1.15, ease: 'power2.out' });
-    };
+    let pushTween: gsap.core.Tween | null = null;
+    let touchPointerId: number | null = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartedAt = 0;
+    let touchMoved = false;
 
     const interactivePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-    if (!reducedMotion && interactivePointer) {
+    const isInsideHost = (clientX: number, clientY: number) => {
+      const rect = host.getBoundingClientRect();
+      return (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      );
+    };
+
+    const updatePointer = (event: PointerEvent, snap = false) => {
+      const [x, y] = toField(event.clientX, event.clientY);
+      pointer.tx = x;
+      pointer.ty = y;
+      if (snap) {
+        pointer.x = x;
+        pointer.y = y;
+      }
+    };
+
+    const setPush = (value: number, tweenDuration: number) => {
+      pushTween?.kill();
+      pushTween = gsap.to(material.uniforms.uPush, {
+        value,
+        duration: tweenDuration,
+        ease: 'power2.out',
+        overwrite: true,
+      });
+    };
+
+    const fireBurst = (event: PointerEvent) => {
+      const [x, y] = toField(event.clientX, event.clientY);
+      material.uniforms.uBurstAt.value.set(x, y);
+      burstTween?.kill();
+      material.uniforms.uBurst.value = 0;
+      burstTween = gsap.to(material.uniforms.uBurst, {
+        value: 1,
+        duration: 1.15,
+        ease: 'power2.out',
+      });
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (interactivePointer) {
+        updatePointer(event);
+        setPush(1, 0.5);
+        return;
+      }
+
+      if (touchPointerId !== event.pointerId) return;
+      updatePointer(event);
+      if (Math.hypot(event.clientX - touchStartX, event.clientY - touchStartY) > 12) {
+        touchMoved = true;
+      }
+    };
+
+    const onPointerLeave = () => {
+      setPush(0, 0.7);
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!event.isPrimary) return;
+      if (interactivePointer) {
+        fireBurst(event);
+        return;
+      }
+      if (!isInsideHost(event.clientX, event.clientY)) return;
+
+      touchPointerId = event.pointerId;
+      touchStartX = event.clientX;
+      touchStartY = event.clientY;
+      touchStartedAt = performance.now();
+      touchMoved = false;
+      updatePointer(event, true);
+      setPush(1, 0.18);
+    };
+
+    const finishTouch = (event: PointerEvent, cancelled: boolean) => {
+      if (touchPointerId !== event.pointerId) return;
+      const travel = Math.hypot(event.clientX - touchStartX, event.clientY - touchStartY);
+      const elapsed = performance.now() - touchStartedAt;
+      const confirmedTap =
+        !cancelled &&
+        !touchMoved &&
+        travel <= 12 &&
+        elapsed <= 650 &&
+        isInsideHost(event.clientX, event.clientY);
+
+      if (confirmedTap) fireBurst(event);
+      touchPointerId = null;
+      touchMoved = false;
+      setPush(0, 0.55);
+    };
+
+    const onPointerUp = (event: PointerEvent) => finishTouch(event, false);
+    const onPointerCancel = (event: PointerEvent) => finishTouch(event, true);
+
+    if (!reducedMotion) {
       window.addEventListener('pointermove', onPointerMove, { passive: true });
       window.addEventListener('pointerdown', onPointerDown, { passive: true });
-      document.addEventListener('pointerleave', onPointerLeave);
+      if (interactivePointer) {
+        document.addEventListener('pointerleave', onPointerLeave);
+      } else {
+        window.addEventListener('pointerup', onPointerUp, { passive: true });
+        window.addEventListener('pointercancel', onPointerCancel, { passive: true });
+      }
     }
 
     let visible = true;
-    const io = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-    });
-    io.observe(host);
-
+    let documentVisible = !document.hidden;
     let raf = 0;
     let last = performance.now();
     let elapsed = 0;
@@ -355,17 +456,46 @@ export function HeroParticles({ className }: { className?: string }) {
     const renderOnce = () => renderer.render(scene, camera);
 
     const tick = () => {
-      raf = requestAnimationFrame(tick);
-      if (!visible) return;
+      raf = 0;
+      if (!visible || !documentVisible) return;
       const now = performance.now();
       elapsed += Math.min((now - last) / 1000, 0.05);
       last = now;
       pointer.x += (pointer.tx - pointer.x) * 0.12;
       pointer.y += (pointer.ty - pointer.y) * 0.12;
       material.uniforms.uTime.value = elapsed;
-      material.uniforms.uPointer.value = [pointer.x, pointer.y];
+      material.uniforms.uPointer.value.set(pointer.x, pointer.y);
       renderOnce();
+      raf = requestAnimationFrame(tick);
     };
+
+    const stopLoop = () => {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    };
+
+    const startLoop = () => {
+      if (reducedMotion || raf || !visible || !documentVisible) return;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = Boolean(entry?.isIntersecting);
+        if (visible) startLoop();
+        else stopLoop();
+      },
+      { rootMargin: '120px 0px' },
+    );
+    io.observe(host);
+
+    const onVisibilityChange = () => {
+      documentVisible = !document.hidden;
+      if (documentVisible) startLoop();
+      else stopLoop();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     let intro: gsap.core.Timeline | null = null;
     let trigger: ScrollTrigger | null = null;
@@ -373,13 +503,17 @@ export function HeroParticles({ className }: { className?: string }) {
     if (reducedMotion) {
       // Static frame at the assembled monogram; no loop, no scroll binding.
       renderOnce();
+      onReady?.();
     } else {
-      tick();
+      startLoop();
 
       intro = gsap
         .timeline()
         .to(material.uniforms.uOpacity, { value: 0.95, duration: 1.4, ease: 'power2.out' }, 0)
         .to(material.uniforms.uAssemble, { value: 1, duration: 2.8, ease: 'ce-spring-soft' }, 0.15);
+
+      renderOnce();
+      onReady?.();
 
       // Leaving the hero loosens the constellation and fades it out.
       trigger = ScrollTrigger.create({
@@ -398,18 +532,22 @@ export function HeroParticles({ className }: { className?: string }) {
       intro?.kill();
       trigger?.kill();
       burstTween?.kill();
+      pushTween?.kill();
       ro.disconnect();
       io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerCancel);
       document.removeEventListener('pointerleave', onPointerLeave);
-      cancelAnimationFrame(raf);
+      stopLoop();
       geometry.dispose();
       material.dispose();
       renderer.domElement.remove();
       renderer.dispose();
     };
-  }, [mark, reducedMotion]);
+  }, [compact, mark, onReady, reducedMotion]);
 
   return (
     <div className={cn('pointer-events-none', className)} aria-hidden="true">
@@ -417,7 +555,14 @@ export function HeroParticles({ className }: { className?: string }) {
       {/* Fallback for no-WebGL / decode failure: a static glow. */}
       {failed ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-[44vmin] w-[44vmin] [background:radial-gradient(closest-side,color-mix(in_srgb,var(--color-surface-strong)_28%,transparent),transparent_72%)]" />
+          <div className="absolute h-[44vmin] w-[44vmin] [background:radial-gradient(closest-side,color-mix(in_srgb,var(--color-surface-strong)_28%,transparent),transparent_72%)]" />
+          <LogoMark
+            tone="light"
+            className={cn(
+              'relative opacity-80',
+              compact ? 'w-[72%]' : 'ml-auto mr-[12%] w-[min(34vw,30rem)]',
+            )}
+          />
         </div>
       ) : null}
     </div>

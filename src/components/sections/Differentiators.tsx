@@ -8,6 +8,7 @@ import { cn } from '@/lib/cn';
 import { duration, ease, gsap, ScrollTrigger } from '@/lib/gsap';
 import {
   useCompactMotion,
+  useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -19,6 +20,7 @@ export function Differentiators() {
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
   const compactMotion = useCompactMotion();
+  const fullMotion = useFullMotion();
   const total = differentiators.items.length;
 
   useIsomorphicLayoutEffect(() => {
@@ -26,6 +28,7 @@ export function Differentiators() {
     if (!root) return;
 
     const animate = !reducedMotion && motionAllowed === true;
+    const compactFallback = compactMotion === true && fullMotion !== true;
     const items = Array.from(root.querySelectorAll<HTMLElement>('[data-diff-item]'));
     const compactAnimations: Animation[] = [];
     let compactObserver: IntersectionObserver | null = null;
@@ -92,7 +95,7 @@ export function Differentiators() {
       }
 
       items.forEach((node, index) => {
-        if (compactMotion === true) return;
+        if (fullMotion !== true) return;
 
         ScrollTrigger.create({
           trigger: node,
@@ -130,7 +133,7 @@ export function Differentiators() {
       });
     }, root);
 
-    if (animate && compactMotion === true) {
+    if (animate && compactFallback) {
       const revealed = new WeakSet<HTMLElement>();
       compactObserver = new IntersectionObserver(
         (entries) => {
@@ -199,7 +202,7 @@ export function Differentiators() {
       compactAnimations.forEach((animation) => animation.cancel());
       ctx.revert();
     };
-  }, [compactMotion, motionAllowed, reducedMotion]);
+  }, [compactMotion, fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section

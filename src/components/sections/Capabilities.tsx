@@ -23,6 +23,7 @@ export function Capabilities() {
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    const compactFallback = compactMotion === true && fullMotion !== true;
 
     const ctx = gsap.context(() => {
       if (reducedMotion || motionAllowed !== true) return;
@@ -97,7 +98,7 @@ export function Capabilities() {
       const index = Math.min(capabilities.length, Math.floor(p * capabilities.length) + 1);
       let states: Array<{ card: HTMLElement; weight: number }> = [];
 
-      if (compactMotion === true) {
+      if (compactFallback) {
         const railRect = rail.getBoundingClientRect();
         const focusX = railRect.left + railRect.width / 2;
         const falloff = Math.max(railRect.width * 0.72, 1);
@@ -125,7 +126,7 @@ export function Capabilities() {
         }
       }
 
-      if (compactMotion === true) {
+      if (compactFallback) {
         states.forEach(({ card, weight }) => {
           card.style.setProperty('--cap-scale', String(0.95 + weight * 0.05));
           card.style.setProperty('--cap-y', `${6 - weight * 10}px`);
@@ -136,7 +137,7 @@ export function Capabilities() {
       }
     };
     const onRail = () => {
-      if (rail && compactMotion === true) {
+      if (rail && compactFallback) {
         rail.setAttribute('data-moving', 'true');
         window.clearTimeout(settleTimer);
         settleTimer = window.setTimeout(() => {
@@ -216,7 +217,7 @@ export function Capabilities() {
           <div className="shell">
             <div
               data-capability-grid
-              className="flex w-max snap-x snap-mandatory gap-px bg-border-command/40 md:[perspective:1400px] lg:gap-6 lg:bg-transparent"
+              className="flex w-max snap-x snap-mandatory gap-px bg-border-command/40 [perspective:1400px] [transform-style:preserve-3d] lg:gap-6 lg:bg-transparent"
             >
               {capabilities.map((capability) => (
                 <article

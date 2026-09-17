@@ -10,6 +10,7 @@ import { trust } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
   useCompactMotion,
+  useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -20,6 +21,7 @@ export function TrustStatement() {
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
   const compactMotion = useCompactMotion();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
@@ -55,7 +57,7 @@ export function TrustStatement() {
         },
       );
 
-      if (compactMotion === true) {
+      if (compactMotion === true && fullMotion !== true) {
         gsap.fromTo(
           '[data-trust-drift]',
           { x: 10, y: -7, rotate: -1.5 },
@@ -71,7 +73,7 @@ export function TrustStatement() {
     }, root);
 
     return () => ctx.revert();
-  }, [compactMotion, motionAllowed, reducedMotion]);
+  }, [compactMotion, fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} className="relative z-10 overflow-hidden bg-ink-950 text-steel-300">

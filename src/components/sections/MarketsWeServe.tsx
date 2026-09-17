@@ -5,6 +5,7 @@ import { useRef } from 'react';
 
 import { SectionTag } from '@/components/ui/SectionTag';
 import { markets } from '@/content/site';
+import { cn } from '@/lib/cn';
 import { duration, ease, gsap } from '@/lib/gsap';
 import { sitePath } from '@/lib/site-path';
 import { useCursorPlate } from '@/hooks/useCursorPlate';
@@ -33,6 +34,7 @@ export function MarketsWeServe() {
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (!root || reducedMotion || motionAllowed !== true) return;
+    const compactFallback = compactMotion === true && fullMotion !== true;
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -48,10 +50,10 @@ export function MarketsWeServe() {
         },
       );
 
-      // Desktop only: the section pins and the row scrubs sideways. Below lg the
-      // same markup is a native snap-scroll carousel.
-      const mm = gsap.matchMedia();
-      if (fullMotion === true) mm.add('(min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)', () => {
+      // Full choreography is input-agnostic: native vertical scrolling drives
+      // the same pinned horizontal sequence on touch and fine-pointer devices.
+      // Touch is never routed through a synthetic scroller.
+      if (fullMotion === true) {
         const track = trackRef.current;
         const stage = stageRef.current;
         if (!track || !stage) return;
@@ -60,16 +62,30 @@ export function MarketsWeServe() {
         );
 
         const distance = () => Math.max(0, track.scrollWidth - stage.clientWidth + 64);
-        const updateCardDepth = () => {
+        let trackBaseLeft = 0;
+        let focusX = stage.clientWidth / 2;
+        let falloff = Math.max(stage.clientWidth * 0.52, 1);
+        let cardCenters = cards.map((card) => card.offsetLeft + card.offsetWidth / 2);
+        let lastPercent = -1;
+
+        const measureGeometry = () => {
+          const currentX = Number(gsap.getProperty(track, 'x')) || 0;
+          const trackRect = track.getBoundingClientRect();
           const stageRect = stage.getBoundingClientRect();
-          const focusX = stageRect.left + stageRect.width / 2;
-          const falloff = Math.max(stageRect.width * 0.52, 1);
-          const states = cards.map((card) => {
-            const rect = card.getBoundingClientRect();
+          trackBaseLeft = trackRect.left - currentX;
+          focusX = stageRect.left + stageRect.width / 2;
+          falloff = Math.max(stageRect.width * 0.52, 1);
+          cardCenters = cards.map((card) => card.offsetLeft + card.offsetWidth / 2);
+        };
+
+        const updateCardDepth = () => {
+          const currentX = Number(gsap.getProperty(track, 'x')) || 0;
+          const states = cards.map((card, index) => {
+            const center = trackBaseLeft + currentX + cardCenters[index];
             const offset = gsap.utils.clamp(
               -1,
               1,
-              (rect.left + rect.width / 2 - focusX) / falloff,
+              (center - focusX) / falloff,
             );
             const weight = 1 - Math.abs(offset);
             return { card, offset, weight };
@@ -90,6 +106,22 @@ export function MarketsWeServe() {
           });
         };
 
+        const updateProgress = (progress: number) => {
+          const scale = Math.max(progress, 0.02);
+          if (progressBarRef.current) {
+            gsap.set(progressBarRef.current, { scaleX: scale });
+          }
+          if (mobileProgressBarRef.current) {
+            gsap.set(mobileProgressBarRef.current, { scaleX: scale });
+          }
+          const percent = Math.round(progress * 100);
+          if (percent === lastPercent) return;
+          lastPercent = percent;
+          const label = `${String(percent).padStart(3, '0')}%`;
+          if (progressValueRef.current) progressValueRef.current.textContent = label;
+          if (mobileProgressValueRef.current) mobileProgressValueRef.current.textContent = label;
+        };
+
         const tween = gsap.to(track, {
           x: () => -distance(),
           ease: 'none',
@@ -102,15 +134,13 @@ export function MarketsWeServe() {
             invalidateOnRefresh: true,
             onUpdate: (self) => {
               updateCardDepth();
-              const progress = self.progress;
-              if (progressBarRef.current) {
-                gsap.set(progressBarRef.current, { scaleX: Math.max(progress, 0.02) });
-              }
-              if (progressValueRef.current) {
-                progressValueRef.current.textContent = `${String(Math.round(progress * 100)).padStart(3, '0')}%`;
-              }
+              updateProgress(self.progress);
             },
-            onRefresh: updateCardDepth,
+            onRefresh: (self) => {
+              measureGeometry();
+              updateCardDepth();
+              updateProgress(self.progress);
+            },
           },
         });
 
@@ -127,10 +157,14 @@ export function MarketsWeServe() {
           if (progressValueRef.current) {
             progressValueRef.current.textContent = '000%';
           }
+          if (mobileProgressBarRef.current) {
+            gsap.set(mobileProgressBarRef.current, { clearProps: 'transform' });
+          }
+          if (mobileProgressValueRef.current) {
+            mobileProgressValueRef.current.textContent = '000%';
+          }
         };
-      });
-
-      return () => mm.revert();
+      }
     }, root);
 
     const rail = railRef.current;
@@ -140,7 +174,7 @@ export function MarketsWeServe() {
     let lastMobilePercent = -1;
     const updateMobileRail = () => {
       mobileFrame = 0;
-      if (!rail || compactMotion !== true) return;
+      if (!rail || !compactFallback) return;
 
       const max = Math.max(rail.scrollWidth - rail.clientWidth, 0);
       const progress = max > 0 ? rail.scrollLeft / max : 0;
@@ -175,7 +209,7 @@ export function MarketsWeServe() {
       });
     };
     const onMobileRail = () => {
-      if (rail && compactMotion === true) {
+      if (rail && compactFallback) {
         rail.setAttribute('data-moving', 'true');
         window.clearTimeout(settleTimer);
         settleTimer = window.setTimeout(() => {
@@ -185,7 +219,7 @@ export function MarketsWeServe() {
       }
       if (!mobileFrame) mobileFrame = window.requestAnimationFrame(updateMobileRail);
     };
-    if (compactMotion === true) {
+    if (compactFallback) {
       rail?.addEventListener('scroll', onMobileRail, { passive: true });
       window.addEventListener('resize', onMobileRail, { passive: true });
       mobileFrame = window.requestAnimationFrame(updateMobileRail);
@@ -214,7 +248,7 @@ export function MarketsWeServe() {
     <section ref={rootRef} id="markets" className="relative z-10 overflow-hidden bg-surface-intermediate text-foreground-secondary">
       <div
         ref={stageRef}
-        className="relative flex flex-col justify-center py-20 md:py-28 lg:h-screen lg:py-0"
+        className="relative flex h-[100svh] min-h-[34rem] flex-col justify-center py-14 [@media(max-height:500px)]:min-h-0 [@media(max-height:500px)]:py-8 md:py-20 lg:h-screen lg:min-h-0 lg:py-0"
       >
         <div className="shell">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -233,11 +267,17 @@ export function MarketsWeServe() {
           data-market-rail
           role="region"
           aria-label="Markets served"
-          className="mt-10 overflow-x-auto pb-4 [scrollbar-width:none] lg:mt-12 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden"
+          className={cn(
+            'mt-8 [scrollbar-width:none] lg:mt-12 lg:overflow-visible lg:pb-0 [&::-webkit-scrollbar]:hidden',
+            fullMotion === true ? 'overflow-visible pb-0' : 'overflow-x-auto pb-4',
+          )}
         >
           <div
             ref={trackRef}
-            className="flex w-max snap-x snap-mandatory gap-px bg-border-command/45 px-5 md:px-10 lg:snap-none lg:[perspective:1400px] lg:[transform-style:preserve-3d] lg:will-change-transform xl:px-14"
+            className={cn(
+              'flex w-max gap-px bg-border-command/45 px-5 [perspective:1400px] [transform-style:preserve-3d] will-change-transform md:px-10 xl:px-14',
+              fullMotion === true ? 'snap-none' : 'snap-x snap-mandatory',
+            )}
           >
             {markets.items.map((market, index) => (
               <MarketCard key={market.id} market={market} index={index} />
@@ -246,7 +286,9 @@ export function MarketsWeServe() {
         </div>
 
         <div className="shell mt-5 flex items-center gap-4 lg:hidden" aria-hidden="true">
-          <span className="label-mono text-[0.56rem] text-foreground-secondary">Swipe</span>
+          <span className="label-mono text-[0.56rem] text-foreground-secondary">
+            {fullMotion === true ? 'Scroll' : 'Swipe'}
+          </span>
           <span className="relative h-px flex-1 overflow-hidden bg-border-command/45">
             <span
               ref={mobileProgressBarRef}
@@ -292,7 +334,7 @@ function MarketCard({
       ref={ref}
       data-market-card
       tabIndex={0}
-      className="group relative aspect-4/5 w-[78vw] shrink-0 snap-start overflow-hidden bg-ink-950 outline-none transition-transform duration-[var(--motion-ui)] active:scale-[0.99] sm:w-[20rem] lg:aspect-auto lg:h-[52vh] lg:w-[41.6vh] lg:transition-none lg:[backface-visibility:hidden]"
+      className="group relative h-[min(43svh,97.5vw)] w-[78vw] shrink-0 snap-start overflow-hidden bg-ink-950 outline-none [backface-visibility:hidden] transition-transform duration-[var(--motion-ui)] active:scale-[0.99] sm:h-[min(48svh,25rem)] sm:w-[20rem] lg:aspect-auto lg:h-[52vh] lg:w-[41.6vh] lg:transition-none"
     >
       <div data-market-surface className="relative h-full w-full">
         {/* Slightly oversized so the parallax shift never exposes an edge. */}
