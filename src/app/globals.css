@@ -463,6 +463,14 @@
   display: block;
 }
 
+/* The static range marker is the inverse of the live reactive logo. This also
+   covers large touch-first tablets and reduced-motion desktops. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-hero-static-art] {
+    display: none;
+  }
+}
+
 @media (width < 64rem), (hover: none), (pointer: coarse) {
   [data-kinetic-ghost],
   [data-instrument-sweep] {
