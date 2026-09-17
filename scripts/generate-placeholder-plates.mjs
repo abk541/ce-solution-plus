@@ -17,12 +17,12 @@ import { fileURLToPath } from 'node:url';
 
 const OUT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../public/images');
 
-const INK = '#252f3e';
-const NAVY = '#2a3b55';
-const NAVY_LIGHT = '#2f4668';
-const STEEL = '#bbcae4';
-const ACCENT = '#5dc0d1';
-const SIGNAL = '#ecf1f7';
+const INK = '#10283E';
+const NAVY = '#163B5C';
+const NAVY_LIGHT = '#1F5078';
+const STEEL = '#BFD0DC';
+const ACCENT = '#FF5C3D';
+const SIGNAL = '#F2F3EF';
 
 /** Deterministic PRNG so regenerating never churns the files. */
 function rng(seed) {

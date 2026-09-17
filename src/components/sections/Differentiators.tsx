@@ -89,12 +89,12 @@ export function Differentiators() {
             </p>
 
             <div className="mt-12 flex items-center gap-5">
-              <span className="label-mono text-[0.65rem] text-accent tabular-nums">
+              <span className="label-mono text-[0.65rem] text-power-bright tabular-nums">
                 {String(activeIndex + 1).padStart(2, '0')}
               </span>
               <span className="relative h-px flex-1 max-w-48 bg-ink-700">
                 <span
-                  className="absolute inset-y-0 left-0 bg-accent transition-[width] duration-[var(--motion-reveal)] ease-[var(--ease-spring)]"
+                  className="absolute inset-y-0 left-0 bg-power transition-[width] duration-[var(--motion-reveal)] ease-[var(--ease-spring)]"
                   style={{ width: `${((activeIndex + 1) / total) * 100}%` }}
                 />
               </span>
@@ -117,7 +117,7 @@ export function Differentiators() {
                 aria-hidden="true"
                 className={cn(
                   'absolute left-0 top-0 h-full w-px origin-top transition-colors duration-[var(--motion-ui)]',
-                  activeIndex === index ? 'bg-accent' : 'bg-ink-700',
+                  activeIndex === index ? 'bg-power' : 'bg-ink-700',
                 )}
               />
 
@@ -129,7 +129,7 @@ export function Differentiators() {
                   <span
                     className={cn(
                       'tabular-nums transition-colors duration-[var(--motion-ui)]',
-                      activeIndex === index ? 'text-accent' : 'text-steel-400',
+                      activeIndex === index ? 'text-power-bright' : 'text-steel-400',
                     )}
                   >
                     {item.label}
@@ -180,7 +180,7 @@ export function Differentiators() {
  */
 function KineticWord({ word, reducedMotion }: { word: string; reducedMotion: boolean }) {
   return (
-    <span className="relative inline-block whitespace-nowrap text-accent">
+    <span className="relative inline-block whitespace-nowrap text-power">
       <span className="relative z-10">{word}</span>
       {!reducedMotion ? (
         <>
@@ -194,7 +194,7 @@ function KineticWord({ word, reducedMotion }: { word: string; reducedMotion: boo
           <span
             data-kinetic-ghost
             aria-hidden="true"
-            className="absolute inset-0 z-0 select-none text-accent-dim [animation:register-shift_7s_steps(1,end)_infinite_reverse,register-clip_7s_steps(1,end)_infinite]"
+            className="absolute inset-0 z-0 select-none text-power/45 [animation:register-shift_7s_steps(1,end)_infinite_reverse,register-clip_7s_steps(1,end)_infinite]"
           >
             {word}
           </span>
@@ -202,7 +202,7 @@ function KineticWord({ word, reducedMotion }: { word: string; reducedMotion: boo
       ) : null}
       <span
         aria-hidden="true"
-        className="absolute -bottom-1 left-0 h-px w-full bg-accent/50"
+        className="absolute -bottom-1 left-0 h-[2px] w-full bg-power/65"
       />
     </span>
   );

@@ -28,9 +28,9 @@ const BASE =
   'group relative inline-flex items-center justify-center gap-3 overflow-hidden whitespace-nowrap rounded-xs px-7 py-4 label-mono transition-[background-color,border-color,color,scale] duration-[var(--motion-micro)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50';
 
 const VARIANTS: Record<Variant, string> = {
-  solid: 'bg-accent text-ink-950 hover:bg-accent-bright',
+  solid: 'clip-command bg-power text-power-ink hover:bg-power-bright',
   outline:
-    'border border-ink-600 text-steel-100 hover:border-accent/60 hover:text-paper',
+    'border border-power/60 text-paper hover:border-power hover:bg-power hover:text-power-ink',
   ghost: 'text-steel-300 hover:text-accent',
 };
 

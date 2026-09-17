@@ -260,7 +260,7 @@ function FieldLabel({
       htmlFor={htmlFor}
       className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-foreground-muted transition-colors duration-[var(--motion-micro)] group-focus-within/field:text-accent"
     >
-      <span className="text-accent tabular-nums">{index}</span>
+      <span className="text-power-bright tabular-nums">{index}</span>
       {children}
       {required ? <span className="text-signal-bright">*</span> : null}
     </label>

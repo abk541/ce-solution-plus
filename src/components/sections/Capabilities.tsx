@@ -84,7 +84,7 @@ export function Capabilities() {
               standard.
             </p>
             <p className="label-mono text-[0.6rem] text-foreground-secondary">
-              <span data-cap-readout className="text-accent tabular-nums">
+              <span data-cap-readout className="text-power-bright tabular-nums">
                 01
               </span>
               <span aria-hidden="true" className="mx-2 text-foreground-muted">/</span>
@@ -111,69 +111,69 @@ export function Capabilities() {
               data-capability-grid
               className="flex w-max snap-x snap-mandatory gap-px bg-border-command/40 lg:gap-6 lg:bg-transparent"
             >
-          {capabilities.map((capability) => (
-            <article
-              key={capability.id}
-              tabIndex={0}
-              aria-labelledby={`cap-${capability.id}`}
-              className="group relative flex min-h-[21rem] w-[82vw] shrink-0 snap-start flex-col justify-between border border-border-command/45 bg-surface-panel p-7 outline-none transition-[background-color,border-color,transform] duration-[var(--motion-ui)] active:scale-[0.99] hover:border-accent/70 hover:bg-surface-canvas focus-visible:border-foreground-primary focus-visible:bg-surface-canvas sm:w-[24rem] md:min-h-[23rem] md:p-9"
-            >
-              <span
-                data-cell-rule
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-px origin-left bg-border-command/55"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-accent transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
-              />
-
-              <div data-cell-body>
-                <div className="flex items-center justify-between">
-                  <span className="label-mono text-[0.65rem] text-foreground-secondary tabular-nums transition-colors duration-[var(--motion-ui)] group-hover:text-accent group-focus-visible:text-accent">
-                    {capability.index}
-                  </span>
-                  <svg
-                    viewBox="0 0 12 12"
-                    aria-hidden="true"
-                    className="h-3 w-3 text-foreground-secondary transition-all duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:rotate-90 group-hover:text-accent group-focus-visible:rotate-90 group-focus-visible:text-accent"
-                  >
-                    <path d="M6 0v12M0 6h12" stroke="currentColor" strokeWidth="1" />
-                  </svg>
-                </div>
-
-                <h3
-                  id={`cap-${capability.id}`}
-                  className="mt-8 text-[1.35rem] font-bold leading-tight tracking-tight text-foreground-primary md:text-2xl"
+              {capabilities.map((capability) => (
+                <article
+                  key={capability.id}
+                  tabIndex={0}
+                  aria-labelledby={`cap-${capability.id}`}
+                  className="group relative flex min-h-[22rem] w-[82vw] shrink-0 snap-start flex-col justify-between overflow-hidden border border-border-command/45 bg-surface-canvas p-7 outline-none transition-[background-color,border-color,transform] duration-[var(--motion-ui)] active:scale-[0.99] hover:-translate-y-1 hover:border-power/70 hover:bg-ink-850 focus-visible:border-foreground-primary focus-visible:bg-ink-850 sm:w-[24rem] md:min-h-[24rem] md:p-9"
                 >
-                  {capability.title}
-                </h3>
-                <p className="mt-4 text-[0.92rem] leading-relaxed text-foreground-secondary">
-                  {capability.summary}
-                </p>
-              </div>
+                  <span
+                    data-cell-rule
+                    aria-hidden="true"
+                    className="absolute inset-x-0 top-0 h-px origin-left bg-border-command/55"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-0 top-0 h-1 origin-left scale-x-0 bg-power transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                  />
 
-              {/* PLACEHOLDER tags — see src/content/site.ts. */}
-              <div
-                data-hover-details
-                className="mt-8 grid grid-rows-[1fr]"
-              >
-                <div className="overflow-hidden">
-                  <span aria-hidden="true" className="mb-4 block h-px w-full bg-border-command/45" />
-                  <ul className="flex flex-wrap gap-2">
-                    {capability.tags.map((item) => (
-                      <li
-                        key={item}
-                        className="border border-border-command/45 px-2.5 py-2 label-mono text-[0.55rem] leading-none text-foreground-secondary"
+                  <div data-cell-body>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[clamp(2.8rem,5vw,4.7rem)] font-medium leading-none tracking-[-0.08em] text-border-command/45 tabular-nums transition-colors duration-[var(--motion-ui)] group-hover:text-power group-focus-visible:text-power">
+                        {capability.index}
+                      </span>
+                      <svg
+                        viewBox="0 0 12 12"
+                        aria-hidden="true"
+                        className="h-4 w-4 text-foreground-secondary transition-all duration-[var(--motion-ui)] ease-[var(--ease-spring)] group-hover:rotate-90 group-hover:text-power group-focus-visible:rotate-90 group-focus-visible:text-power"
                       >
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </article>
-          ))}
+                        <path d="M6 0v12M0 6h12" stroke="currentColor" strokeWidth="1" />
+                      </svg>
+                    </div>
+
+                    <h3
+                      id={`cap-${capability.id}`}
+                      className="mt-6 text-[1.45rem] font-extrabold uppercase leading-[1.02] tracking-[-0.035em] text-foreground-primary md:text-[1.75rem]"
+                    >
+                      {capability.title}
+                    </h3>
+                    <p className="mt-4 text-[0.92rem] leading-relaxed text-foreground-secondary">
+                      {capability.summary}
+                    </p>
+                  </div>
+
+                  {/* PLACEHOLDER tags — see src/content/site.ts. */}
+                  <div className="mt-8 grid grid-rows-[1fr]">
+                    <div className="overflow-hidden">
+                      <span
+                        aria-hidden="true"
+                        className="mb-4 block h-px w-full bg-border-command/45"
+                      />
+                      <ul className="flex flex-wrap gap-2">
+                        {capability.tags.map((item) => (
+                          <li
+                            key={item}
+                            className="border border-border-command/45 px-2.5 py-2 label-mono text-[0.55rem] leading-none text-foreground-secondary"
+                          >
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </div>

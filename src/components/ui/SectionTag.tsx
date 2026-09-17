@@ -27,10 +27,10 @@ export function SectionTag({ children, index, tone = 'dark', className }: Sectio
     >
       <span
         aria-hidden="true"
-        className={cn('h-px w-8', isLight ? 'bg-accent-ink/70' : 'bg-accent/70')}
+        className={cn('h-[2px] w-8', isLight ? 'bg-accent-ink/70' : 'bg-power/85')}
       />
       {index ? (
-        <span className={cn('tabular-nums', isLight ? 'text-accent-ink' : 'text-accent')}>
+        <span className={cn('tabular-nums', isLight ? 'text-accent-ink' : 'text-power-bright')}>
           {index}
         </span>
       ) : null}

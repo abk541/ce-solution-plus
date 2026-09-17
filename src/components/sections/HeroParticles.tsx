@@ -256,10 +256,10 @@ export function HeroParticles({ className }: { className?: string }) {
         uBurstAt: { value: [0, 0] },
         uBurst: { value: 1 },
         uOpacity: { value: reducedMotion ? 0.95 : 0 },
-        // Atlantic Command neutrals keep the constellation crisp; cyan remains
-        // reserved for the smaller signal details around it.
-        uColorEdge: { value: new Color('#BBCAE4') },
-        uColorCore: { value: new Color('#ECF1F7') },
+        // Mineral and steel keep the constellation crisp. Vermilion remains
+        // reserved for structural rails so the field never reads as neon.
+        uColorEdge: { value: new Color('#BFD0DC') },
+        uColorCore: { value: new Color('#F2F3EF') },
       },
     });
 
@@ -289,7 +289,8 @@ export function HeroParticles({ className }: { className?: string }) {
 
       // Keyed off the window so it matches the `lg:` breakpoint the layout uses.
       const wide = window.innerWidth >= 1024;
-      points.position.x = wide ? 2.85 : 0;
+      points.scale.setScalar(wide ? 1.25 : 1);
+      points.position.x = wide ? 3.3 : 0;
       points.position.y = wide ? -0.15 : 0.1;
 
       halfH = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
@@ -416,7 +417,7 @@ export function HeroParticles({ className }: { className?: string }) {
       {/* Fallback for no-WebGL / decode failure: a static glow. */}
       {failed ? (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-[40vmin] w-[40vmin] rounded-full [background:radial-gradient(closest-side,color-mix(in_srgb,var(--color-accent)_16%,transparent),transparent_70%)]" />
+          <div className="h-[44vmin] w-[44vmin] [background:radial-gradient(closest-side,color-mix(in_srgb,var(--color-surface-strong)_28%,transparent),transparent_72%)]" />
         </div>
       ) : null}
     </div>

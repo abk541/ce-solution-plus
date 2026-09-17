@@ -126,7 +126,7 @@ export function MarketsWeServe() {
           <span className="relative h-px flex-1 bg-border-command/45">
             <span
               ref={progressBarRef}
-              className="absolute inset-y-0 left-0 w-full origin-left scale-x-[0.02] bg-accent"
+              className="absolute inset-y-0 left-0 w-full origin-left scale-x-[0.02] bg-power"
             />
           </span>
           <span ref={progressValueRef} className="label-mono text-[0.6rem] text-foreground-secondary tabular-nums">
@@ -169,7 +169,7 @@ function MarketCard({
       </span>
       <span
         aria-hidden="true"
-        className="absolute inset-0 bg-linear-to-t from-ink-950 via-ink-950/70 to-ink-950/10"
+        className="absolute inset-0 bg-linear-to-t from-ink-950 via-ink-950/48 to-ink-950/5"
       />
       {/* Specular sheen tracking the pointer. */}
       <span
@@ -179,7 +179,7 @@ function MarketCard({
       />
       <span
         aria-hidden="true"
-        className="absolute inset-0 border border-transparent transition-colors duration-[var(--motion-ui)] group-hover:border-accent/40 group-focus-visible:border-accent/40"
+        className="absolute inset-0 border border-transparent transition-colors duration-[var(--motion-ui)] group-hover:border-power/50 group-focus-visible:border-accent/55"
       />
 
       <span className="absolute left-5 top-5 label-mono text-[0.58rem] text-steel-300 tabular-nums">
@@ -193,7 +193,7 @@ function MarketCard({
         </h3>
         <span
           aria-hidden="true"
-          className="mt-3 block h-px w-8 origin-left bg-accent transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-[4] group-focus-visible:scale-x-[4]"
+          className="mt-3 block h-[3px] w-8 origin-left bg-power transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-[4] group-focus-visible:scale-x-[4]"
         />
         <div data-hover-details className="grid grid-rows-[1fr]">
           <div className="overflow-hidden">

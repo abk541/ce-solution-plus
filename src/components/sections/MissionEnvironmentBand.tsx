@@ -24,7 +24,7 @@ export function MissionEnvironmentBand() {
     <section
       id="mission-environments"
       aria-labelledby="mission-environments-title"
-      className="relative z-10 overflow-hidden border-y border-border-command/35 bg-surface-canvas text-foreground-primary"
+      className="relative z-10 overflow-hidden border-y border-power/50 bg-surface-canvas text-foreground-primary"
     >
       <div className="shell py-14 md:py-18 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12">
@@ -45,7 +45,7 @@ export function MissionEnvironmentBand() {
 
           <button
             type="button"
-            className="mission-band-control inline-flex min-h-11 w-fit items-center justify-center gap-3 justify-self-start border border-border-command/70 bg-surface-panel px-4 py-2.5 label-mono text-[0.62rem] text-foreground-primary transition-colors hover:border-accent hover:bg-surface-intermediate focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground-primary lg:justify-self-end lg:self-end"
+            className="mission-band-control inline-flex min-h-11 w-fit items-center justify-center gap-3 justify-self-start border border-border-command/70 bg-surface-panel px-4 py-2.5 label-mono text-[0.62rem] text-foreground-primary transition-colors hover:border-power hover:bg-surface-intermediate focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-foreground-primary lg:justify-self-end lg:self-end"
             aria-controls="mission-environments-track"
             aria-label={isPaused ? 'Resume mission environment band' : 'Pause mission environment band'}
             aria-pressed={isPaused}
@@ -58,16 +58,16 @@ export function MissionEnvironmentBand() {
       </div>
 
       <div
-        className={`mission-belt relative border-y border-border-command/40 bg-surface-panel${isPaused ? ' is-paused' : ''}`}
+        className={`mission-belt relative border-y border-border-command/55 bg-surface-intermediate${isPaused ? ' is-paused' : ''}`}
         data-paused={isPaused ? 'true' : 'false'}
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-linear-to-r from-surface-panel to-transparent md:w-24"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-linear-to-r from-surface-intermediate to-transparent md:w-24"
         />
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-linear-to-l from-surface-panel to-transparent md:w-24"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-linear-to-l from-surface-intermediate to-transparent md:w-24"
         />
 
         <div
@@ -100,19 +100,19 @@ function MissionSet({ duplicate = false }: { duplicate?: boolean }) {
       {missionEnvironments.map((mission, index) => (
         <li
           key={mission.icon}
-          className="mission-mark flex min-w-[15rem] shrink-0 items-center gap-4 border-r border-border-command/40 px-6 py-7 text-foreground-primary sm:min-w-[17rem] sm:px-8 md:py-8"
+          className="mission-mark flex min-w-[17rem] shrink-0 items-center gap-5 border-r border-border-command/55 px-7 py-9 text-foreground-primary sm:min-w-[19rem] sm:px-9 md:py-11"
         >
           <span
             aria-hidden="true"
-            className="mission-mark-icon grid size-12 shrink-0 place-items-center border border-border-command/55 bg-surface-canvas text-accent"
+            className="mission-mark-icon grid size-14 shrink-0 place-items-center border border-border-command/65 bg-surface-canvas text-foreground-primary"
           >
             <MissionIcon name={mission.icon} />
           </span>
           <span className="flex min-w-0 flex-col gap-1.5">
-            <span aria-hidden="true" className="label-mono text-[0.52rem] text-accent tabular-nums">
+            <span aria-hidden="true" className="label-mono text-[0.56rem] text-power-bright tabular-nums">
               {String(index + 1).padStart(2, '0')}
             </span>
-            <span className="text-sm font-semibold leading-tight tracking-[-0.01em] text-foreground-primary">
+            <span className="text-base font-bold leading-tight tracking-[-0.015em] text-foreground-primary">
               {mission.label}
             </span>
           </span>

@@ -165,10 +165,10 @@ export function LogoPreloader() {
         (particle.accent ? accentPath : paperPath).rect(x, y, size, size);
       }
       context.globalAlpha = 0.88 * (1 - disperse);
-      context.fillStyle = '#ECF1F7';
+      context.fillStyle = '#F2F3EF';
       context.fill(paperPath);
       context.globalAlpha = 0.68 * (1 - disperse);
-      context.fillStyle = '#5DC0D1';
+      context.fillStyle = '#FF5C3D';
       context.fill(accentPath);
       context.globalAlpha = 1;
 
@@ -215,7 +215,7 @@ export function LogoPreloader() {
             ey: Math.sin(exitAngle),
             delay: random() * 0.34,
             speed: 0.45 + random() * 0.55,
-            accent: random() > 0.82,
+            accent: random() > 0.88,
           });
         }
 
@@ -245,7 +245,7 @@ export function LogoPreloader() {
       aria-label={`${company.name} — preparing site`}
       className={[
         'fixed inset-0 z-100 h-[100dvh] min-h-[100svh] touch-none overflow-hidden overscroll-none',
-        'bg-[linear-gradient(180deg,#2F4668_0%,#252F3E_58%,#252F3E_100%)]',
+        'bg-[linear-gradient(180deg,#163B5C_0%,#10283E_58%,#10283E_100%)]',
         'transition-[opacity,transform] duration-[360ms] ease-[var(--ease-spring)]',
         leaving ? 'pointer-events-none -translate-y-[1.5%] opacity-0' : 'opacity-100',
       ].join(' ')}
@@ -260,7 +260,7 @@ export function LogoPreloader() {
         className={[
           'pointer-events-none absolute inset-0 transition-opacity duration-[560ms]',
           flaring ? 'opacity-100' : 'opacity-55',
-          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(93,192,209,0.12),transparent_70%)]',
+          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(53,94,147,0.22),transparent_70%)]',
         ].join(' ')}
       />
 
@@ -275,7 +275,7 @@ export function LogoPreloader() {
           leaving ? 'scale-[1.015] opacity-0' : '',
         ].join(' ')}
         style={{
-          backgroundColor: '#ECF1F7',
+          backgroundColor: '#F2F3EF',
           WebkitMaskImage: `url("${LOCKUP_SRC}")`,
           maskImage: `url("${LOCKUP_SRC}")`,
           WebkitMaskPosition: 'center',
@@ -298,7 +298,7 @@ export function LogoPreloader() {
           Mission support systems
         </span>
         <span aria-hidden="true" className="relative h-px w-32 overflow-hidden bg-paper/15">
-          <span className="absolute inset-y-0 w-12 bg-linear-to-r from-transparent via-accent to-transparent [animation:loader-scan_900ms_var(--ease-precise)_infinite]" />
+          <span className="absolute inset-y-0 w-12 bg-linear-to-r from-transparent via-power to-transparent [animation:loader-scan_900ms_var(--ease-precise)_infinite]" />
         </span>
       </div>
     </div>

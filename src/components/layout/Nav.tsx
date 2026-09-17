@@ -166,7 +166,7 @@ export function Nav() {
               />
             </span>
             <span aria-hidden="true" className="hidden h-6 w-px bg-ink-600 xl:block" />
-            <span className="hidden whitespace-nowrap label-mono text-[0.6rem] text-accent xl:block">
+            <span className="hidden whitespace-nowrap label-mono text-[0.6rem] text-power-bright xl:block">
               {company.designationShort}
             </span>
           </a>
@@ -185,12 +185,12 @@ export function Nav() {
                     isActive ? 'text-paper' : 'text-steel-400 hover:text-steel-100',
                   )}
                 >
-                  <span className="mr-2 text-accent tabular-nums">{link.index}</span>
+                  <span className="mr-2 text-power-bright tabular-nums">{link.index}</span>
                   {link.label}
                   <span
                     aria-hidden="true"
                     className={cn(
-                      'absolute inset-x-3 bottom-1.5 h-px origin-left bg-accent transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
+                      'absolute inset-x-3 bottom-1.5 h-[2px] origin-left bg-power transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
                       isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100',
                     )}
                   />
@@ -204,7 +204,7 @@ export function Nav() {
               href="#contact"
               variant="outline"
               strength={6}
-              className="hidden border-accent/40 px-5 py-3 text-[0.62rem] text-accent hover:border-accent hover:text-accent-bright sm:inline-flex lg:hidden xl:inline-flex"
+              className="hidden px-5 py-3 text-[0.62rem] sm:inline-flex lg:hidden xl:inline-flex"
             >
               Request capabilities
             </MagneticAction>
@@ -215,7 +215,7 @@ export function Nav() {
               onClick={toggleMenu}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
-              className="relative flex h-11 w-11 items-center justify-center rounded-xs border border-ink-600 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-accent/60 lg:hidden"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xs border border-ink-600 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-power/70 lg:hidden"
             >
               <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
               <span className="relative block h-3 w-5">
@@ -239,7 +239,7 @@ export function Nav() {
         <span
           ref={progressRef}
           aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-accent"
+          className="absolute inset-x-0 bottom-0 h-[2px] origin-left scale-x-0 bg-power"
         />
       </header>
 
@@ -277,7 +277,7 @@ export function Nav() {
                 type="button"
                 onClick={closeMenu}
                 aria-label="Close menu"
-                className="relative flex h-11 w-11 items-center justify-center rounded-xs border border-accent/45 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-accent"
+                className="relative flex h-11 w-11 items-center justify-center rounded-xs border border-power/60 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-power"
               >
                 <span aria-hidden="true" className="relative block h-4 w-4">
                   <span className="absolute left-0 top-2 h-px w-full rotate-45 bg-current" />
@@ -299,17 +299,17 @@ export function Nav() {
                   style={{ transitionDelay: `${index * 45}ms` }}
                   className={cn(
                     'flex items-baseline gap-5 border-b py-5 transition-[opacity,transform,border-color] duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
-                    isActive ? 'border-accent/60' : 'border-ink-800',
+                    isActive ? 'border-power/75' : 'border-ink-800',
                     menuOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
                   )}
                 >
-                  <span className="label-mono text-[0.65rem] text-accent tabular-nums">
+                  <span className="label-mono text-[0.65rem] text-power-bright tabular-nums">
                     {link.index}
                   </span>
                   <span
                     className={cn(
                       'font-grotesk text-3xl font-semibold tracking-tight',
-                      isActive ? 'text-accent-bright' : 'text-paper',
+                      isActive ? 'text-power-bright' : 'text-paper',
                     )}
                   >
                     {link.label}

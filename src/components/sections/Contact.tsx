@@ -70,12 +70,12 @@ export function Contact() {
           <span
             data-panel-edge
             aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-px origin-left bg-accent/70"
+            className="absolute inset-x-0 top-0 h-[3px] origin-left bg-power/90"
           />
           <span
             data-instrument-sweep
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 h-px w-16 bg-linear-to-r from-transparent via-accent to-transparent [animation:sweep-x_7s_cubic-bezier(0.45,0,0.55,1)_infinite]"
+            className="pointer-events-none absolute left-0 top-0 h-[3px] w-16 bg-linear-to-r from-transparent via-power to-transparent [animation:sweep-x_7s_cubic-bezier(0.45,0,0.55,1)_infinite]"
           />
 
           <div className="grid lg:grid-cols-12">

@@ -120,12 +120,12 @@ export function About() {
                 <li
                   key={credential.label}
                   data-credential
-                  className="group flex items-baseline justify-between gap-6 border-b border-border-command/45 py-4 transition-colors duration-[var(--motion-ui)] hover:border-accent/75"
+                  className="group flex items-baseline justify-between gap-6 border-b border-border-command/45 py-4 transition-colors duration-[var(--motion-ui)] hover:border-power/75"
                 >
                   <span className="font-grotesk text-base font-semibold tracking-tight text-foreground-primary">
                     {credential.label}
                   </span>
-                  <span className="label-mono text-[0.62rem] text-foreground-secondary transition-colors duration-[var(--motion-ui)] group-hover:text-accent">
+                  <span className="label-mono text-[0.62rem] text-foreground-secondary transition-colors duration-[var(--motion-ui)] group-hover:text-power-bright">
                     {credential.note}
                   </span>
                 </li>
@@ -140,7 +140,7 @@ export function About() {
               </p>
             ))}
 
-            <blockquote className="relative mt-10 border-l-2 border-accent bg-surface-canvas/65 px-7 py-6">
+            <blockquote className="relative mt-10 border-l-4 border-power bg-surface-canvas/75 px-7 py-7">
               <p className="font-grotesk text-[1.4rem] font-bold leading-snug tracking-[-0.03em] text-foreground-primary md:text-[1.65rem]">
                 {about.pullQuote}
               </p>
@@ -166,7 +166,7 @@ export function About() {
                 </dd>
                 <span
                   aria-hidden="true"
-                  className="absolute inset-x-6 bottom-0 h-px origin-left scale-x-0 bg-accent transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100"
+                  className="absolute inset-x-6 bottom-0 h-[3px] origin-left scale-x-0 bg-power transition-transform duration-[var(--motion-reveal)] ease-[var(--ease-spring)] group-hover:scale-x-100"
                 />
               </div>
             );

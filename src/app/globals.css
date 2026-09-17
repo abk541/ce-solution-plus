@@ -1,58 +1,63 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ *
- * CE Solution Plus — Atlantic Command design tokens
+ * CE Solution Plus — Strategic Command design tokens
  *
- * A medium-dark federal system derived from USWDS blue-warm and cyan roles:
- * charcoal navy carries the page, layered command blues create depth, and a
- * restrained cyan signal marks action. Existing ink/steel aliases remain as
- * compatibility tokens while semantic roles describe the intended use.
+ * A defense-forward federal system: command blue carries the page, hard cobalt
+ * planes create visual mass, and a restrained vermilion signal marks decisive
+ * action. Existing ink/steel aliases remain as compatibility tokens while
+ * semantic roles describe the intended use.
  * ------------------------------------------------------------------ */
 @theme {
-  /* Semantic roles: 60% canvas, 30% command surfaces, <10% signal cyan. */
-  --color-surface-canvas: #252f3e;
-  --color-surface-intermediate: #2a3b55;
-  --color-surface-panel: #2f4668;
-  --color-surface-strong: #345d96;
-  --color-foreground-primary: #ecf1f7;
-  --color-foreground-secondary: #bbcae4;
-  --color-foreground-muted: #a3b5d2;
-  --color-border-command: #7292c7;
-  --color-detail-signal: #5dc0d1;
+  /* Semantic roles: 55% deep command, 37% cobalt/armor, 3–5% signal. */
+  --color-surface-canvas: #10283e;
+  --color-surface-intermediate: #163b5c;
+  --color-surface-panel: #1f5078;
+  --color-surface-strong: #355e93;
+  --color-foreground-primary: #f2f3ef;
+  --color-foreground-secondary: #bfd0dc;
+  --color-foreground-muted: #a6bbc8;
+  --color-border-command: #5d83a1;
+  --color-detail-signal: #ff5c3d;
 
   /* Compatibility ramp for established components. */
-  --color-ink-950: #252f3e;
-  --color-ink-900: #2f4668;
-  --color-ink-850: #2a3b55;
-  --color-ink-800: #345d96;
-  --color-ink-700: #4b6f9f;
-  --color-ink-600: #7292c7;
-  --color-ink-500: #9ab2d4;
+  --color-ink-950: #10283e;
+  --color-ink-900: #163b5c;
+  --color-ink-850: #142f49;
+  --color-ink-800: #1f5078;
+  --color-ink-700: #35678d;
+  --color-ink-600: #5d83a1;
+  --color-ink-500: #83a4bb;
 
   /* Legacy field names now resolve to command surfaces, never pale sheets. */
-  --color-field-50: #252f3e;
-  --color-field-100: #2a3b55;
-  --color-field-200: #2f4668;
-  --color-field-300: #7292c7;
-  --color-mission-mist: #252f3e;
-  --color-equipment-steel: #2f4668;
-  --color-field-mist: #2a3b55;
-  --color-field-steel: #2f4668;
+  --color-field-50: #10283e;
+  --color-field-100: #163b5c;
+  --color-field-200: #1f5078;
+  --color-field-300: #5d83a1;
+  --color-mission-mist: #10283e;
+  --color-equipment-steel: #1f5078;
+  --color-field-mist: #163b5c;
+  --color-field-steel: #1f5078;
 
   /* Copy on command surfaces. The lightest value is icy blue, not white. */
-  --color-steel-400: #a3b5d2;
-  --color-steel-300: #bbcae4;
-  --color-steel-200: #d8e2f0;
-  --color-steel-100: #ecf1f7;
-  --color-paper: #ecf1f7;
-  --color-paper-dim: #d8e2f0;
-  --color-paper-line: #bbcae4;
+  --color-steel-400: #a6bbc8;
+  --color-steel-300: #bfd0dc;
+  --color-steel-200: #d8e2e8;
+  --color-steel-100: #f2f3ef;
+  --color-paper: #f2f3ef;
+  --color-paper-dim: #d8e2e8;
+  --color-paper-line: #bfd0dc;
 
-  /* Calm operational cyan, used for action and instrumentation only. */
-  --color-accent: #5dc0d1;
-  --color-accent-bright: #9bdce7;
-  --color-accent-dim: #46a7ba;
-  --color-accent-ink: #5dc0d1;
+  /* Cool instrumentation stays distinct from the high-energy action role. */
+  --color-accent: #bfd0dc;
+  --color-accent-bright: #f2f3ef;
+  --color-accent-dim: #7fa4bd;
+  --color-accent-ink: #355e93;
+
+  /* Command signal: primary actions, active rails and decisive numerals only. */
+  --color-power: #ff5c3d;
+  --color-power-bright: #ffad9e;
+  --color-power-ink: #10283e;
 
   /* Functional only — validation and destructive states. */
   --color-signal: #e77f85;
@@ -110,8 +115,8 @@
   }
 
   ::selection {
-    background-color: var(--color-accent);
-    color: var(--color-ink-950);
+    background-color: var(--color-power);
+    color: var(--color-power-ink);
   }
 
   :focus-visible {
@@ -186,8 +191,8 @@
 
 @utility grid-lines-light {
   background-image:
-    linear-gradient(to right, color-mix(in srgb, var(--color-accent) 10%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 10%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--color-accent) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-accent) 12%, transparent) 1px, transparent 1px);
   background-size: 72px 72px;
 }
 
@@ -252,8 +257,14 @@
   display: flex;
   width: max-content;
   min-width: 100%;
-  animation: mission-band-scroll 58s linear infinite;
+  animation: mission-band-scroll 46s linear infinite;
   will-change: transform;
+}
+
+/* Mechanical cut corners for the primary command action. */
+.clip-command {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 13px 100%, 0 calc(100% - 13px));
 }
 
 .mission-track[data-paused='true'] {

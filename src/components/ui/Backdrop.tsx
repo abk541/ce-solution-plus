@@ -7,8 +7,8 @@ import { useRichMotion } from '@/hooks/usePrefersReducedMotion';
 import { sitePath } from '@/lib/site-path';
 
 /**
- * Persistent command substrate: a fine cyan schematic grid, four full-height
- * column rules, and a static film grain over Atlantic Navy. Fixed,
+ * Persistent command substrate: a fine steel schematic grid, four full-height
+ * column rules, and a static film grain over Deep Command. Fixed,
  * non-interactive, and quiet enough to register as texture, not decoration.
  */
 export function Backdrop() {
@@ -50,7 +50,7 @@ export function Backdrop() {
 
       {/* Desktop-only pointer light. Touch and reduced-motion users see the
           same field held at its calm default position. */}
-      <div className="absolute inset-0 opacity-70 [background:radial-gradient(34rem_circle_at_var(--ambient-x)_var(--ambient-y),rgba(93,192,209,0.12),transparent_72%)]" />
+      <div className="absolute inset-0 opacity-70 [background:radial-gradient(34rem_circle_at_var(--ambient-x)_var(--ambient-y),rgba(93,131,161,0.15),transparent_72%)]" />
 
       {/* Column rules — anchor the schematic grid the sections are laid out on. */}
       <div className="shell absolute inset-x-0 top-0 h-full">
@@ -66,7 +66,7 @@ export function Backdrop() {
       </div>
 
       {/* Radial falloff keeps the grid from competing with body copy. */}
-      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_50%_0%,transparent_0%,rgba(37,47,62,0.78)_82%)]" />
+      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_50%_0%,transparent_0%,rgba(16,40,62,0.8)_82%)]" />
 
       <div
         className="absolute inset-0 hidden opacity-[0.035] mix-blend-soft-light [background-size:180px_180px] md:block"
