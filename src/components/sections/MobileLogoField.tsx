@@ -339,6 +339,7 @@ export function MobileLogoField({
   return (
     <div
       ref={hostRef}
+      data-mobile-logo-field
       aria-hidden="true"
       className={cn('relative touch-pan-y select-none', className)}
     >

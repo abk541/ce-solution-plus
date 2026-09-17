@@ -210,15 +210,23 @@ export function Hero() {
       {/* Sticky viewport lets the reactive mark hold briefly as content leaves. */}
       <div
         data-hero-viewport
-        className="relative flex flex-col overflow-hidden pb-[max(40px,env(safe-area-inset-bottom))] pt-[clamp(272px,40svh,336px)]"
+        className="relative flex min-h-[100svh] flex-col overflow-hidden pb-[max(40px,env(safe-area-inset-bottom))] pt-[clamp(272px,40svh,336px)]"
       >
         <div data-hero-scene aria-hidden="true" className="absolute inset-0 z-[2]">
           {richMotion === true && webGLMotion === true && introReady ? (
             <HeroParticles className="absolute inset-0 h-full w-full" />
           ) : null}
 
-          {/* Phones use the real CE mark plus a lightweight living field. The
-              crisp image carries the brand while the canvas supplies energy. */}
+          {compactMotion === true && webGLMotion === true && introReady ? (
+            <HeroParticles
+              compact
+              onReady={handleParticleReady}
+              className="absolute inset-0 h-full w-full"
+            />
+          ) : null}
+
+          {/* The real mark remains a crisp handoff/fallback while the compact
+              WebGL field now occupies the entire hero rather than this art box. */}
           <div
             data-hero-mobile-art
             className="absolute inset-x-0 top-[calc(64px+env(safe-area-inset-top))] h-[clamp(192px,32svh,256px)]"
@@ -228,13 +236,6 @@ export function Hero() {
               webGLActive={particleReady}
               className="pointer-events-auto absolute right-[-12px] top-0 h-[calc(100%_-_28px)] w-[clamp(208px,64vw,272px)]"
             />
-            {compactMotion === true && webGLMotion === true && introReady ? (
-              <HeroParticles
-                compact
-                onReady={handleParticleReady}
-                className="absolute right-[-12px] top-0 h-[calc(100%_-_28px)] w-[clamp(208px,64vw,272px)]"
-              />
-            ) : null}
             <span className="absolute bottom-[12px] right-[20px] flex items-center gap-[8px] label-mono text-[10px] tracking-[1.3px] text-steel-200">
               <span className="h-[6px] w-[6px] bg-power" />
               Mission support / active

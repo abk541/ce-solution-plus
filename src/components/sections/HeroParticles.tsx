@@ -46,6 +46,7 @@ const VERTEX = /* glsl */ `
   uniform float uPush;
   uniform vec2  uBurstAt;
   uniform float uBurst;
+  uniform float uInteractionScale;
 
   attribute vec3  aScatter;
   attribute float aRand;
@@ -72,15 +73,15 @@ const VERTEX = /* glsl */ `
     // under the glyph height or hovering dismantles the monogram.
     vec2 away = pos.xy - uPointer;
     float d = length(away);
-    float influence = smoothstep(0.5, 0.0, d) * uPush;
-    pos.xy += normalize(away + vec2(0.0001)) * influence * (0.14 + aRand * 0.10);
+    float influence = smoothstep(0.5 * uInteractionScale, 0.0, d) * uPush;
+    pos.xy += normalize(away + vec2(0.0001)) * influence * (0.14 + aRand * 0.10) * uInteractionScale;
 
     // Click shockwave: an expanding ring nudges whatever it passes through.
     vec2 fromBurst = pos.xy - uBurstAt;
     float bd = length(fromBurst);
-    float ringRadius = uBurst * 3.0;
-    float ring = smoothstep(0.4, 0.0, abs(bd - ringRadius));
-    pos.xy += normalize(fromBurst + vec2(0.0001)) * ring * 0.26 * (1.0 - uBurst);
+    float ringRadius = uBurst * 3.0 * uInteractionScale;
+    float ring = smoothstep(0.4 * uInteractionScale, 0.0, abs(bd - ringRadius));
+    pos.xy += normalize(fromBurst + vec2(0.0001)) * ring * 0.26 * uInteractionScale * (1.0 - uBurst);
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mv;
@@ -191,6 +192,39 @@ function buildScatter(count: number, radius: number): Float32Array {
   return out;
 }
 
+/**
+ * Stable normalized seeds for the compact field. Most points begin along all
+ * four viewport edges (and just beyond them), with a smaller interior population
+ * so the convergence reads as depth rather than a rectangular wipe.
+ */
+function buildFullBleedScatterSeeds(count: number): Float32Array {
+  const out = new Float32Array(count * 3);
+  let state = 0xce501;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+
+  for (let index = 0; index < count; index += 1) {
+    const outer = random() > 0.2;
+    if (outer) {
+      const edge = Math.floor(random() * 4);
+      const edgeDistance = 1.02 + random() * 0.28;
+      const alongEdge = (random() * 2 - 1) * 1.08;
+      out[index * 3] = edge === 1 ? edgeDistance : edge === 3 ? -edgeDistance : alongEdge;
+      out[index * 3 + 1] = edge === 0 ? edgeDistance : edge === 2 ? -edgeDistance : alongEdge;
+    } else {
+      const angle = random() * Math.PI * 2;
+      const radius = Math.sqrt(random()) * 0.92;
+      out[index * 3] = Math.cos(angle) * radius;
+      out[index * 3 + 1] = Math.sin(angle) * radius;
+    }
+    out[index * 3 + 2] = (random() - 0.5) * 4 - 0.8;
+  }
+
+  return out;
+}
+
 export function HeroParticles({
   className,
   compact = false,
@@ -220,8 +254,11 @@ export function HeroParticles({
   }, []);
 
   useEffect(() => {
-    if (failed) onReady?.();
-  }, [failed, onReady]);
+    // Compact mode already has the crisp MobileLogoField fallback beneath it.
+    // Keep that visible if WebGL/image sampling fails instead of replacing it
+    // with a second, full-viewport fallback mark.
+    if (failed && !compact) onReady?.();
+  }, [compact, failed, onReady]);
 
   useEffect(() => {
     const host = hostRef.current;
@@ -247,9 +284,17 @@ export function HeroParticles({
       size[i] = 0.3 + Math.pow(Math.random(), 3.9) * 3.2;
     }
 
+    const formedPositions = compact ? new Float32Array(mark.length) : mark;
+    const scatterPositions = compact
+      ? new Float32Array(COUNT * 3)
+      : buildScatter(COUNT, 5.2);
+    const fullBleedSeeds = compact ? buildFullBleedScatterSeeds(COUNT) : null;
+    const formedAttribute = new BufferAttribute(formedPositions, 3);
+    const scatterAttribute = new BufferAttribute(scatterPositions, 3);
+
     const geometry = new BufferGeometry();
-    geometry.setAttribute('position', new BufferAttribute(mark, 3));
-    geometry.setAttribute('aScatter', new BufferAttribute(buildScatter(COUNT, 5.2), 3));
+    geometry.setAttribute('position', formedAttribute);
+    geometry.setAttribute('aScatter', scatterAttribute);
     geometry.setAttribute('aRand', new BufferAttribute(rand, 1));
     geometry.setAttribute('aSize', new BufferAttribute(size, 1));
     geometry.setDrawRange(0, compact ? 4800 : COUNT);
@@ -270,6 +315,7 @@ export function HeroParticles({
         uPush: { value: 0 },
         uBurstAt: { value: new Vector2(0, 0) },
         uBurst: { value: 1 },
+        uInteractionScale: { value: 1 },
         uOpacity: { value: reducedMotion ? 0.95 : 0 },
         // Mineral and steel keep the constellation crisp. Vermilion remains
         // reserved for structural rails so the field never reads as neon.
@@ -287,42 +333,126 @@ export function HeroParticles({
     renderer.domElement.style.height = '100%';
     renderer.domElement.style.display = 'block';
     host.appendChild(renderer.domElement);
+    const compactTarget = compact
+      ? host.closest<HTMLElement>('[data-hero-scene]')?.querySelector<HTMLElement>('[data-mobile-logo-field]') ?? null
+      : null;
 
     // World units visible at the z=0 plane, used to map pointer -> field space.
     let halfH = 1;
     let halfW = 1;
+    let bufferWidth = 0;
+    let bufferHeight = 0;
+    let bufferDpr = 0;
+    let resizeFrame = 0;
+
+    const layoutBoxWithin = (element: HTMLElement, ancestor: HTMLElement) => {
+      let left = 0;
+      let top = 0;
+      let node: HTMLElement | null = element;
+
+      while (node && node !== ancestor) {
+        left += node.offsetLeft;
+        top += node.offsetTop;
+        node = node.offsetParent as HTMLElement | null;
+      }
+
+      return node === ancestor
+        ? { left, top, width: element.offsetWidth, height: element.offsetHeight }
+        : null;
+    };
 
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = host;
       if (!w || !h) return;
       const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, coarsePointer ? 1.5 : 2);
-      renderer.setPixelRatio(dpr);
-      renderer.setSize(w, h, false);
+      const pixelBudgetDpr = compact ? Math.sqrt(900_000 / (w * h)) : Number.POSITIVE_INFINITY;
+      const dpr = Math.max(
+        0.9,
+        Math.min(window.devicePixelRatio || 1, coarsePointer ? 1.5 : 2, pixelBudgetDpr),
+      );
+      if (w !== bufferWidth || h !== bufferHeight || Math.abs(dpr - bufferDpr) > 0.01) {
+        renderer.setPixelRatio(dpr);
+        renderer.setSize(w, h, false);
+        bufferWidth = w;
+        bufferHeight = h;
+        bufferDpr = dpr;
+      }
       camera.aspect = w / h;
-      camera.position.z = compact ? 4.55 : w < 768 ? 8.6 : 6.2;
+      camera.position.z = compact ? 6.2 : w < 768 ? 8.6 : 6.2;
       camera.updateProjectionMatrix();
-
-      // Keyed off the window so it matches the `lg:` breakpoint the layout uses.
-      const wide = window.innerWidth >= 1024;
-      points.scale.setScalar(compact ? 0.96 : wide ? 1.25 : 1);
-      points.position.x = compact ? 0.08 : wide ? 3.3 : 0;
-      points.position.y = compact ? 0.05 : wide ? -0.15 : 0.1;
 
       halfH = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
       halfW = halfH * camera.aspect;
 
+      // Keyed off the window so it matches the `lg:` breakpoint the layout uses.
+      const wide = window.innerWidth >= 1024;
+      if (compact && fullBleedSeeds) {
+        const layoutRoot = host.offsetParent as HTMLElement | null;
+        const hostBox = layoutRoot ? layoutBoxWithin(host, layoutRoot) : null;
+        const targetBox = compactTarget && layoutRoot
+          ? layoutBoxWithin(compactTarget, layoutRoot)
+          : null;
+
+        // Preserve the exact final scale/offset of the former compact canvas,
+        // but express it in this full-viewport camera. Only the approach path
+        // changes: the assembled monogram still lands in the same art anchor.
+        // Layout offsets deliberately ignore the scene's GSAP entrance transform,
+        // so a first measurement during scale-in remains correct after it clears.
+        const legacyHalfH = Math.tan((camera.fov * Math.PI) / 360) * 4.55;
+        const targetHeight = targetBox?.height ?? Math.min(h * 0.27, 228);
+        const targetCenterX = targetBox && hostBox
+          ? targetBox.left - hostBox.left + targetBox.width / 2 +
+            targetBox.height * (0.08 / (legacyHalfH * 2))
+          : w * 0.72;
+        const targetCenterY = targetBox && hostBox
+          ? targetBox.top - hostBox.top + targetBox.height / 2 -
+            targetBox.height * (0.05 / (legacyHalfH * 2))
+          : h * 0.22;
+        const formedHeightPx = targetHeight * ((2.9 * 0.96) / (legacyHalfH * 2));
+        const formedScale = (formedHeightPx / h) * ((halfH * 2) / 2.9);
+        const centerX = (targetCenterX / w * 2 - 1) * halfW;
+        const centerY = (1 - targetCenterY / h * 2) * halfH;
+
+        for (let index = 0; index < COUNT; index += 1) {
+          const offset = index * 3;
+          formedPositions[offset] = mark[offset] * formedScale + centerX;
+          formedPositions[offset + 1] = mark[offset + 1] * formedScale + centerY;
+          formedPositions[offset + 2] = mark[offset + 2] * formedScale;
+          scatterPositions[offset] = fullBleedSeeds[offset] * halfW;
+          scatterPositions[offset + 1] = fullBleedSeeds[offset + 1] * halfH;
+          scatterPositions[offset + 2] = fullBleedSeeds[offset + 2];
+        }
+        formedAttribute.needsUpdate = true;
+        scatterAttribute.needsUpdate = true;
+        points.scale.setScalar(1);
+        points.position.set(0, 0, 0);
+        material.uniforms.uInteractionScale.value = formedScale;
+      } else {
+        points.scale.setScalar(wide ? 1.25 : 1);
+        points.position.x = wide ? 3.3 : 0;
+        points.position.y = wide ? -0.15 : 0.1;
+        material.uniforms.uInteractionScale.value = 1;
+      }
+
       material.uniforms.uPixelRatio.value = dpr;
-      material.uniforms.uSize.value = compact ? 11 : w < 768 ? 20 : 26;
+      material.uniforms.uSize.value = compact ? 15 : w < 768 ? 20 : 26;
     };
     resize();
 
-    const ro = new ResizeObserver(resize);
+    const scheduleResize = () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        resize();
+      });
+    };
+    const ro = new ResizeObserver(scheduleResize);
     ro.observe(host);
+    if (compactTarget) ro.observe(compactTarget);
 
     /** Screen point -> field-local world coordinates. */
     const toField = (clientX: number, clientY: number) => {
-      const rect = host.getBoundingClientRect();
+      const rect = touchFieldRect ?? host.getBoundingClientRect();
       const nx = ((clientX - rect.left) / rect.width) * 2 - 1;
       const ny = -(((clientY - rect.top) / rect.height) * 2 - 1);
       return [nx * halfW - points.position.x, ny * halfH - points.position.y] as const;
@@ -336,11 +466,13 @@ export function HeroParticles({
     let touchStartY = 0;
     let touchStartedAt = 0;
     let touchMoved = false;
+    let touchFieldRect: DOMRect | null = null;
+    let touchTargetRect: DOMRect | null = null;
 
     const interactivePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
     const isInsideHost = (clientX: number, clientY: number) => {
-      const rect = host.getBoundingClientRect();
+      const rect = touchTargetRect ?? (compactTarget ?? host).getBoundingClientRect();
       return (
         clientX >= rect.left &&
         clientX <= rect.right &&
@@ -405,7 +537,19 @@ export function HeroParticles({
         fireBurst(event);
         return;
       }
-      if (!isInsideHost(event.clientX, event.clientY)) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest('a, button, input, textarea, select, [role="button"]')
+      ) {
+        return;
+      }
+      touchFieldRect = host.getBoundingClientRect();
+      touchTargetRect = (compactTarget ?? host).getBoundingClientRect();
+      if (!isInsideHost(event.clientX, event.clientY)) {
+        touchFieldRect = null;
+        touchTargetRect = null;
+        return;
+      }
 
       touchPointerId = event.pointerId;
       touchStartX = event.clientX;
@@ -430,6 +574,8 @@ export function HeroParticles({
       if (confirmedTap) fireBurst(event);
       touchPointerId = null;
       touchMoved = false;
+      touchFieldRect = null;
+      touchTargetRect = null;
       setPush(0, 0.55);
     };
 
@@ -534,6 +680,7 @@ export function HeroParticles({
       burstTween?.kill();
       pushTween?.kill();
       ro.disconnect();
+      cancelAnimationFrame(resizeFrame);
       io.disconnect();
       document.removeEventListener('visibilitychange', onVisibilityChange);
       window.removeEventListener('pointermove', onPointerMove);
@@ -553,7 +700,7 @@ export function HeroParticles({
     <div className={cn('pointer-events-none', className)} aria-hidden="true">
       <div ref={hostRef} className="h-full w-full" />
       {/* Fallback for no-WebGL / decode failure: a static glow. */}
-      {failed ? (
+      {failed && !compact ? (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="absolute h-[44vmin] w-[44vmin] [background:radial-gradient(closest-side,color-mix(in_srgb,var(--color-surface-strong)_28%,transparent),transparent_72%)]" />
           <LogoMark
