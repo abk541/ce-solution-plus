@@ -29,7 +29,7 @@ type Particle = {
   ey: number;
   delay: number;
   speed: number;
-  gold: boolean;
+  accent: boolean;
 };
 
 function clamp01(value: number) {
@@ -144,7 +144,7 @@ export function LogoPreloader() {
       const disperse = clamp01((elapsed - CONVERGE_MS - HOLD_MS) / DISPERSE_MS);
       const outward = disperse * disperse;
       const paperPath = new Path2D();
-      const goldPath = new Path2D();
+      const accentPath = new Path2D();
 
       context.clearRect(0, 0, width, height);
       for (const particle of particles) {
@@ -162,14 +162,14 @@ export function LogoPreloader() {
           size *= 1 + outward;
         }
 
-        (particle.gold ? goldPath : paperPath).rect(x, y, size, size);
+        (particle.accent ? accentPath : paperPath).rect(x, y, size, size);
       }
       context.globalAlpha = 0.88 * (1 - disperse);
-      context.fillStyle = '#eef1f5';
+      context.fillStyle = '#eaf0f1';
       context.fill(paperPath);
       context.globalAlpha = 0.82 * (1 - disperse);
-      context.fillStyle = '#d7b45e';
-      context.fill(goldPath);
+      context.fillStyle = '#8dafc0';
+      context.fill(accentPath);
       context.globalAlpha = 1;
 
       if (elapsed < FINISH_AT_MS) animationFrame = requestAnimationFrame(draw);
@@ -215,7 +215,7 @@ export function LogoPreloader() {
             ey: Math.sin(exitAngle),
             delay: random() * 0.34,
             speed: 0.45 + random() * 0.55,
-            gold: random() > 0.82,
+            accent: random() > 0.82,
           });
         }
 
@@ -245,7 +245,7 @@ export function LogoPreloader() {
       aria-label={`${company.name} — preparing site`}
       className={[
         'fixed inset-0 z-100 h-[100dvh] min-h-[100svh] touch-none overflow-hidden overscroll-none',
-        'bg-[linear-gradient(180deg,#172a4a_0%,#0d1930_48%,#060b18_100%)]',
+        'bg-[linear-gradient(180deg,#2b516a_0%,#18334a_52%,#102638_100%)]',
         'transition-[opacity,transform] duration-[360ms] ease-[var(--ease-spring)]',
         leaving ? 'pointer-events-none -translate-y-[1.5%] opacity-0' : 'opacity-100',
       ].join(' ')}
@@ -260,7 +260,7 @@ export function LogoPreloader() {
         className={[
           'pointer-events-none absolute inset-0 transition-opacity duration-[560ms]',
           flaring ? 'opacity-100' : 'opacity-55',
-          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(201,165,78,0.18),transparent_70%)]',
+          '[background:radial-gradient(45%_34%_at_50%_50%,rgba(141,175,192,0.2),transparent_70%)]',
         ].join(' ')}
       />
 

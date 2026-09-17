@@ -3,46 +3,47 @@
 /* ------------------------------------------------------------------ *
  * CE Solution Plus — design tokens
  *
- * Night navy, silver, gold.
- *
- *   navy   the ground. Deep enough to read as near-black, blue enough to
- *          never look like flat charcoal.
- *   silver the working neutral — all body copy, borders and UI sit here.
- *   gold   the single accent. Rationed to section indices, primary actions
- *          and hover states; it stops reading as precious the moment it is
- *          used for anything routine.
- *
- * The red at the bottom is functional only, so validation never looks like
- * brand styling.
+ * An institutional daylight system: mist and equipment steel carry the
+ * majority of the page, Federal Navy anchors high-emphasis sections, and
+ * Sky Steel is the restrained service accent. Existing ink/steel aliases are
+ * retained so established components inherit the new system safely.
  * ------------------------------------------------------------------ */
 @theme {
-  /* Base — night navy. */
-  --color-ink-950: #060b18;
-  --color-ink-900: #0a1224;
-  --color-ink-850: #0d172d;
-  --color-ink-800: #111d38;
-  --color-ink-700: #1a2a4d;
-  --color-ink-600: #263a66;
-  --color-ink-500: #35507f;
+  /* Federal Navy and its service-dark working shades. */
+  --color-ink-950: #18334a;
+  --color-ink-900: #1f3d54;
+  --color-ink-850: #26475e;
+  --color-ink-800: #2e5269;
+  --color-ink-700: #3b6074;
+  --color-ink-600: #4c7182;
+  --color-ink-500: #63808d;
 
-  /* Silver ramp. */
-  --color-steel-400: #929cad;
-  --color-steel-300: #9aa3b5;
-  --color-steel-200: #c0c7d4;
-  --color-steel-100: #dee3eb;
+  /* Daylight fields. Named tokens are the preferred surface contract. */
+  --color-field-50: #eaf0f1;
+  --color-field-100: #d7e1e4;
+  --color-field-200: #c5d2d7;
+  --color-field-300: #afc2c9;
+  --color-mission-mist: #d7e1e4;
+  --color-equipment-steel: #c5d2d7;
+  --color-field-mist: #d7e1e4;
+  --color-field-steel: #c5d2d7;
 
-  /* Light surfaces — cool silver, used for type on navy and the rare
-     light panel. */
-  --color-paper: #eef1f5;
-  --color-paper-dim: #e1e6ed;
-  --color-paper-line: #c9d0da;
+  /* Compatibility ramp for existing copy and controls on navy anchors. */
+  --color-steel-400: #b3c3c9;
+  --color-steel-300: #c5d2d7;
+  --color-steel-200: #d7e1e4;
+  --color-steel-100: #eaf0f1;
 
-  /* Accent — gold. 8.4:1 on ink-950. */
-  --color-accent: #c9a54e;
-  --color-accent-bright: #e0c078;
-  --color-accent-dim: #7a6329;
-  /* Text-safe gold for light surfaces (5.9:1 on --color-paper). */
-  --color-accent-ink: #7a5e1f;
+  /* Raised and document-like surfaces; intentionally cool, never white. */
+  --color-paper: #eaf0f1;
+  --color-paper-dim: #d7e1e4;
+  --color-paper-line: #c5d2d7;
+
+  /* Sky Steel reads on Federal Navy; accent-ink carries links on light fields. */
+  --color-accent: #8dafc0;
+  --color-accent-bright: #b8cdd5;
+  --color-accent-dim: #678b9c;
+  --color-accent-ink: #2b516a;
 
   /* Functional only — validation and destructive states. */
   --color-signal: #d0565a;
@@ -92,8 +93,8 @@
   }
 
   body {
-    background-color: var(--color-ink-950);
-    color: var(--color-steel-200);
+    background-color: var(--color-mission-mist);
+    color: var(--color-ink-900);
     font-family: var(--font-sans);
     font-feature-settings: 'cv05' 1, 'ss03' 1;
     overflow-x: hidden;
@@ -105,20 +106,23 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-accent-ink);
     outline-offset: 3px;
     border-radius: var(--radius-xs);
+    box-shadow: 0 0 0 4px var(--color-paper);
   }
 
   h1,
   h2,
   h3,
-  h4 {
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-grotesk);
     font-weight: 700;
     letter-spacing: -0.03em;
     text-wrap: balance;
-    color: var(--color-paper);
+    color: var(--color-ink-950);
   }
 
   p {
@@ -148,14 +152,12 @@
   text-transform: uppercase;
 }
 
-/* Large statement setting. Uppercase, tight, heavy — institutional/aerospace
-   rather than marketing-sans. */
+/* Large statement setting. Tight and heavy, with casing left to the content. */
 @utility display-editorial {
   font-family: var(--font-grotesk);
   font-weight: 800;
   letter-spacing: -0.035em;
   line-height: 0.92;
-  text-transform: uppercase;
 }
 
 @utility display-tight {
@@ -175,8 +177,8 @@
 
 @utility grid-lines-light {
   background-image:
-    linear-gradient(to right, color-mix(in srgb, #1b1f26 8%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in srgb, #1b1f26 8%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--color-ink-950) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-ink-950) 9%, transparent) 1px, transparent 1px);
   background-size: 72px 72px;
 }
 
@@ -209,6 +211,100 @@
   transform-origin: left center;
   height: 1px;
   background-color: var(--color-ink-600);
+}
+
+/* ------------------------------------------------------------------ *
+ * Mission band
+ *
+ * Two identical sets share one max-content track. Translating exactly half
+ * the duplicated track keeps the handoff seamless without a visual reset.
+ * ------------------------------------------------------------------ */
+.mission-belt {
+  --mission-band-edge: clamp(1rem, 5vw, 5rem);
+  position: relative;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--mission-band-edge),
+    #000 calc(100% - var(--mission-band-edge)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 var(--mission-band-edge),
+    #000 calc(100% - var(--mission-band-edge)),
+    transparent
+  );
+}
+
+.mission-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  animation: mission-band-scroll 58s linear infinite;
+  will-change: transform;
+}
+
+.mission-track[data-paused='true'] {
+  animation-play-state: paused;
+}
+
+.mission-set {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.mission-mark {
+  flex: none;
+}
+
+@keyframes mission-band-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mission-belt {
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .mission-track {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+
+  .mission-set {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 1.25rem;
+  }
+
+  .mission-set[data-duplicate='true'],
+  .mission-band-control {
+    display: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .mission-belt {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 /* ------------------------------------------------------------------ *

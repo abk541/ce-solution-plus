@@ -8,6 +8,7 @@ import { Contact } from '@/components/sections/Contact';
 import { Differentiators } from '@/components/sections/Differentiators';
 import { Hero } from '@/components/sections/Hero';
 import { MarketsWeServe } from '@/components/sections/MarketsWeServe';
+import { MissionEnvironmentBand } from '@/components/sections/MissionEnvironmentBand';
 import { TrustStatement } from '@/components/sections/TrustStatement';
 import { Backdrop } from '@/components/ui/Backdrop';
 import { BackToTop } from '@/components/ui/BackToTop';
@@ -29,6 +30,7 @@ export default function HomePage() {
       <main id="main" className="relative">
         <Hero />
         <About />
+        <MissionEnvironmentBand />
         <Capabilities />
         <Differentiators />
         <MarketsWeServe />

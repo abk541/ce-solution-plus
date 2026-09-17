@@ -87,7 +87,7 @@ export function HeroLattice({ className }: { className?: string }) {
 
     const drawReticle = (alpha: number) => {
       ctx.save();
-      ctx.strokeStyle = `rgba(110, 122, 146, ${0.24 * alpha})`;
+      ctx.strokeStyle = `rgba(141, 175, 192, ${0.26 * alpha})`;
       ctx.lineWidth = 1;
       for (let i = 1; i <= 5; i++) {
         ctx.beginPath();
@@ -114,10 +114,10 @@ export function HeroLattice({ className }: { className?: string }) {
 
         if (energy > 0.02) {
           const size = DOT + energy * 1.7;
-          ctx.fillStyle = `rgba(201, 162, 76, ${Math.min(0.95, energy * 0.95) * alpha})`;
+          ctx.fillStyle = `rgba(141, 175, 192, ${Math.min(0.95, energy * 0.95) * alpha})`;
           ctx.fillRect(px - size / 2, py - size / 2, size, size);
         } else {
-          ctx.fillStyle = `rgba(142, 153, 174, ${base * alpha})`;
+          ctx.fillStyle = `rgba(197, 210, 215, ${base * alpha})`;
           ctx.fillRect(px - DOT / 2, py - DOT / 2, DOT, DOT);
         }
       }
@@ -130,9 +130,9 @@ export function HeroLattice({ className }: { className?: string }) {
         originX + Math.cos(sweep) * maxRadius,
         originY + Math.sin(sweep) * maxRadius,
       );
-      grad.addColorStop(0, 'rgba(201, 162, 76, 0)');
-      grad.addColorStop(0.35, `rgba(201, 162, 76, ${0.42 * alpha})`);
-      grad.addColorStop(1, 'rgba(201, 162, 76, 0)');
+      grad.addColorStop(0, 'rgba(141, 175, 192, 0)');
+      grad.addColorStop(0.35, `rgba(141, 175, 192, ${0.42 * alpha})`);
+      grad.addColorStop(1, 'rgba(141, 175, 192, 0)');
       ctx.strokeStyle = grad;
       ctx.lineWidth = 1;
       ctx.beginPath();

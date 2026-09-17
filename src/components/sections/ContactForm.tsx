@@ -30,7 +30,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ENDPOINT = process.env.NEXT_PUBLIC_CONTACT_ENDPOINT;
 
 const fieldClass =
-  'peer w-full border-b border-ink-600 bg-transparent pb-3 pt-2 text-[0.95rem] text-paper outline-none transition-[border-color,box-shadow] duration-[var(--motion-micro)] placeholder:text-steel-400/70 hover:border-ink-500 focus:border-accent focus:shadow-[0_1px_0_var(--color-accent)]';
+  'peer w-full border-b border-field-300 bg-transparent pb-3 pt-2 text-[0.95rem] text-ink-950 outline-none transition-[border-color,box-shadow] duration-[var(--motion-micro)] placeholder:text-ink-700/60 hover:border-ink-700 focus:border-accent-ink focus:shadow-[0_1px_0_var(--color-accent-ink)]';
 
 export function ContactForm() {
   const [fields, setFields] = useState<Fields>(EMPTY);
@@ -102,15 +102,15 @@ export function ContactForm() {
     return (
       <div
         role="status"
-        className="relative flex min-h-[26rem] flex-col justify-center border border-ink-700 bg-ink-900/60 p-10"
+        className="relative flex min-h-[26rem] flex-col justify-center border border-field-300 bg-field-100 p-10"
       >
-        <span className="label-mono text-[0.62rem] text-accent">
+        <span className="label-mono text-[0.62rem] text-accent-ink">
           {status === 'sent' ? 'Transmission logged' : 'Email draft ready'}
         </span>
-        <p className="mt-6 font-grotesk text-2xl font-bold tracking-tight text-paper">
+        <p className="mt-6 font-grotesk text-2xl font-bold tracking-tight text-ink-950">
           {status === 'sent' ? 'Your requirement is with us.' : 'Review, then send.'}
         </p>
-        <p className="mt-4 max-w-md text-[0.95rem] leading-relaxed text-steel-300">
+        <p className="mt-4 max-w-md text-[0.95rem] leading-relaxed text-ink-700">
           {status === 'sent'
             ? 'A member of the team will respond directly. If it is time-critical, call the number listed and say so.'
             : 'Your email draft is ready. Review it in your mail app, then send it.'}
@@ -118,7 +118,7 @@ export function ContactForm() {
         <button
           type="button"
           onClick={() => setStatus('idle')}
-          className="mt-8 self-start label-mono text-[0.62rem] text-steel-400 underline underline-offset-8 transition-colors duration-[var(--motion-micro)] hover:text-accent"
+          className="mt-8 self-start label-mono text-[0.62rem] text-ink-700 underline underline-offset-8 transition-colors duration-[var(--motion-micro)] hover:text-accent-ink"
         >
           Submit another
         </button>
@@ -129,7 +129,7 @@ export function ContactForm() {
   return (
     <form noValidate onSubmit={handleSubmit} className="relative">
       {Object.values(errors).some(Boolean) ? (
-        <p role="alert" className="mb-7 border-l-2 border-signal-bright pl-4 text-sm text-signal-bright">
+        <p role="alert" className="mb-7 border-l-2 border-signal-ink pl-4 text-sm text-signal-ink">
           Check the highlighted fields before continuing.
         </p>
       ) : null}
@@ -181,7 +181,7 @@ export function ContactForm() {
             className={cn(fieldClass, 'appearance-none')}
           >
             {contact.interests.map((option) => (
-              <option key={option} value={option} className="bg-ink-900 text-paper">
+              <option key={option} value={option} className="bg-field-50 text-ink-950">
                 {option}
               </option>
             ))}
@@ -201,10 +201,10 @@ export function ContactForm() {
             aria-invalid={errors.message ? 'true' : undefined}
             aria-describedby={errors.message ? 'message-error' : undefined}
             placeholder="Scope, location, timeline, contract vehicle — whatever you have."
-            className={cn(fieldClass, 'resize-y', errors.message && 'border-signal')}
+            className={cn(fieldClass, 'resize-y', errors.message && 'border-signal-ink')}
           />
           {errors.message ? (
-            <p id="message-error" className="mt-2 label-mono text-[0.58rem] text-signal-bright">
+            <p id="message-error" className="mt-2 label-mono text-[0.58rem] text-signal-ink">
               {errors.message}
             </p>
           ) : null}
@@ -229,14 +229,14 @@ export function ContactForm() {
               ? 'Send requirement'
               : 'Open email draft'}
         </MagneticAction>
-        <p className="max-w-xs label-mono text-[0.58rem] leading-relaxed text-steel-400">
+        <p className="max-w-xs label-mono text-[0.58rem] leading-relaxed text-ink-700">
           {ENDPOINT ? 'Encrypted in transit' : 'Opens your mail client'} — no sensitive or
           classified information.
         </p>
       </div>
 
       {status === 'error' ? (
-        <p role="alert" className="mt-6 label-mono text-[0.6rem] text-signal-bright">
+        <p role="alert" className="mt-6 label-mono text-[0.6rem] text-signal-ink">
           Send failed. Email {company.email} directly.
         </p>
       ) : null}
@@ -258,11 +258,11 @@ function FieldLabel({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-steel-400 transition-colors duration-[var(--motion-micro)] group-focus-within/field:text-paper"
+      className="mb-3 flex items-center gap-3 label-mono text-[0.58rem] text-ink-700 transition-colors duration-[var(--motion-micro)] group-focus-within/field:text-accent-ink"
     >
-      <span className="text-accent tabular-nums">{index}</span>
+      <span className="text-accent-ink tabular-nums">{index}</span>
       {children}
-      {required ? <span className="text-signal-bright">*</span> : null}
+      {required ? <span className="text-signal-ink">*</span> : null}
     </label>
   );
 }
@@ -301,10 +301,10 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         aria-invalid={error ? 'true' : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
-        className={cn(fieldClass, error && 'border-signal')}
+        className={cn(fieldClass, error && 'border-signal-ink')}
       />
       {error ? (
-        <p id={`${id}-error`} className="mt-2 label-mono text-[0.58rem] text-signal-bright">
+        <p id={`${id}-error`} className="mt-2 label-mono text-[0.58rem] text-signal-ink">
           {error}
         </p>
       ) : null}

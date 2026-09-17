@@ -110,7 +110,11 @@ export function Hero() {
   }, [fullMotion, introReady, motionAllowed, reducedMotion]);
 
   return (
-    <section ref={rootRef} id="top" className="relative h-[100svh] lg:h-[118svh]">
+    <section
+      ref={rootRef}
+      id="top"
+      className="relative h-[100svh] bg-ink-950 text-steel-200 lg:h-[118svh]"
+    >
       {/* Sticky viewport so the constellation holds briefly as content leaves. */}
       <div className="sticky top-0 flex h-[100svh] flex-col justify-end overflow-hidden pb-10 pt-40 md:pb-14 md:pt-44">
         {richMotion === true && introReady ? (
@@ -130,7 +134,7 @@ export function Hero() {
           <span className="absolute inset-[28%] rotate-[32deg] rounded-[50%] border border-accent/20" />
           <span className="absolute left-1/2 top-0 h-full w-px bg-linear-to-b from-transparent via-ink-600/70 to-transparent" />
           <span className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-ink-600/70 to-transparent" />
-          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_18px_rgba(201,165,78,0.5)]" />
+          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent shadow-[0_0_18px_rgba(141,175,192,0.48)]" />
         </div>
 
         {/* Contrast behind the left-aligned type only, and kept light enough

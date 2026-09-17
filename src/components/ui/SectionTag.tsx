@@ -21,7 +21,7 @@ export function SectionTag({ children, index, tone = 'dark', className }: Sectio
     <div
       className={cn(
         'flex items-center gap-3 label-mono',
-        isLight ? 'text-ink-500' : 'text-steel-400',
+        isLight ? 'text-ink-700' : 'text-steel-400',
         className,
       )}
     >

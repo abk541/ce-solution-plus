@@ -110,14 +110,14 @@ const FRAGMENT = /* glsl */ `
     if (d > 0.5) discard;
 
     float f = smoothstep(0.5, 0.0, d);
-    // Tight core plus a wide halo reads as bloom; defocused points lose the core.
+    // A tight core and restrained halo keep the field crisp and instrument-like.
     float core = pow(f, mix(7.0, 1.6, vBlur));
-    float halo = pow(f, 1.6) * mix(0.30, 0.55, vBlur);
+    float halo = pow(f, 1.8) * mix(0.12, 0.24, vBlur);
     float alpha = min(core + halo, 1.0);
 
-    // Larger points skew white-hot, small ones keep the accent tint.
+    // Larger points lift toward the mist tone; small ones keep the steel tint.
     vec3 col = mix(uColorEdge, uColorCore, smoothstep(0.9, 3.0, vSize));
-    col += core * 0.35;
+    col += core * 0.12;
 
     float brightness = mix(0.45, 1.0, smoothstep(0.0, 2.5, vSize)) * (1.0 - vBlur * 0.35);
     gl_FragColor = vec4(col, alpha * uOpacity * brightness);
@@ -255,9 +255,9 @@ export function HeroParticles({ className }: { className?: string }) {
         uBurstAt: { value: [0, 0] },
         uBurst: { value: 1 },
         uOpacity: { value: reducedMotion ? 0.95 : 0 },
-        // Silver field with gold glint on the larger, brighter particles.
-        uColorEdge: { value: new Color('#9aa3b5') },
-        uColorCore: { value: new Color('#e8d7a4') },
+        // Steel field with a cool signal-blue glint on larger particles.
+        uColorEdge: { value: new Color('#8dafc0') },
+        uColorCore: { value: new Color('#eaf0f1') },
       },
     });
 

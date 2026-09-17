@@ -70,14 +70,14 @@ export function Differentiators() {
     <section
       ref={rootRef}
       id="why-us"
-      className="relative z-10 overflow-x-clip border-y border-ink-800 bg-ink-900"
+      className="relative z-10 overflow-x-clip border-y border-ink-700 bg-ink-900"
     >
       <div className="shell grid gap-12 py-20 md:py-28 lg:grid-cols-12 lg:gap-12 lg:py-36">
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-32">
             <SectionTag index="03">{differentiators.label}</SectionTag>
 
-            <h2 className="mt-7 display-editorial text-[clamp(2rem,4.4vw,3.5rem)]">
+            <h2 className="mt-7 display-editorial text-[clamp(2rem,4.4vw,3.5rem)] text-paper">
               Small-business value. Delivery{' '}
               <span className="whitespace-nowrap">
                 <KineticWord word={differentiators.kineticWord} reducedMotion={reducedMotion} />.

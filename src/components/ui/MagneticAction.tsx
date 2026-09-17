@@ -98,7 +98,7 @@ export function MagneticAction({
       <span
         data-action-sheen
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-white/15 to-transparent transition-[left] duration-[var(--motion-reveal)] ease-[var(--ease-precise)] group-hover:left-[150%]"
+        className="pointer-events-none absolute inset-y-0 -left-full w-1/2 -skew-x-12 bg-linear-to-r from-transparent via-mission-mist/30 to-transparent transition-[left] duration-[var(--motion-reveal)] ease-[var(--ease-precise)] group-hover:left-[150%]"
       />
       <span data-magnet-label className="relative flex items-center gap-3">
         {children}
