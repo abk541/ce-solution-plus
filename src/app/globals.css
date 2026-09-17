@@ -360,7 +360,7 @@
 
 .motion-hero [data-hero-status],
 .motion-hero [data-hero-fade],
-.motion-hero [data-hero-art] {
+.motion-hero [data-hero-scene] {
   opacity: 0;
 }
 
@@ -422,7 +422,7 @@
   .motion-hero [data-hero-line] > span,
   .motion-hero [data-hero-status],
   .motion-hero [data-hero-fade],
-  .motion-hero [data-hero-art],
+  .motion-hero [data-hero-scene],
   .motion-on [data-word] > span,
   .motion-on [data-about-body] > *,
   .motion-on [data-credential],
@@ -463,68 +463,10 @@
   display: block;
 }
 
-/* The static monogram is the inverse of the rich WebGL enhancement. This
-   includes large touch-first tablets and reduced-motion desktops. */
-@media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  [data-hero-static-art] {
-    display: none;
-  }
-}
-
 @media (width < 64rem), (hover: none), (pointer: coarse) {
   [data-kinetic-ghost],
   [data-instrument-sweep] {
     display: none !important;
-  }
-}
-
-/* Kinetic "register shift" — the one signature type moment on the page.
-   A print-registration misalignment, not an RGB glitch. */
-@keyframes register-shift {
-  0%,
-  86%,
-  100% {
-    transform: translate3d(0, 0, 0);
-    opacity: 0;
-  }
-  88% {
-    transform: translate3d(-0.14em, -0.02em, 0);
-    opacity: 0.75;
-  }
-  91% {
-    transform: translate3d(0.1em, 0.015em, 0);
-    opacity: 0.5;
-  }
-  94% {
-    transform: translate3d(-0.04em, 0, 0);
-    opacity: 0.65;
-  }
-}
-
-@keyframes register-clip {
-  0%,
-  86%,
-  100% {
-    clip-path: inset(0 0 0 0);
-  }
-  89% {
-    clip-path: inset(38% 0 42% 0);
-  }
-  92% {
-    clip-path: inset(12% 0 68% 0);
-  }
-  95% {
-    clip-path: inset(72% 0 6% 0);
-  }
-}
-
-/* Slow instrument sweep for the contact panel + trust band hairlines. */
-@keyframes sweep-x {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(400%);
   }
 }
 

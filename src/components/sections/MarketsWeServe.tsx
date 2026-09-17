@@ -31,7 +31,7 @@ export function MarketsWeServe() {
 
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        '[data-market-card]',
+        '[data-market-surface]',
         { opacity: 0, y: 34 },
         {
           opacity: 1,
@@ -50,8 +50,40 @@ export function MarketsWeServe() {
         const track = trackRef.current;
         const stage = stageRef.current;
         if (!track || !stage) return;
+        const cards = Array.from(
+          track.querySelectorAll<HTMLElement>('[data-market-card]'),
+        );
 
         const distance = () => Math.max(0, track.scrollWidth - stage.clientWidth + 64);
+        const updateCardDepth = () => {
+          const stageRect = stage.getBoundingClientRect();
+          const focusX = stageRect.left + stageRect.width / 2;
+          const falloff = Math.max(stageRect.width * 0.52, 1);
+          const states = cards.map((card) => {
+            const rect = card.getBoundingClientRect();
+            const offset = gsap.utils.clamp(
+              -1,
+              1,
+              (rect.left + rect.width / 2 - focusX) / falloff,
+            );
+            const weight = 1 - Math.abs(offset);
+            return { card, offset, weight };
+          });
+
+          // The rail owns horizontal travel; cards only receive local depth
+          // and focus transforms so pointer-driven artwork remains independent.
+          states.forEach(({ card, offset, weight }) => {
+            gsap.set(card, {
+              z: -44 * (1 - weight),
+              rotationY: -offset * 4.2,
+              scale: 0.97 + weight * 0.03,
+              opacity: 1,
+              transformOrigin: '50% 50%',
+              force3D: true,
+              willChange: 'transform, opacity',
+            });
+          });
+        };
 
         const tween = gsap.to(track, {
           x: () => -distance(),
@@ -64,6 +96,7 @@ export function MarketsWeServe() {
             scrub: 0.75,
             invalidateOnRefresh: true,
             onUpdate: (self) => {
+              updateCardDepth();
               const progress = self.progress;
               if (progressBarRef.current) {
                 gsap.set(progressBarRef.current, { scaleX: Math.max(progress, 0.02) });
@@ -72,13 +105,23 @@ export function MarketsWeServe() {
                 progressValueRef.current.textContent = `${String(Math.round(progress * 100)).padStart(3, '0')}%`;
               }
             },
+            onRefresh: updateCardDepth,
           },
         });
 
         return () => {
           tween.scrollTrigger?.kill();
           tween.kill();
-          gsap.set(track, { x: 0 });
+          gsap.set(track, { clearProps: 'transform' });
+          gsap.set(cards, {
+            clearProps: 'transform,opacity,transformOrigin,willChange',
+          });
+          if (progressBarRef.current) {
+            gsap.set(progressBarRef.current, { clearProps: 'transform' });
+          }
+          if (progressValueRef.current) {
+            progressValueRef.current.textContent = '000%';
+          }
         };
       });
 
@@ -113,7 +156,7 @@ export function MarketsWeServe() {
         >
           <div
             ref={trackRef}
-            className="flex w-max snap-x snap-mandatory gap-px bg-border-command/45 px-5 md:px-10 lg:snap-none lg:will-change-transform xl:px-14"
+            className="flex w-max snap-x snap-mandatory gap-px bg-border-command/45 px-5 md:px-10 lg:snap-none lg:[perspective:1400px] lg:[transform-style:preserve-3d] lg:will-change-transform xl:px-14"
           >
             {markets.items.map((market, index) => (
               <MarketCard key={market.id} market={market} index={index} />
@@ -152,64 +195,66 @@ function MarketCard({
       ref={ref}
       data-market-card
       tabIndex={0}
-      className="group relative aspect-4/5 w-[78vw] shrink-0 snap-start overflow-hidden bg-ink-950 outline-none transition-transform duration-[var(--motion-ui)] active:scale-[0.99] sm:w-[20rem] lg:aspect-auto lg:h-[52vh] lg:w-[41.6vh]"
+      className="group relative aspect-4/5 w-[78vw] shrink-0 snap-start overflow-hidden bg-ink-950 outline-none transition-transform duration-[var(--motion-ui)] active:scale-[0.99] sm:w-[20rem] lg:aspect-auto lg:h-[52vh] lg:w-[41.6vh] lg:transition-none lg:[backface-visibility:hidden]"
     >
-      {/* Slightly oversized so the parallax shift never exposes an edge. */}
-      <span data-plate-art className="absolute -inset-[4%] block">
-        {/* PLACEHOLDER plate — swap for client photography of this market. */}
-        <Image
-          src={sitePath(`/images/${market.imageSeed}.svg`)}
-          alt=""
-          aria-hidden="true"
-          fill
-          sizes="(max-width: 1024px) 78vw, 42vh"
-          loading="lazy"
-          className="object-cover transition-transform duration-[var(--motion-feature)] ease-[var(--ease-spring)] group-hover:scale-105 group-focus-visible:scale-105"
-        />
-      </span>
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 bg-linear-to-t from-ink-950 via-ink-950/48 to-ink-950/5"
-      />
-      {/* Specular sheen tracking the pointer. */}
-      <span
-        data-plate-sheen
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-0 [background:radial-gradient(45%_35%_at_var(--mx,50%)_var(--my,50%),color-mix(in_srgb,var(--color-accent)_22%,transparent),transparent_70%)]"
-      />
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 border border-transparent transition-colors duration-[var(--motion-ui)] group-hover:border-power/50 group-focus-visible:border-accent/55"
-      />
-
-      <span className="absolute left-5 top-5 label-mono text-[0.58rem] text-steel-300 tabular-nums">
-        {String(index + 1).padStart(2, '0')}
-        <span className="text-steel-400">/{String(markets.items.length).padStart(2, '0')}</span>
-      </span>
-
-      <div className="absolute inset-x-0 bottom-0 p-6">
-        <h3 className="text-lg font-bold leading-tight tracking-tight text-paper xl:text-xl">
-          {market.title}
-        </h3>
+      <div data-market-surface className="relative h-full w-full">
+        {/* Slightly oversized so the parallax shift never exposes an edge. */}
+        <span data-plate-art className="absolute -inset-[4%] block">
+          {/* PLACEHOLDER plate — swap for client photography of this market. */}
+          <Image
+            src={sitePath(`/images/${market.imageSeed}.svg`)}
+            alt=""
+            aria-hidden="true"
+            fill
+            sizes="(max-width: 1024px) 78vw, 42vh"
+            loading="lazy"
+            className="object-cover transition-transform duration-[var(--motion-feature)] ease-[var(--ease-spring)] group-hover:scale-105 group-focus-visible:scale-105"
+          />
+        </span>
         <span
           aria-hidden="true"
-          className="mt-3 block h-[3px] w-8 origin-left bg-power transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-[4] group-focus-visible:scale-x-[4]"
+          className="absolute inset-0 bg-linear-to-t from-ink-950 via-ink-950/48 to-ink-950/5"
         />
-        <div data-hover-details className="grid grid-rows-[1fr]">
-          <div className="overflow-hidden">
-            <p className="pt-4 text-[0.85rem] leading-relaxed text-steel-200">
-              {market.description}
-            </p>
-            <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={`${market.title} tags`}>
-              {market.tags.map((tag) => (
-                <li
-                  key={tag}
-                  className="border border-steel-400/35 bg-ink-950/55 px-2 py-1.5 label-mono text-[0.48rem] leading-none text-steel-200"
-                >
-                  {tag}
-                </li>
-              ))}
-            </ul>
+        {/* Specular sheen tracking the pointer. */}
+        <span
+          data-plate-sheen
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-0 [background:radial-gradient(45%_35%_at_var(--mx,50%)_var(--my,50%),color-mix(in_srgb,var(--color-accent)_22%,transparent),transparent_70%)]"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 border border-transparent transition-colors duration-[var(--motion-ui)] group-hover:border-power/50 group-focus-visible:border-accent/55"
+        />
+
+        <span className="absolute left-5 top-5 label-mono text-[0.58rem] text-steel-300 tabular-nums">
+          {String(index + 1).padStart(2, '0')}
+          <span className="text-steel-400">/{String(markets.items.length).padStart(2, '0')}</span>
+        </span>
+
+        <div className="absolute inset-x-0 bottom-0 p-6">
+          <h3 className="text-lg font-bold leading-tight tracking-tight text-paper xl:text-xl">
+            {market.title}
+          </h3>
+          <span
+            aria-hidden="true"
+            className="mt-3 block h-[3px] w-8 origin-left bg-power transition-transform duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-[4] group-focus-visible:scale-x-[4]"
+          />
+          <div data-hover-details className="grid grid-rows-[1fr]">
+            <div className="overflow-hidden">
+              <p className="pt-4 text-[0.85rem] leading-relaxed text-steel-200">
+                {market.description}
+              </p>
+              <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={`${market.title} tags`}>
+                {market.tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="border border-steel-400/35 bg-ink-950/55 px-2 py-1.5 label-mono text-[0.48rem] leading-none text-steel-200"
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>

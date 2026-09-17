@@ -23,6 +23,8 @@ export function Contact() {
     if (!root || reducedMotion || motionAllowed !== true) return;
 
     const ctx = gsap.context(() => {
+      const panel = root.querySelector<HTMLElement>('[data-contact-panel]');
+      const instrumentSweep = root.querySelector<HTMLElement>('[data-instrument-sweep]');
       const tl = gsap.timeline({
         scrollTrigger: { trigger: '[data-contact-panel]', start: 'top 78%', once: true },
       });
@@ -44,6 +46,24 @@ export function Contact() {
           { opacity: 1, y: 0, duration: duration.reveal, stagger: duration.stagger, ease: ease.spring },
           0.4,
         );
+
+      if (panel && instrumentSweep) {
+        tl.fromTo(
+          instrumentSweep,
+          { x: -instrumentSweep.offsetWidth, opacity: 0 },
+          {
+            x: () => panel.clientWidth,
+            opacity: 1,
+            duration: duration.feature,
+            ease: 'power2.inOut',
+          },
+          0.08,
+        ).to(
+          instrumentSweep,
+          { opacity: 0, duration: duration.micro, ease: 'none' },
+          `>-${duration.micro}`,
+        );
+      }
     }, root);
 
     return () => ctx.revert();
@@ -75,7 +95,7 @@ export function Contact() {
           <span
             data-instrument-sweep
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 h-[3px] w-16 bg-linear-to-r from-transparent via-power to-transparent [animation:sweep-x_7s_cubic-bezier(0.45,0,0.55,1)_infinite]"
+            className="pointer-events-none absolute left-0 top-0 h-[3px] w-16 opacity-0 bg-linear-to-r from-transparent via-power to-transparent"
           />
 
           <div className="grid lg:grid-cols-12">

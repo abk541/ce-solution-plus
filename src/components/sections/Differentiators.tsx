@@ -26,6 +26,66 @@ export function Differentiators() {
     const animate = !reducedMotion && motionAllowed === true;
 
     const ctx = gsap.context(() => {
+      if (animate) {
+        const kineticWord = root.querySelector<HTMLElement>('[data-kinetic-word]');
+        const ghosts = gsap.utils.toArray<HTMLElement>('[data-kinetic-ghost]');
+        const steelGhost = ghosts.at(0);
+        const powerGhost = ghosts.at(1);
+
+        if (kineticWord && steelGhost && powerGhost) {
+          const registerTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: kineticWord,
+              start: 'top 82%',
+              once: true,
+            },
+          });
+
+          registerTimeline
+            .fromTo(
+              steelGhost,
+              { x: '-0.13em', y: '-0.02em', opacity: 0 },
+              {
+                x: '0.08em',
+                y: '0.012em',
+                opacity: 0.72,
+                duration: duration.press,
+                repeat: 2,
+                yoyo: true,
+                ease: 'steps(1)',
+              },
+            )
+            .fromTo(
+              powerGhost,
+              {
+                x: '0.1em',
+                y: '0.015em',
+                opacity: 0,
+                clipPath: 'inset(0 0 0 0)',
+              },
+              {
+                x: '-0.05em',
+                y: 0,
+                opacity: 0.5,
+                clipPath: 'inset(38% 0 42% 0)',
+                duration: duration.press,
+                repeat: 2,
+                yoyo: true,
+                ease: 'steps(1)',
+              },
+              '<',
+            )
+            .to(ghosts, {
+              x: 0,
+              y: 0,
+              opacity: 0,
+              clipPath: 'inset(0 0 0 0)',
+              duration: duration.ui,
+              ease: ease.expo,
+            });
+        }
+      }
+
       gsap.utils.toArray<HTMLElement>('[data-diff-item]').forEach((node, index) => {
         ScrollTrigger.create({
           trigger: node,
@@ -173,28 +233,24 @@ export function Differentiators() {
   );
 }
 
-/**
- * The page's one kinetic type moment: a print-registration misalignment.
- * Two offset ghosts drift out of register on a long, mostly-idle cycle, so it
- * reads as a press artefact rather than a glitch effect.
- */
+/** A one-shot print-registration check that resolves as the section enters. */
 function KineticWord({ word, reducedMotion }: { word: string; reducedMotion: boolean }) {
   return (
-    <span className="relative inline-block whitespace-nowrap text-power">
+    <span data-kinetic-word className="relative inline-block whitespace-nowrap text-power">
       <span className="relative z-10">{word}</span>
       {!reducedMotion ? (
         <>
           <span
             data-kinetic-ghost
             aria-hidden="true"
-            className="absolute inset-0 z-0 select-none text-steel-200 [animation:register-shift_7s_steps(1,end)_infinite]"
+            className="absolute inset-0 z-0 select-none opacity-0 text-steel-200"
           >
             {word}
           </span>
           <span
             data-kinetic-ghost
             aria-hidden="true"
-            className="absolute inset-0 z-0 select-none text-power/45 [animation:register-shift_7s_steps(1,end)_infinite_reverse,register-clip_7s_steps(1,end)_infinite]"
+            className="absolute inset-0 z-0 select-none opacity-0 text-power/45"
           >
             {word}
           </span>

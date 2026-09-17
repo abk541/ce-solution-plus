@@ -6,6 +6,7 @@ import { SectionTag } from '@/components/ui/SectionTag';
 import { capabilities } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
 import {
+  useFullMotion,
   useIsomorphicLayoutEffect,
   useMotionAllowed,
   usePrefersReducedMotion,
@@ -15,6 +16,7 @@ export function Capabilities() {
   const rootRef = useRef<HTMLElement>(null);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
+  const fullMotion = useFullMotion();
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
@@ -22,21 +24,56 @@ export function Capabilities() {
 
     const ctx = gsap.context(() => {
       if (reducedMotion || motionAllowed !== true) return;
-      // Cells assemble as the rail enters: rule draws, then contents settle.
-      gsap
-        .timeline({
-          scrollTrigger: { trigger: '[data-capability-grid]', start: 'top 82%', once: true },
-        })
+
+      // Fine-pointer layouts assemble the cards into a shallow rack. Touch
+      // layouts retain the simpler rule/content reveal, and reduced motion
+      // keeps the authored final state without any inline transforms.
+      const timeline = gsap.timeline({
+        scrollTrigger: { trigger: '[data-capability-grid]', start: 'top 82%', once: true },
+      });
+
+      if (fullMotion === true) {
+        timeline.fromTo(
+          '[data-cap-card]',
+          {
+            opacity: 0,
+            z: -68,
+            rotationX: 3.5,
+            rotationY: (index: number) => (index % 2 === 0 ? -3 : 3),
+            scale: 0.985,
+            transformOrigin: '50% 50%',
+          },
+          {
+            opacity: 1,
+            z: 0,
+            rotationX: 0,
+            rotationY: 0,
+            scale: 1,
+            duration: duration.feature,
+            ease: ease.glide,
+            stagger: duration.stagger,
+            clearProps: 'transform,opacity,transformOrigin',
+          },
+        );
+      }
+
+      timeline
         .fromTo(
           '[data-cell-rule]',
           { scaleX: 0 },
-          { scaleX: 1, duration: duration.reveal, ease: ease.expo, stagger: duration.stagger },
+          {
+            scaleX: 1,
+            duration: duration.reveal,
+            ease: ease.expo,
+            stagger: duration.stagger,
+          },
+          fullMotion === true ? 0.16 : 0,
         )
         .fromTo(
           '[data-cell-body]',
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: duration.reveal, ease: ease.spring, stagger: duration.stagger },
-          0.12,
+          fullMotion === true ? 0.24 : 0.12,
         );
     }, root);
 
@@ -66,7 +103,7 @@ export function Capabilities() {
       window.cancelAnimationFrame(frame);
       ctx.revert();
     };
-  }, [motionAllowed, reducedMotion]);
+  }, [fullMotion, motionAllowed, reducedMotion]);
 
   return (
     <section ref={rootRef} id="capabilities" className="relative z-10 bg-surface-intermediate py-20 text-foreground-secondary md:py-28 lg:py-36">
@@ -109,11 +146,12 @@ export function Capabilities() {
           <div className="shell">
             <div
               data-capability-grid
-              className="flex w-max snap-x snap-mandatory gap-px bg-border-command/40 lg:gap-6 lg:bg-transparent"
+              className="flex w-max snap-x snap-mandatory gap-px bg-border-command/40 md:[perspective:1400px] lg:gap-6 lg:bg-transparent"
             >
               {capabilities.map((capability) => (
                 <article
                   key={capability.id}
+                  data-cap-card
                   tabIndex={0}
                   aria-labelledby={`cap-${capability.id}`}
                   className="group relative flex min-h-[22rem] w-[82vw] shrink-0 snap-start flex-col justify-between overflow-hidden border border-border-command/45 bg-surface-canvas p-7 outline-none transition-[background-color,border-color,transform] duration-[var(--motion-ui)] active:scale-[0.99] hover:-translate-y-1 hover:border-power/70 hover:bg-ink-850 focus-visible:border-foreground-primary focus-visible:bg-ink-850 sm:w-[24rem] md:min-h-[24rem] md:p-9"
