@@ -147,22 +147,25 @@ export function Nav() {
       <header
         ref={headerRef}
         className={cn(
-          'fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-[var(--motion-ui)]',
+          'fixed inset-x-0 top-0 z-50 border-b border-ink-700/55 bg-ink-950/94 pt-[env(safe-area-inset-top)] transition-[background-color,border-color,backdrop-filter] duration-[var(--motion-ui)]',
           condensed
             ? 'border-b border-ink-700/80 bg-ink-950/95 lg:bg-ink-950/80 lg:backdrop-blur-xl'
-            : 'border-b border-transparent bg-transparent',
+            : 'lg:border-b-transparent lg:bg-transparent',
         )}
       >
-        <div className="shell flex h-18 items-center justify-between gap-6 md:h-20">
+        <div
+          data-nav-shell
+          className="shell flex h-16 items-center justify-between gap-3 md:h-20 md:gap-6"
+        >
           <a
             href="#top"
             aria-label={`${company.name} — home`}
-            className="group relative flex items-center gap-4"
+            className="group relative flex min-w-0 items-center gap-4"
           >
             <span data-nav-logo-slot className="block">
               <Logo
                 tone="light"
-                className="h-6 w-[126px] transition-opacity duration-[var(--motion-micro)] group-hover:opacity-80 md:h-8 md:w-[167px]"
+                className="h-[24px] w-[126px] transition-opacity duration-[var(--motion-micro)] group-hover:opacity-80 md:h-[32px] md:w-[167px]"
               />
             </span>
             <span aria-hidden="true" className="hidden h-6 w-px bg-ink-600 xl:block" />
@@ -199,7 +202,7 @@ export function Nav() {
             })}
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-3">
             <MagneticAction
               href="#contact"
               variant="outline"
@@ -215,20 +218,20 @@ export function Nav() {
               onClick={toggleMenu}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
-              className="relative flex h-11 w-11 items-center justify-center rounded-xs border border-ink-600 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-power/70 lg:hidden"
+              className="relative flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-xs border border-ink-600 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-power/70 lg:hidden"
             >
               <span className="sr-only">{menuOpen ? 'Close menu' : 'Open menu'}</span>
-              <span className="relative block h-3 w-5">
+              <span className="relative block h-[12px] w-[20px]">
                 <span
                   className={cn(
                     'absolute left-0 h-px w-full bg-current transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
-                    menuOpen ? 'top-1.5 rotate-45' : 'top-0',
+                    menuOpen ? 'top-[6px] rotate-45' : 'top-0',
                   )}
                 />
                 <span
                   className={cn(
                     'absolute left-0 h-px w-full bg-current transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
-                    menuOpen ? 'top-1.5 -rotate-45' : 'top-3',
+                    menuOpen ? 'top-[6px] -rotate-45' : 'top-[12px]',
                   )}
                 />
               </span>
@@ -245,6 +248,7 @@ export function Nav() {
 
       {menuMounted ? (
         <div
+          ref={sheetRef}
           id="mobile-menu"
           role="dialog"
           aria-modal="true"
@@ -255,37 +259,43 @@ export function Nav() {
           )}
           onClick={closeMenu}
         >
-          <div className="absolute inset-0 bg-ink-950/98" />
+          <div className="absolute inset-0 bg-ink-950" />
           <div
-            ref={sheetRef}
+            className="fixed inset-x-0 top-0 z-20 flex h-[calc(76px+env(safe-area-inset-top))] items-center justify-between border-b border-ink-700/55 bg-ink-950 pl-[max(20px,env(safe-area-inset-left))] pr-[max(20px,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)]"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <a
+              href="#top"
+              onClick={closeMenu}
+              aria-label={`${company.name} — home`}
+              className="flex h-[44px] items-center"
+            >
+              <Logo tone="light" className="h-[24px] w-[126px]" />
+            </a>
+            <button
+              type="button"
+              onClick={closeMenu}
+              aria-label="Close menu"
+              className="relative flex h-[44px] w-[44px] items-center justify-center rounded-xs border border-power/60 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-power"
+            >
+              <span aria-hidden="true" className="relative block h-[16px] w-[16px]">
+                <span className="absolute left-0 top-[8px] h-px w-full rotate-45 bg-current" />
+                <span className="absolute left-0 top-[8px] h-px w-full -rotate-45 bg-current" />
+              </span>
+            </button>
+          </div>
+          <div
+            data-mobile-menu-sheet
             className={cn(
-              'shell relative flex h-[100dvh] min-h-[100svh] flex-col justify-center gap-2 pb-[max(6rem,env(safe-area-inset-bottom))] pt-24 transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
+              'shell relative flex h-[100dvh] min-h-[100svh] flex-col justify-center gap-2 overflow-y-auto overscroll-contain pb-[max(6rem,env(safe-area-inset-bottom))] pt-24 transition-transform duration-[var(--motion-ui)] ease-[var(--ease-spring)]',
               menuOpen ? 'translate-y-0' : 'translate-y-4',
             )}
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="absolute inset-x-5 top-[max(1rem,env(safe-area-inset-top))] z-10 flex h-11 items-center justify-between">
-              <a
-                href="#top"
-                onClick={closeMenu}
-                aria-label={`${company.name} — home`}
-                className="flex h-11 items-center"
-              >
-                <Logo tone="light" className="h-6 w-[126px]" />
-              </a>
-              <button
-                type="button"
-                onClick={closeMenu}
-                aria-label="Close menu"
-                className="relative flex h-11 w-11 items-center justify-center rounded-xs border border-power/60 text-steel-100 transition-[border-color,background-color,transform] duration-[var(--motion-micro)] active:scale-95 hover:border-power"
-              >
-                <span aria-hidden="true" className="relative block h-4 w-4">
-                  <span className="absolute left-0 top-2 h-px w-full rotate-45 bg-current" />
-                  <span className="absolute left-0 top-2 h-px w-full -rotate-45 bg-current" />
-                </span>
-              </button>
-            </div>
-            <CornerTicks className="inset-x-5 inset-y-24" size={12} />
+            <CornerTicks
+              className="bottom-24 left-[max(20px,env(safe-area-inset-left))] right-[max(20px,env(safe-area-inset-right))] top-24"
+              size={12}
+            />
             {navLinks.map((link, index) => {
               const id = link.href.replace('#', '');
               const isActive = active === id;
@@ -295,6 +305,7 @@ export function Nav() {
                   href={link.href}
                   onClick={closeMenu}
                   data-menu-initial-focus={index === 0 ? '' : undefined}
+                  data-mobile-menu-link
                   aria-current={isActive ? 'location' : undefined}
                   style={{ transitionDelay: `${index * 45}ms` }}
                   className={cn(
@@ -307,6 +318,7 @@ export function Nav() {
                     {link.index}
                   </span>
                   <span
+                    data-mobile-menu-label
                     className={cn(
                       'font-grotesk text-3xl font-semibold tracking-tight',
                       isActive ? 'text-power-bright' : 'text-paper',
@@ -317,7 +329,7 @@ export function Nav() {
                 </a>
               );
             })}
-            <div onClick={closeMenu}>
+            <div data-mobile-menu-cta onClick={closeMenu}>
               <MagneticAction href="#contact" variant="solid" className="mt-8 w-full">
                 Request capabilities
               </MagneticAction>

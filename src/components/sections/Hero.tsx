@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useRef, useState } from 'react';
 
+import { MobileLogoField } from '@/components/sections/MobileLogoField';
 import { MagneticAction } from '@/components/ui/MagneticAction';
 import { company, hero } from '@/content/site';
 import { duration, ease, gsap } from '@/lib/gsap';
@@ -23,6 +24,7 @@ const HeroParticles = dynamic(
 
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null);
+  const heroWasPrehiddenRef = useRef(false);
   const reducedMotion = usePrefersReducedMotion();
   const motionAllowed = useMotionAllowed();
   const fullMotion = useFullMotion();
@@ -31,9 +33,11 @@ export function Hero() {
 
   useIsomorphicLayoutEffect(() => {
     const reveal = () => setIntroReady(true);
+    heroWasPrehiddenRef.current = document.documentElement.classList.contains('motion-hero');
     if (!document.documentElement.classList.contains('motion-entry')) reveal();
     window.addEventListener('ce:intro-exit', reveal);
-    const fallback = window.setTimeout(reveal, 1950);
+    const compact = window.matchMedia('(max-width: 1023px), (hover: none), (pointer: coarse)').matches;
+    const fallback = window.setTimeout(reveal, compact ? 1050 : 1950);
     return () => {
       window.removeEventListener('ce:intro-exit', reveal);
       window.clearTimeout(fallback);
@@ -47,6 +51,8 @@ export function Hero() {
       reducedMotion ||
       motionAllowed !== true ||
       !introReady ||
+      !heroWasPrehiddenRef.current ||
+      !document.documentElement.classList.contains('motion-hero') ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     ) {
       return;
@@ -129,27 +135,31 @@ export function Hero() {
     <section
       ref={rootRef}
       id="top"
-      className="relative h-[100svh] bg-ink-950 text-steel-200 lg:h-[118svh]"
+      data-hero-root
+      className="relative bg-ink-950 text-steel-200"
     >
       {/* Sticky viewport lets the reactive mark hold briefly as content leaves. */}
-      <div className="sticky top-0 flex h-[100svh] flex-col justify-end overflow-hidden pb-10 pt-40 md:pb-14 md:pt-44">
-        <div data-hero-scene aria-hidden="true" className="pointer-events-none absolute inset-0 z-[2]">
+      <div
+        data-hero-viewport
+        className="relative flex flex-col overflow-hidden pb-[max(40px,env(safe-area-inset-bottom))] pt-[clamp(272px,40svh,336px)]"
+      >
+        <div data-hero-scene aria-hidden="true" className="absolute inset-0 z-[2]">
           {richMotion === true && introReady ? (
             <HeroParticles className="absolute inset-0 h-full w-full" />
           ) : null}
 
-          {/* Touch and compact layouts keep the original static range-marker
-              fallback; the live constellation stays a desktop enhancement. */}
+          {/* Phones use the real CE mark plus a finite 2D field. It assembles
+              once, stops at rest, and wakes only for a short tap response. */}
           <div
-            data-hero-static-art
-            className="absolute -right-20 top-[12svh] h-72 w-72 opacity-80 md:-right-12 md:h-96 md:w-96"
+            data-hero-mobile-art
+            className="absolute inset-x-0 top-[calc(64px+env(safe-area-inset-top))] h-[clamp(192px,32svh,256px)]"
           >
-            <span className="absolute inset-0 rounded-full border border-power/35" />
-            <span className="absolute inset-[13%] rotate-[-18deg] rounded-[50%] border border-steel-400/25" />
-            <span className="absolute inset-[28%] rotate-[32deg] rounded-[50%] border border-power/45" />
-            <span className="absolute left-1/2 top-0 h-full w-px bg-linear-to-b from-transparent via-ink-600/70 to-transparent" />
-            <span className="absolute left-0 top-1/2 h-px w-full bg-linear-to-r from-transparent via-ink-600/70 to-transparent" />
-            <span className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 bg-power" />
+            <span className="absolute right-[-40px] top-1/2 h-[224px] w-[224px] -translate-y-1/2 bg-[radial-gradient(circle,color-mix(in_srgb,var(--color-surface-strong)_34%,transparent)_0%,transparent_70%)] blur-2xl" />
+            <MobileLogoField className="pointer-events-auto absolute right-[-12px] top-0 h-[calc(100%_-_28px)] w-[clamp(208px,64vw,272px)]" />
+            <span className="absolute bottom-[12px] right-[20px] flex items-center gap-[8px] label-mono text-[10px] tracking-[1.3px] text-steel-200">
+              <span className="h-[6px] w-[6px] bg-power" />
+              Mission support / active
+            </span>
           </div>
         </div>
 
@@ -169,20 +179,25 @@ export function Hero() {
         />
 
         <div data-hero-shift className="shell relative z-10">
-          <div className="flex items-center gap-4" data-hero-status>
-            <span className="relative flex h-1.5 w-1.5">
+          <div className="flex items-start gap-3 sm:items-center sm:gap-4" data-hero-status>
+            <span className="relative mt-1.5 flex h-1.5 w-1.5 shrink-0 sm:mt-0">
               <span className="absolute inline-flex h-full w-full bg-power" />
             </span>
-            <p className="label-mono text-[0.65rem] text-steel-300">
-              {hero.eyebrow}
-              <span className="ml-3 text-power-bright">/ {company.designationShort}</span>
+            <p className="label-mono text-[0.625rem] leading-[1.5] tracking-[0.14em] text-steel-200 sm:text-[0.68rem] sm:leading-none sm:tracking-[0.2em] sm:text-steel-300">
+              <span className="block sm:hidden">Veteran &amp; Woman-Owned Small Business</span>
+              <span className="block text-power-bright sm:hidden">VOSB / WOSB</span>
+              <span className="hidden sm:inline">
+                {hero.eyebrow}
+                <span className="ml-3 text-power-bright">/ {company.designationShort}</span>
+              </span>
             </p>
           </div>
 
           {/* Two hard cadence lines turn the four verbs into a command statement. */}
           <h1
             aria-label={hero.headline.join(' ')}
-            className="mt-7 max-w-[64rem] display-editorial text-[clamp(2.15rem,7.3vw,6.7rem)] text-paper"
+            data-hero-heading
+            className="mt-5 max-w-[64rem] display-editorial text-[clamp(2rem,10vw,3.25rem)] text-paper sm:mt-7 lg:text-[clamp(2.15rem,7.3vw,6.7rem)]"
           >
             <span aria-hidden="true" className="grid gap-y-0.5">
               {[hero.headline.slice(0, 2), hero.headline.slice(2)].map((row, rowIndex) => (
@@ -205,13 +220,20 @@ export function Hero() {
             </span>
           </h1>
 
-          <div className="mt-8 flex flex-col gap-8 border-t border-ink-700/70 pt-7 sm:flex-row sm:items-center sm:justify-between md:mt-10 md:pt-8">
-            <p data-hero-fade className="max-w-md text-[0.98rem] leading-relaxed text-steel-300">
+          <div
+            data-hero-details
+            className="mt-6 flex flex-col gap-5 border-t border-ink-600/65 pt-5 sm:flex-row sm:items-center sm:justify-between md:mt-10 md:gap-8 md:pt-8"
+          >
+            <p data-hero-fade className="max-w-[32ch] text-base leading-[1.65] text-steel-200 md:max-w-md md:text-[0.98rem] md:leading-relaxed md:text-steel-300">
               {hero.lede}
             </p>
 
-            <div data-hero-fade className="shrink-0">
-              <MagneticAction href={hero.primaryCta.href} variant="solid">
+            <div data-hero-fade data-hero-cta className="w-full shrink-0 sm:w-auto">
+              <MagneticAction
+                href={hero.primaryCta.href}
+                variant="solid"
+                className="min-h-14 w-full px-6 sm:w-auto sm:px-7"
+              >
                 {hero.primaryCta.label}
               </MagneticAction>
             </div>

@@ -27,6 +27,26 @@ export function Logo({
       ? '/brand/logo-compact-clean.webp'
       : `/brand/logo${variant === 'compact' ? '-compact' : ''}-${tone}.webp`,
   );
+
+  // The cleaned compact export already carries the exact Mineral tone. Keep it
+  // as a real image rather than a CSS background mask: Chromium/Samsung auto
+  // darkening can remap mask fills until an off-white logo is nearly invisible.
+  if (variant === 'compact' && tone === 'light') {
+    return (
+      <img
+        src={source}
+        alt="CE Solution Plus"
+        width={size.width}
+        height={size.height}
+        draggable={false}
+        className={cn(
+          'block h-auto w-auto shrink-0 select-none object-contain [filter:brightness(0.94)_sepia(0.04)]',
+          className,
+        )}
+      />
+    );
+  }
+
   const maskStyle = {
     aspectRatio: `${size.width} / ${size.height}`,
     WebkitMaskImage: `url("${source}")`,
@@ -52,6 +72,24 @@ export function Logo({
 /** Monogram only — used where the full lockup would be illegible. */
 export function LogoMark({ tone = 'light', className }: Omit<LogoProps, 'variant'>) {
   const source = sitePath(tone === 'light' ? '/brand/mark-clean.webp' : '/brand/mark-dark.webp');
+
+  if (tone === 'light') {
+    return (
+      <img
+        src={source}
+        alt=""
+        aria-hidden="true"
+        width={MARK.width}
+        height={MARK.height}
+        draggable={false}
+        className={cn(
+          'block h-auto w-auto shrink-0 select-none object-contain [filter:brightness(0.94)_sepia(0.04)]',
+          className,
+        )}
+      />
+    );
+  }
+
   const maskStyle = {
     aspectRatio: `${MARK.width} / ${MARK.height}`,
     WebkitMaskImage: `url("${source}")`,
@@ -64,7 +102,7 @@ export function LogoMark({ tone = 'light', className }: Omit<LogoProps, 'variant
       style={maskStyle}
       className={cn(
         'inline-block h-auto w-auto shrink-0 select-none [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]',
-        tone === 'light' ? 'bg-paper' : 'bg-ink-950',
+        'bg-ink-950',
         className,
       )}
     />

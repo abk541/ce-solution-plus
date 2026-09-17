@@ -81,6 +81,9 @@
 }
 
 :root {
+  /* The command-dark palette is fully authored. This opts out of Chromium and
+     Samsung Auto Dark heuristics, which otherwise dim masks and remap it again. */
+  color-scheme: only light;
   --motion-press: 120ms;
   --motion-micro: 200ms;
   --motion-ui: 360ms;
@@ -96,6 +99,7 @@
 
   html {
     -webkit-tap-highlight-color: transparent;
+    overflow-x: clip;
     scroll-behavior: auto;
     scroll-padding-top: 5.5rem;
   }
@@ -209,14 +213,17 @@
   width: 100%;
   margin-inline: auto;
   max-width: 88rem;
-  padding-inline: 1.25rem;
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
 
   @media (width >= 48rem) {
-    padding-inline: 2.5rem;
+    padding-left: max(40px, env(safe-area-inset-left));
+    padding-right: max(40px, env(safe-area-inset-right));
   }
 
   @media (width >= 80rem) {
-    padding-inline: 3.5rem;
+    padding-left: max(56px, env(safe-area-inset-left));
+    padding-right: max(56px, env(safe-area-inset-right));
   }
 }
 
@@ -463,11 +470,135 @@
   display: block;
 }
 
-/* The static range marker is the inverse of the live reactive logo. This also
-   covers large touch-first tablets and reduced-motion desktops. */
+/* The compact intro owns one prepaint-anchored timeline. The readable image is
+   present from frame one and the curtain exits without waiting for hydration. */
+@media (width < 64rem), (hover: none), (pointer: coarse) {
+  .motion-entry [data-logo-preloader] {
+    animation: mobile-loader-curtain 940ms var(--ease-precise) both;
+  }
+
+  [data-loader-lockup] {
+    opacity: 1 !important;
+    scale: 1 !important;
+  }
+}
+
+/* Fine-pointer desktops use the full Three.js constellation. Touch-first
+   layouts keep the finite 2D mark, including large landscape tablets. */
 @media (min-width: 1024px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  [data-hero-static-art] {
+  [data-hero-mobile-art] {
     display: none;
+  }
+}
+
+/* The held, bottom-aligned hero is a desktop interaction, not simply a wide
+   viewport. Wide touch tablets keep the compact content-driven composition. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  [data-hero-root] {
+    height: 118svh;
+  }
+
+  [data-hero-viewport] {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    justify-content: flex-end;
+    padding-top: 11rem;
+    padding-bottom: 3.5rem;
+  }
+}
+
+/* Short phones keep the same hierarchy with less ceremonial air. The hero is
+   content-sized, so larger text can still extend it instead of being clipped. */
+@media (width < 40rem) and (max-height: 700px) {
+  [data-hero-viewport] {
+    padding-top: 240px;
+  }
+
+  [data-hero-mobile-art] {
+    height: 176px;
+  }
+
+  [data-hero-heading] {
+    margin-top: 1rem;
+    font-size: clamp(2rem, 10vw, 2.75rem);
+  }
+
+  [data-hero-details] {
+    margin-top: 1rem;
+    gap: 1rem;
+    padding-top: 1rem;
+  }
+
+  [data-mobile-menu-sheet] {
+    justify-content: flex-start;
+    padding-top: max(88px, calc(env(safe-area-inset-top) + 72px));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  [data-mobile-menu-link] {
+    padding-block: 12px;
+  }
+
+  [data-mobile-menu-label] {
+    font-size: 1.55rem;
+  }
+
+  [data-mobile-menu-cta] a {
+    margin-top: 1rem;
+  }
+}
+
+/* Brand graphics and the menu control keep physical, touch-safe dimensions
+   when users enlarge text. Copy still reflows, but navigation never leaves the
+   viewport because rem-based gutters or icons have doubled. */
+@media (width < 64rem) {
+  [data-nav-shell] {
+    height: 64px;
+    gap: 12px;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+@media (width <= 22.5rem) {
+  [data-hero-heading] {
+    overflow-wrap: anywhere;
+    font-size: clamp(32px, 10vw, 2.75rem);
+  }
+
+  [data-hero-cta] a,
+  [data-mobile-menu-cta] a {
+    padding: 14px 16px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  [data-hero-cta] [data-magnet-label],
+  [data-mobile-menu-cta] [data-magnet-label] {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  [data-mobile-menu-link] {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  [data-mobile-menu-link] > span:first-child {
+    flex: none;
+    font-size: 11px;
+    letter-spacing: 2px;
+    line-height: 1.2;
+  }
+
+  [data-mobile-menu-label] {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 32px;
+    line-height: 1.05;
   }
 }
 
@@ -484,6 +615,16 @@
   }
   to {
     transform: translateX(300%);
+  }
+}
+
+@keyframes mobile-loader-curtain {
+  0%,
+  66% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 
